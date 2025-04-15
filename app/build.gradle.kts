@@ -37,6 +37,11 @@ android {
     buildFeatures {
         compose = true
     }
+    // Thêm cấu hình cho Compose compiler
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.1"
+    }
+
 }
 
 dependencies {
@@ -53,6 +58,18 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(platform(libs.androidx.compose.bom))
+
+    // Added for navigation
+    implementation("androidx.navigation:navigation-compose:2.7.5")
+
+    // Added for Icons support
+    implementation("androidx.compose.material:material-icons-core:1.5.4")
+    implementation("androidx.compose.material:material-icons-extended:1.5.4")
+
+    // Thêm ViewModel cho MVVM
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.6.2")
+
     androidTestImplementation(libs.androidx.ui.test.junit4)
     debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)

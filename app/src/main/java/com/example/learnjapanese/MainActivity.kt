@@ -4,13 +4,17 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.learnjapanese.ui.screens.changepassword.ChangePasswordScreen
+import com.example.learnjapanese.ui.screens.forgotpassword.ForgotPasswordScreen
+import com.example.learnjapanese.ui.screens.login.LoginScreen
+import com.example.learnjapanese.ui.screens.register.RegisterScreen
 import com.example.learnjapanese.ui.theme.LearnJapaneseTheme
 
 class MainActivity : ComponentActivity() {
@@ -19,29 +23,41 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             LearnJapaneseTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+                AppNavigation()
             }
         }
     }
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
-
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    LearnJapaneseTheme {
-        Greeting("Android")
+fun AppNavigation() {
+    val navController = rememberNavController()
+    
+    NavHost(navController = navController, startDestination = "login") {
+        composable("login") {
+            LoginScreen(
+                onRegisterClick = { navController.navigate("register") },
+                onForgotPasswordClick = { navController.navigate("forgot_password") },
+                onLoginSuccess = { /* Handle login success */ }
+            )
+        }
+        composable("register") {
+            RegisterScreen(
+                onBackClick = { navController.popBackStack() },
+                onRegisterSuccess = { navController.navigate("login") }
+            )
+        }
+        composable("forgot_password") {
+            ForgotPasswordScreen(
+                onBackClick = { navController.popBackStack() },
+                onSubmitOtp = { navController.navigate("change_password") }
+            )
+        }
+        composable("change_password") {
+            ChangePasswordScreen(
+                onBackClick = { navController.popBackStack() },
+                onPasswordChanged = { navController.navigate("login") }
+            )
+        }
     }
 }
