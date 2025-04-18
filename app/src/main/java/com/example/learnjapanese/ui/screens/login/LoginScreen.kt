@@ -65,10 +65,9 @@ fun LoginScreen(
                 .fillMaxSize()
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
+            verticalArrangement = Arrangement.Center) {
             Text(
-                text = "Welcome Back",
+                text = "Chào mừng trở lại",
                 style = MaterialTheme.typography.headlineLarge.copy(
                     color = primaryColor,
                     fontWeight = FontWeight.ExtraBold,
@@ -83,7 +82,7 @@ fun LoginScreen(
             )
 
             Text(
-                text = "Sign in to continue",
+                text = "Đăng nhập để tiếp tục",
                 style = MaterialTheme.typography.bodyLarge.copy(
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                     fontWeight = FontWeight.Medium
@@ -96,6 +95,15 @@ fun LoginScreen(
                 onValueChange = { viewModel.updateUsername(it.replace("\n", "")) },
                 label = { Text("Email") },
                 singleLine = true,
+                isError = viewModel.emailError != null,
+                supportingText = {
+                    viewModel.emailError?.let {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Email
                 ),
@@ -121,8 +129,17 @@ fun LoginScreen(
             OutlinedTextField(
                 value = viewModel.password,
                 onValueChange = { viewModel.updatePassword(it) },
-                label = { Text("Password") },
+                label = { Text("Mật khẩu") },
                 singleLine = true,
+                isError = viewModel.passwordError != null,
+                supportingText = {
+                    viewModel.passwordError?.let {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colorScheme.error
+                        )
+                    }
+                },
                 visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Password
@@ -138,7 +155,7 @@ fun LoginScreen(
                     IconButton(onClick = { passwordVisible = !passwordVisible }) {
                         Icon(
                             imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                            contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                            contentDescription = if (passwordVisible) "Ẩn mật khẩu" else "Hiện mật khẩu",
                             tint = iconColor
                         )
                     }
@@ -165,7 +182,7 @@ fun LoginScreen(
             ) {
                 TextButton(onClick = onForgotPasswordClick) {
                     Text(
-                        text = "Forgot Password?",
+                        text = "Quên mật khẩu?",
                         style = MaterialTheme.typography.bodyMedium.copy(
                             color = primaryColor,
                             fontWeight = FontWeight.Medium
@@ -193,7 +210,7 @@ fun LoginScreen(
                 )
             ) {
                 Text(
-                    "Login",
+                    "Đăng nhập",
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.ExtraBold,
                         letterSpacing = 1.sp
@@ -208,14 +225,14 @@ fun LoginScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = "Don't have an account? ",
+                    text = "Chưa có tài khoản? ",
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
                 )
                 TextButton(onClick = onRegisterClick) {
                     Text(
-                        text = "Register",
+                        text = "Đăng ký",
                         style = MaterialTheme.typography.bodyMedium.copy(
                             color = primaryColor,
                             fontWeight = FontWeight.Bold

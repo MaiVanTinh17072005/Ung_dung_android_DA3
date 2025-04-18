@@ -37,7 +37,7 @@ fun RegisterScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = "Register",
+            text = "Đăng ký tài khoản",
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(bottom = 24.dp)
         )
@@ -45,8 +45,17 @@ fun RegisterScreen(
         OutlinedTextField(
             value = viewModel.fullName,
             onValueChange = { viewModel.updateFullName(it.replace("\n", "")) },
-            label = { Text("Full Name") },
+            label = { Text("Họ và tên") },
             singleLine = true,
+            isError = viewModel.fullNameError != null,
+            supportingText = {
+                viewModel.fullNameError?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Text
             ),
@@ -60,6 +69,15 @@ fun RegisterScreen(
             onValueChange = { viewModel.updateEmail(it.replace("\n", "")) },
             label = { Text("Email") },
             singleLine = true,
+            isError = viewModel.emailError != null,
+            supportingText = {
+                viewModel.emailError?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email
             ),
@@ -71,8 +89,17 @@ fun RegisterScreen(
         OutlinedTextField(
             value = viewModel.phone,
             onValueChange = { viewModel.updatePhone(it.replace("\n", "")) },
-            label = { Text("Phone Number") },
+            label = { Text("Số điện thoại") },
             singleLine = true,
+            isError = viewModel.phoneError != null,
+            supportingText = {
+                viewModel.phoneError?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Phone
             ),
@@ -84,8 +111,17 @@ fun RegisterScreen(
         OutlinedTextField(
             value = viewModel.password,
             onValueChange = { viewModel.updatePassword(it.replace("\n", "")) },
-            label = { Text("Password") },
+            label = { Text("Mật khẩu") },
             singleLine = true,
+            isError = viewModel.passwordError != null,
+            supportingText = {
+                viewModel.passwordError?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
             visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password
@@ -94,7 +130,7 @@ fun RegisterScreen(
                 IconButton(onClick = { passwordVisible = !passwordVisible }) {
                     Icon(
                         imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = if (passwordVisible) "Hide password" else "Show password"
+                        contentDescription = if (passwordVisible) "Ẩn mật khẩu" else "Hiện mật khẩu"
                     )
                 }
             },
@@ -106,8 +142,17 @@ fun RegisterScreen(
         OutlinedTextField(
             value = viewModel.confirmPassword,
             onValueChange = { viewModel.updateConfirmPassword(it.replace("\n", "")) },
-            label = { Text("Confirm Password") },
+            label = { Text("Xác nhận mật khẩu") },
             singleLine = true,
+            isError = viewModel.confirmPasswordError != null,
+            supportingText = {
+                viewModel.confirmPasswordError?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
             visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password
@@ -116,31 +161,32 @@ fun RegisterScreen(
                 IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
                     Icon(
                         imageVector = if (confirmPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = if (confirmPasswordVisible) "Hide password" else "Show password"
+                        contentDescription = if (confirmPasswordVisible) "Ẩn mật khẩu" else "Hiện mật khẩu"
                     )
                 }
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp)
+                .padding(bottom = 24.dp)
         )
 
         Button(
-            onClick = { 
+            onClick = {
                 viewModel.register()
-                onRegisterSuccess() 
+                onRegisterSuccess()
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp)
+                .height(56.dp)
         ) {
-            Text("Register")
+            Text("Đăng ký")
         }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        TextButton(onClick = onBackClick) {
-            Text("Already have an account? Login")
+
+        TextButton(
+            onClick = onBackClick,
+            modifier = Modifier.padding(top = 8.dp)
+        ) {
+            Text("Đã có tài khoản? Đăng nhập")
         }
     }
 }

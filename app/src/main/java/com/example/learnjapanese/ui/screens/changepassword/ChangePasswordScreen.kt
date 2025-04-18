@@ -39,7 +39,7 @@ fun ChangePasswordScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Change Password",
+            text = "Đổi mật khẩu",
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(bottom = 32.dp)
         )
@@ -47,8 +47,17 @@ fun ChangePasswordScreen(
         OutlinedTextField(
             value = viewModel.newPassword,
             onValueChange = { viewModel.updateNewPassword(it.replace("\n", "")) },
-            label = { Text("New Password") },
+            label = { Text("Mật khẩu mới") },
             singleLine = true,
+            isError = viewModel.newPasswordError != null,
+            supportingText = {
+                viewModel.newPasswordError?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password
             ),
@@ -57,7 +66,7 @@ fun ChangePasswordScreen(
                 IconButton(onClick = { newPasswordVisible = !newPasswordVisible }) {
                     Icon(
                         imageVector = if (newPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = if (newPasswordVisible) "Hide password" else "Show password"
+                        contentDescription = if (newPasswordVisible) "Ẩn mật khẩu" else "Hiện mật khẩu"
                     )
                 }
             },
@@ -69,8 +78,17 @@ fun ChangePasswordScreen(
         OutlinedTextField(
             value = viewModel.confirmPassword,
             onValueChange = { viewModel.updateConfirmPassword(it.replace("\n", "")) },
-            label = { Text("Confirm New Password") },
+            label = { Text("Xác nhận mật khẩu mới") },
             singleLine = true,
+            isError = viewModel.confirmPasswordError != null,
+            supportingText = {
+                viewModel.confirmPasswordError?.let {
+                    Text(
+                        text = it,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password
             ),
@@ -79,42 +97,32 @@ fun ChangePasswordScreen(
                 IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
                     Icon(
                         imageVector = if (confirmPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                        contentDescription = if (confirmPasswordVisible) "Hide password" else "Show password"
+                        contentDescription = if (confirmPasswordVisible) "Ẩn mật khẩu" else "Hiện mật khẩu"
                     )
                 }
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 16.dp)
+                .padding(bottom = 32.dp)
         )
 
         Button(
-            onClick = { 
+            onClick = {
                 viewModel.changePassword()
-                onPasswordChanged() 
+                onPasswordChanged()
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .height(50.dp)
+                .height(56.dp)
         ) {
-            Text("Change Password")
+            Text("Xác nhận")
         }
-        
-        Spacer(modifier = Modifier.height(16.dp))
-        
-        TextButton(onClick = onBackClick) {
-            Text("Back")
-        }
-    }
-}
 
-@Preview(showBackground = true)
-@Composable
-fun ChangePasswordScreenPreview() {
-    LearnJapaneseTheme {
-        ChangePasswordScreen(
-            onBackClick = {},
-            onPasswordChanged = {}
-        )
+        TextButton(
+            onClick = onBackClick,
+            modifier = Modifier.padding(top = 8.dp)
+        ) {
+            Text("Quay lại")
+        }
     }
 }

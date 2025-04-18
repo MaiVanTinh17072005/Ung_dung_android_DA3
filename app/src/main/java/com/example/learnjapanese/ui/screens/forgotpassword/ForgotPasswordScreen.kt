@@ -31,7 +31,7 @@ fun ForgotPasswordScreen(
         verticalArrangement = Arrangement.Center
     ) {
         Text(
-            text = "Forgot Password",
+            text = "Quên mật khẩu",
             style = MaterialTheme.typography.headlineMedium,
             modifier = Modifier.padding(bottom = 32.dp)
         )
@@ -56,11 +56,11 @@ fun ForgotPasswordScreen(
                     .fillMaxWidth()
                     .height(50.dp)
             ) {
-                Text("Send OTP")
+                Text("Gửi mã OTP")
             }
         } else {
             Text(
-                text = "OTP sent to ${viewModel.email}",
+                text = "Đã gửi mã OTP đến ${viewModel.email}",
                 style = MaterialTheme.typography.bodyMedium,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
@@ -68,7 +68,7 @@ fun ForgotPasswordScreen(
             OutlinedTextField(
                 value = viewModel.otp,
                 onValueChange = { viewModel.updateOtp(it.replace("\n", "")) },
-                label = { Text("Enter OTP") },
+                label = { Text("Nhập mã OTP") },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(
                     keyboardType = KeyboardType.Number
@@ -87,14 +87,14 @@ fun ForgotPasswordScreen(
                     .fillMaxWidth()
                     .height(50.dp)
             ) {
-                Text("Verify OTP")
+                Text("Xác nhận mã OTP")
             }
         }
         
         Spacer(modifier = Modifier.height(16.dp))
         
         TextButton(onClick = onBackClick) {
-            Text("Back to Login")
+            Text("Quay lại đăng nhập")
         }
     }
 }
