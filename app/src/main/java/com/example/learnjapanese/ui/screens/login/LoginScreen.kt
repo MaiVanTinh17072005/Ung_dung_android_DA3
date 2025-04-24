@@ -19,14 +19,18 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import com.example.learnjapanese.ui.viewmodels.LoginViewModel
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
 
 // Thay đổi import
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Shadow
+import androidx.compose.ui.text.style.TextAlign
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
 fun LoginScreen(
@@ -35,57 +39,60 @@ fun LoginScreen(
     onForgotPasswordClick: () -> Unit,
     onLoginSuccess: () -> Unit
 ) {
+    val systemUiController = rememberSystemUiController()
+    val statusBarColor = Color(0xFFF5F5F5) // Màu xám nhạt cho status bar
+    
+    SideEffect {
+        systemUiController.setStatusBarColor(
+            color = statusBarColor,
+            darkIcons = true // Icon màu tối vì nền xám nhạt
+        )
+    }
+
     var passwordVisible by remember { mutableStateOf(false) }
 
-    val primaryColor = MaterialTheme.colorScheme.primary
-    val secondaryColor = MaterialTheme.colorScheme.secondary
-    val surfaceColor = MaterialTheme.colorScheme.surface
-    val iconColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f)
+    val primaryColor = Color(0xFF2B80E5) // Màu xanh đậm (blue dark)
 
-    // Sử dụng gradient màu hồng-trắng sáng hơn
-    val gradientColors = listOf(
-        Color(0xFFFFE9F0),  // Trắng hồng rất nhạt
-        Color(0xFFFFFFFF),  // Hồng siêu nhạt
-        Color(0xFFFAF2FF)   // Trắng
-    )
+    val iconColor = Color(0xFF0D47A1) // Xanh đậm
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = gradientColors,
-                    startY = 0f,
-                    endY = Float.POSITIVE_INFINITY
-                )
-            )
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = Color(0xFFF5F5F5) // Màu xám nhạt
     ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 24.dp, vertical = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center) {
+            verticalArrangement = Arrangement.Center
+        ) {
             Text(
-                text = "Chào mừng trở lại",
+                text = "LearnJapanese",
                 style = MaterialTheme.typography.headlineLarge.copy(
                     color = primaryColor,
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 0.5.sp,
+                    fontSize = 30.sp,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 32.sp,
                     shadow = Shadow(
-                        color = primaryColor.copy(alpha = 0.2f),
-                        offset = Offset(2f, 2f),
-                        blurRadius = 3f
+                        color = primaryColor.copy(alpha = 0.3f),
+                        offset = Offset(1f, 1f),
+                        blurRadius = 2f
                     )
                 ),
-                modifier = Modifier.padding(bottom = 8.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 20.dp, end = 20.dp, bottom = 8.dp)
             )
 
             Text(
                 text = "Đăng nhập để tiếp tục",
                 style = MaterialTheme.typography.bodyLarge.copy(
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                    fontWeight = FontWeight.Medium
+                    color = Color.Black.copy(alpha = 0.7f),
+                    fontWeight = FontWeight.Light
+                    
                 ),
                 modifier = Modifier.padding(bottom = 40.dp)
             )
@@ -119,7 +126,7 @@ fun LoginScreen(
                     focusedLabelColor = primaryColor,
                     focusedLeadingIconColor = iconColor,
                     cursorColor = primaryColor,
-                    unfocusedLeadingIconColor = iconColor.copy(alpha = 0.7f)
+                    unfocusedLeadingIconColor = iconColor.copy(alpha = 1f)
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -166,8 +173,8 @@ fun LoginScreen(
                     focusedLeadingIconColor = iconColor,
                     focusedTrailingIconColor = iconColor,
                     cursorColor = primaryColor,
-                    unfocusedLeadingIconColor = iconColor.copy(alpha = 0.7f),
-                    unfocusedTrailingIconColor = iconColor.copy(alpha = 0.7f)
+                    unfocusedLeadingIconColor = iconColor.copy( alpha =1f),
+                    unfocusedTrailingIconColor = iconColor.copy(alpha = 1f)
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -227,14 +234,14 @@ fun LoginScreen(
                 Text(
                     text = "Chưa có tài khoản? ",
                     style = MaterialTheme.typography.bodyMedium.copy(
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        color = Color(0xFF212121) ,
                     )
                 )
                 TextButton(onClick = onRegisterClick) {
                     Text(
                         text = "Đăng ký",
                         style = MaterialTheme.typography.bodyMedium.copy(
-                            color = primaryColor,
+                            color = primaryColor, // Giữ nguyên màu primary không cần alpha
                             fontWeight = FontWeight.Bold
                         )
                     )

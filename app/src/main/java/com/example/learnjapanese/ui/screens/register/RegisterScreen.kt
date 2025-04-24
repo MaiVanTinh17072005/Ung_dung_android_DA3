@@ -20,6 +20,7 @@ import com.example.learnjapanese.ui.viewmodels.RegisterViewModel
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 
 @Composable
 fun RegisterScreen(
@@ -182,11 +183,26 @@ fun RegisterScreen(
             Text("Đăng ký")
         }
 
-        TextButton(
-            onClick = onBackClick,
+        Row(
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.padding(top = 8.dp)
         ) {
-            Text("Đã có tài khoản? Đăng nhập")
+            Text(
+                text = "Đã có tài khoản? ",
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                )
+            )
+            TextButton(onClick = onBackClick) {
+                Text(
+                    text = "Đăng nhập",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold
+                    )
+                )
+            }
         }
     }
 }
