@@ -94,7 +94,8 @@ fun DashboardScreen(
     onNavigateToVocabulary: () -> Unit = {},
     onNavigateToGrammar: () -> Unit = {},
     onNavigateToReading: () -> Unit = {},
-    onNavigateToAccount: () -> Unit = {}
+    onNavigateToAccount: () -> Unit = {},
+    onNavigateToCall: () -> Unit = {}
 ) {
     // Collect states from ViewModel
     val learningStats by viewModel.learningStats.collectAsState()
@@ -111,7 +112,7 @@ fun DashboardScreen(
         when (index) {
             0 -> onNavigateToVocabulary()
             1 -> onNavigateToGrammar()
-            2 -> {} // Gọi điện
+            2 -> onNavigateToCall() // Gọi điện
             3 -> {} // Trò chuyện
             4 -> {} // Trang chủ (mặc định)
         }

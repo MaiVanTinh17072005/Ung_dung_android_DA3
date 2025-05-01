@@ -17,6 +17,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.learnjapanese.navigation.NavGraph
 import com.example.learnjapanese.screens.DashboardScreen
+import com.example.learnjapanese.screens.call.CallListScreen
+import com.example.learnjapanese.screens.call.CallScreen
 import com.example.learnjapanese.screens.grammar.GrammarDetailScreen
 import com.example.learnjapanese.screens.grammar.GrammarQuizScreen
 import com.example.learnjapanese.screens.grammar.GrammarScreen
@@ -57,6 +59,9 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onNavigateToAccount = {
                                     // Sẽ thêm sau
+                                },
+                                onNavigateToCall = {
+                                    navController.navigate("calls")
                                 }
                             )
                         }
@@ -176,6 +181,45 @@ class MainActivity : ComponentActivity() {
                                     navController.popBackStack()
                                 },
                                 onComplete = { correct, total ->
+                                    navController.popBackStack()
+                                }
+                            )
+                        }
+                        
+                        composable("calls") {
+                            CallListScreen(
+                                onBack = {
+                                    navController.popBackStack()
+                                },
+                                onContactClick = { contactId ->
+                                    // Xử lý khi nhấn vào liên hệ
+                                },
+                                onStartCall = { contactId, isVideo ->
+                                    navController.navigate("calls/active/$contactId?video=$isVideo")
+                                }
+                            )
+                        }
+                        
+                        composable(
+                            route = "calls/active/{contactId}?video={isVideo}",
+                            arguments = listOf(
+                                navArgument("contactId") { type = NavType.StringType },
+                                navArgument("isVideo") { 
+                                    type = NavType.BoolType 
+                                    defaultValue = false
+                                }
+                            )
+                        ) { backStackEntry ->
+                            val contactId = backStackEntry.arguments?.getString("contactId") ?: "c1"
+                            val isVideo = backStackEntry.arguments?.getBoolean("isVideo") ?: false
+                            
+                            CallScreen(
+                                contactId = contactId,
+                                isVideoCall = isVideo,
+                                onEndCall = {
+                                    navController.popBackStack()
+                                },
+                                onNavigateBack = {
                                     navController.popBackStack()
                                 }
                             )
