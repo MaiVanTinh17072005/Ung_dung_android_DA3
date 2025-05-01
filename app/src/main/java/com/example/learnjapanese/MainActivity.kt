@@ -25,6 +25,10 @@ import com.example.learnjapanese.screens.chat.VoiceChatScreen
 import com.example.learnjapanese.screens.grammar.GrammarDetailScreen
 import com.example.learnjapanese.screens.grammar.GrammarQuizScreen
 import com.example.learnjapanese.screens.grammar.GrammarScreen
+import com.example.learnjapanese.screens.profile.EditProfileScreen
+import com.example.learnjapanese.screens.profile.FriendsScreen
+import com.example.learnjapanese.screens.profile.NotificationsScreen
+import com.example.learnjapanese.screens.profile.ProfileScreen
 import com.example.learnjapanese.screens.vocabulary.VocabularyDetailScreen
 import com.example.learnjapanese.screens.vocabulary.VocabularyFlashcardScreen
 import com.example.learnjapanese.screens.vocabulary.VocabularyQuizScreen
@@ -61,7 +65,7 @@ class MainActivity : ComponentActivity() {
                                     // Sẽ thêm sau
                                 },
                                 onNavigateToAccount = {
-                                    // Sẽ thêm sau
+                                    navController.navigate("profile")
                                 },
                                 onNavigateToCall = {
                                     navController.navigate("calls")
@@ -231,7 +235,6 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         
-                        // Route trò chuyện
                         composable("chat") {
                             ChatListScreen(
                                 onBack = {
@@ -274,6 +277,80 @@ class MainActivity : ComponentActivity() {
                         
                         composable("chat/voice") {
                             VoiceChatScreen(
+                                onBack = {
+                                    navController.popBackStack()
+                                }
+                            )
+                        }
+                        
+                        composable("profile") {
+                            ProfileScreen(
+                                onBack = {
+                                    navController.popBackStack()
+                                },
+                                onEditProfile = {
+                                    navController.navigate("profile/edit")
+                                },
+                                onFindFriends = {
+                                    navController.navigate("profile/friends")
+                                },
+                                onNotifications = {
+                                    navController.navigate("profile/notifications")
+                                },
+                                onSettings = {
+                                    // Sẽ thêm sau
+                                }
+                            )
+                        }
+                        
+                        composable("profile/edit") {
+                            EditProfileScreen(
+                                onBack = {
+                                    navController.popBackStack()
+                                },
+                                onSave = { fullName, email, phone, bio, level ->
+                                    // Xử lý lưu thông tin cá nhân
+                                    navController.popBackStack()
+                                }
+                            )
+                        }
+                        
+                        composable("profile/friends") {
+                            FriendsScreen(
+                                onBack = {
+                                    navController.popBackStack()
+                                },
+                                onUserClick = { userId ->
+                                    // Hiển thị profile của người dùng khác
+                                    navController.navigate("profile/user/$userId")
+                                }
+                            )
+                        }
+                        
+                        composable("profile/notifications") {
+                            NotificationsScreen(
+                                onBack = {
+                                    navController.popBackStack()
+                                },
+                                onNotificationClick = { notificationId ->
+                                    // Xử lý khi nhấn vào thông báo
+                                },
+                                onUserClick = { userId ->
+                                    // Hiển thị profile của người gửi yêu cầu kết bạn
+                                    navController.navigate("profile/user/$userId")
+                                }
+                            )
+                        }
+                        
+                        composable(
+                            route = "profile/user/{userId}",
+                            arguments = listOf(
+                                navArgument("userId") { type = NavType.StringType }
+                            )
+                        ) { backStackEntry ->
+                            val userId = backStackEntry.arguments?.getString("userId") ?: "u1"
+                            // Màn hình xem profile người dùng khác - có thể dùng chung ProfileScreen với flag
+                            ProfileScreen(
                                 onBack = {
                                     navController.popBackStack()
                                 }

@@ -137,7 +137,7 @@ fun DashboardScreen(
                             contentDescription = "Thông báo"
                         )
                     }
-                    IconButton(onClick = { handleNavigation(5) }) { // 5 là Account
+                    IconButton(onClick = { onNavigateToAccount() }) {
                         Box(
                             modifier = Modifier
                                 .size(32.dp)
@@ -148,6 +148,7 @@ fun DashboardScreen(
                                     color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
                                     shape = CircleShape
                                 )
+                                .clickable { onNavigateToAccount() }
                         ) {
                             Text(
                                 "A",
