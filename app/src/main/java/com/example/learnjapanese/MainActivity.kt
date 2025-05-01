@@ -17,6 +17,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.example.learnjapanese.navigation.NavGraph
 import com.example.learnjapanese.screens.DashboardScreen
+import com.example.learnjapanese.screens.grammar.GrammarDetailScreen
+import com.example.learnjapanese.screens.grammar.GrammarQuizScreen
+import com.example.learnjapanese.screens.grammar.GrammarScreen
 import com.example.learnjapanese.screens.vocabulary.VocabularyDetailScreen
 import com.example.learnjapanese.screens.vocabulary.VocabularyFlashcardScreen
 import com.example.learnjapanese.screens.vocabulary.VocabularyQuizScreen
@@ -47,7 +50,7 @@ class MainActivity : ComponentActivity() {
                                     navController.navigate("vocabulary")
                                 },
                                 onNavigateToGrammar = {
-                                    // Sẽ thêm sau
+                                    navController.navigate("grammar")
                                 },
                                 onNavigateToReading = {
                                     // Sẽ thêm sau
@@ -117,6 +120,58 @@ class MainActivity : ComponentActivity() {
                             val topicId = backStackEntry.arguments?.getString("topicId") ?: "1"
                             VocabularyQuizScreen(
                                 topicId = topicId,
+                                onBack = {
+                                    navController.popBackStack()
+                                },
+                                onComplete = { correct, total ->
+                                    navController.popBackStack()
+                                }
+                            )
+                        }
+                        
+                        composable("grammar") {
+                            GrammarScreen(
+                                onBack = {
+                                    navController.popBackStack()
+                                },
+                                onGrammarClick = { grammarId ->
+                                    navController.navigate("grammar/detail/$grammarId")
+                                },
+                                onStartQuiz = { grammarIds ->
+                                    val idsParam = grammarIds.joinToString(",")
+                                    navController.navigate("grammar/quiz?ids=$idsParam")
+                                }
+                            )
+                        }
+                        
+                        composable(
+                            route = "grammar/detail/{grammarId}",
+                            arguments = listOf(
+                                navArgument("grammarId") { type = NavType.StringType }
+                            )
+                        ) { backStackEntry ->
+                            val grammarId = backStackEntry.arguments?.getString("grammarId") ?: "g1"
+                            GrammarDetailScreen(
+                                grammarId = grammarId,
+                                onBack = {
+                                    navController.popBackStack()
+                                },
+                                onStartQuiz = { id ->
+                                    navController.navigate("grammar/quiz?ids=$id")
+                                }
+                            )
+                        }
+                        
+                        composable(
+                            route = "grammar/quiz?ids={ids}",
+                            arguments = listOf(
+                                navArgument("ids") { type = NavType.StringType }
+                            )
+                        ) { backStackEntry ->
+                            val idsString = backStackEntry.arguments?.getString("ids") ?: "g1"
+                            val grammarIds = idsString.split(",")
+                            GrammarQuizScreen(
+                                grammarIds = grammarIds,
                                 onBack = {
                                     navController.popBackStack()
                                 },
