@@ -19,6 +19,9 @@ import com.example.learnjapanese.navigation.NavGraph
 import com.example.learnjapanese.screens.DashboardScreen
 import com.example.learnjapanese.screens.call.CallListScreen
 import com.example.learnjapanese.screens.call.CallScreen
+import com.example.learnjapanese.screens.chat.ChatListScreen
+import com.example.learnjapanese.screens.chat.TextChatScreen
+import com.example.learnjapanese.screens.chat.VoiceChatScreen
 import com.example.learnjapanese.screens.grammar.GrammarDetailScreen
 import com.example.learnjapanese.screens.grammar.GrammarQuizScreen
 import com.example.learnjapanese.screens.grammar.GrammarScreen
@@ -62,6 +65,9 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onNavigateToCall = {
                                     navController.navigate("calls")
+                                },
+                                onNavigateToChat = {
+                                    navController.navigate("chat")
                                 }
                             )
                         }
@@ -220,6 +226,55 @@ class MainActivity : ComponentActivity() {
                                     navController.popBackStack()
                                 },
                                 onNavigateBack = {
+                                    navController.popBackStack()
+                                }
+                            )
+                        }
+                        
+                        // Route trò chuyện
+                        composable("chat") {
+                            ChatListScreen(
+                                onBack = {
+                                    navController.popBackStack()
+                                },
+                                onStartTextChat = {
+                                    navController.navigate("chat/text")
+                                },
+                                onStartVoiceChat = {
+                                    navController.navigate("chat/voice")
+                                },
+                                onHistoryChatClick = { chatId ->
+                                    navController.navigate("chat/text/$chatId")
+                                }
+                            )
+                        }
+                        
+                        composable("chat/text") {
+                            TextChatScreen(
+                                onBack = {
+                                    navController.popBackStack()
+                                }
+                            )
+                        }
+                        
+                        composable(
+                            route = "chat/text/{chatId}",
+                            arguments = listOf(
+                                navArgument("chatId") { type = NavType.StringType }
+                            )
+                        ) { backStackEntry ->
+                            val chatId = backStackEntry.arguments?.getString("chatId")
+                            TextChatScreen(
+                                chatId = chatId,
+                                onBack = {
+                                    navController.popBackStack()
+                                }
+                            )
+                        }
+                        
+                        composable("chat/voice") {
+                            VoiceChatScreen(
+                                onBack = {
                                     navController.popBackStack()
                                 }
                             )
