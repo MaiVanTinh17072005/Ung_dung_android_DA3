@@ -29,6 +29,7 @@ import com.example.learnjapanese.screens.profile.EditProfileScreen
 import com.example.learnjapanese.screens.profile.FriendsScreen
 import com.example.learnjapanese.screens.profile.NotificationsScreen
 import com.example.learnjapanese.screens.profile.ProfileScreen
+import com.example.learnjapanese.screens.profile.SettingsScreen
 import com.example.learnjapanese.screens.vocabulary.VocabularyDetailScreen
 import com.example.learnjapanese.screens.vocabulary.VocabularyFlashcardScreen
 import com.example.learnjapanese.screens.vocabulary.VocabularyQuizScreen
@@ -298,7 +299,7 @@ class MainActivity : ComponentActivity() {
                                     navController.navigate("profile/notifications")
                                 },
                                 onSettings = {
-                                    // Sẽ thêm sau
+                                    navController.navigate("profile/settings")
                                 }
                             )
                         }
@@ -338,6 +339,29 @@ class MainActivity : ComponentActivity() {
                                 onUserClick = { userId ->
                                     // Hiển thị profile của người gửi yêu cầu kết bạn
                                     navController.navigate("profile/user/$userId")
+                                }
+                            )
+                        }
+                        
+                        composable("profile/settings") {
+                            SettingsScreen(
+                                onBack = {
+                                    navController.popBackStack()
+                                },
+                                onAccountSettings = {
+                                    navController.navigate("profile/edit")
+                                },
+                                onLanguageSettings = {
+                                    // Sẽ thêm sau
+                                },
+                                onNotificationSettings = {
+                                    // Sẽ thêm sau
+                                },
+                                onLogout = {
+                                    // Xử lý đăng xuất và quay về màn hình đăng nhập (nếu có)
+                                    navController.navigate("dashboard") {
+                                        popUpTo("dashboard") { inclusive = true }
+                                    }
                                 }
                             )
                         }
