@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -30,6 +31,7 @@ import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
@@ -38,6 +40,7 @@ import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.Call
 import androidx.compose.material.icons.outlined.ChatBubble
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
@@ -45,6 +48,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
@@ -77,6 +81,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.learnjapanese.R
@@ -85,23 +90,39 @@ import com.example.learnjapanese.ui.theme.LearnJapaneseTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
-    viewModel: DashboardViewModel = viewModel()
+    viewModel: DashboardViewModel = viewModel(),
+    onNavigateToVocabulary: () -> Unit = {},
+    onNavigateToGrammar: () -> Unit = {},
+    onNavigateToReading: () -> Unit = {},
+    onNavigateToAccount: () -> Unit = {}
 ) {
     // Collect states from ViewModel
     val learningStats by viewModel.learningStats.collectAsState()
     val featuredBanner by viewModel.featuredBanner.collectAsState()
     val learningFeatures by viewModel.learningFeatures.collectAsState()
     
-    var selectedNavItem by remember { mutableStateOf(0) }
+    var selectedNavItem by remember { mutableStateOf(4) } // Mặc định là trang chủ
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }
+
+    // Xử lý điều hướng
+    val handleNavigation = { index: Int ->
+        selectedNavItem = index
+        when (index) {
+            0 -> onNavigateToVocabulary()
+            1 -> onNavigateToGrammar()
+            2 -> {} // Gọi điện
+            3 -> {} // Trò chuyện
+            4 -> {} // Trang chủ (mặc định)
+        }
+    }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
                     Text(
-                        "Learn Japanese",
+                        "Học Tiếng Nhật",
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold
                         )
@@ -114,7 +135,7 @@ fun DashboardScreen(
                             contentDescription = "Thông báo"
                         )
                     }
-                    IconButton(onClick = { }) {
+                    IconButton(onClick = { handleNavigation(5) }) { // 5 là Account
                         Box(
                             modifier = Modifier
                                 .size(32.dp)
@@ -142,42 +163,126 @@ fun DashboardScreen(
             )
         },
         bottomBar = {
-            NavigationBar(
-                containerColor = MaterialTheme.colorScheme.surface,
-                contentColor = MaterialTheme.colorScheme.onSurface,
-                tonalElevation = 0.dp,
+            Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .shadow(5.dp)
+                    .height(100.dp) // Tăng chiều cao để chứa FAB
             ) {
-                BottomNavItems.forEachIndexed { index, item ->
+                // Thanh điều hướng
+                NavigationBar(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    tonalElevation = 0.dp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(100.dp)
+                        .align(Alignment.BottomCenter)
+                        .shadow(5.dp)
+                        .zIndex(0f)
+                ) {
+                    val navItems = listOf(
+                        BottomNavItems[0],
+                        BottomNavItems[1],
+                        // Để trống ở giữa cho nút Home
+                        BottomNavItems[2],
+                        BottomNavItems[3]
+                    )
+                    
+                    // 2 mục đầu tiên
+                    navItems.subList(0, 2).forEachIndexed { index, item ->
+                        NavigationBarItem(
+                            icon = { 
+                                Icon(
+                                    imageVector = if (selectedNavItem == index) item.selectedIcon else item.icon,
+                                    contentDescription = item.title,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            },
+                            label = { 
+                                Text(
+                                    item.title, 
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        fontWeight = if (selectedNavItem == index) FontWeight.Bold else FontWeight.Normal
+                                    ),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                ) 
+                            },
+                            selected = selectedNavItem == index,
+                            onClick = { handleNavigation(index) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                indicatorColor = MaterialTheme.colorScheme.surface,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        )
+                    }
+                    
+                    // Mục giữa (trống)
                     NavigationBarItem(
                         icon = { 
-                            Icon(
-                                imageVector = if (selectedNavItem == index) item.selectedIcon else item.icon,
-                                contentDescription = item.title,
-                                modifier = Modifier.size(26.dp)
-                            )
+                            Spacer(modifier = Modifier.size(24.dp))
                         },
-                        label = { 
-                            Text(
-                                item.title, 
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    fontWeight = if (selectedNavItem == index) FontWeight.Bold else FontWeight.Normal
-                                ),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            ) 
-                        },
-                        selected = selectedNavItem == index,
-                        onClick = { selectedNavItem = index },
+                        label = { Spacer(modifier = Modifier.height(12.dp)) },
+                        selected = selectedNavItem == 4,
+                        onClick = { },
                         colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MaterialTheme.colorScheme.primary,
-                            selectedTextColor = MaterialTheme.colorScheme.primary,
-                            indicatorColor = MaterialTheme.colorScheme.surface,
-                            unselectedIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                            unselectedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            indicatorColor = MaterialTheme.colorScheme.surface
                         )
+                    )
+                    
+                    // 2 mục cuối
+                    navItems.subList(2, 4).forEachIndexed { index, item ->
+                        val actualIndex = index + 2
+                        NavigationBarItem(
+                            icon = { 
+                                Icon(
+                                    imageVector = if (selectedNavItem == actualIndex) item.selectedIcon else item.icon,
+                                    contentDescription = item.title,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            },
+                            label = { 
+                                Text(
+                                    item.title, 
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        fontWeight = if (selectedNavItem == actualIndex) FontWeight.Bold else FontWeight.Normal
+                                    ),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                ) 
+                            },
+                            selected = selectedNavItem == actualIndex,
+                            onClick = { handleNavigation(actualIndex) },
+                            colors = NavigationBarItemDefaults.colors(
+                                selectedIconColor = MaterialTheme.colorScheme.primary,
+                                selectedTextColor = MaterialTheme.colorScheme.primary,
+                                indicatorColor = MaterialTheme.colorScheme.surface,
+                                unselectedIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                unselectedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        )
+                    }
+                }
+                
+                // Nút Trang chủ nổi ở giữa
+                FloatingActionButton(
+                    onClick = { handleNavigation(4) },
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary,
+                    shape = CircleShape,
+                    modifier = Modifier
+                        .size(56.dp)
+                        .align(Alignment.TopCenter)
+                        .offset(y = (-16).dp)
+                        .zIndex(1f)
+                ) {
+                    Icon(
+                        imageVector = if (selectedNavItem == 4) Icons.Filled.Home else Icons.Outlined.Home,
+                        contentDescription = "Trang chủ",
+                        modifier = Modifier.size(28.dp)
                     )
                 }
             }
@@ -564,7 +669,7 @@ val BottomNavItems = listOf(
     BottomNavItem("Ngữ pháp", Icons.Outlined.Edit, Icons.Filled.Edit),
     BottomNavItem("Gọi điện", Icons.Outlined.Call, Icons.Filled.Call),
     BottomNavItem("Trò chuyện", Icons.Outlined.ChatBubble, Icons.Filled.ChatBubble),
-    BottomNavItem("Tài khoản", Icons.Outlined.Person, Icons.Filled.Person)
+    BottomNavItem("Trang chủ", Icons.Outlined.Home, Icons.Filled.Home)
 )
 
 @Preview(showBackground = true)

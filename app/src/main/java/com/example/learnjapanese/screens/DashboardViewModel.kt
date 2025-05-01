@@ -1,24 +1,15 @@
 package com.example.learnjapanese.screens
 
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.learnjapanese.data.repository.LearningProgressRepository
-import com.example.learnjapanese.data.repository.UserRepository
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@HiltViewModel
-class DashboardViewModel @Inject constructor(
-    private val userRepository: UserRepository,
-    private val learningProgressRepository: LearningProgressRepository
-) : ViewModel() {
+// Tạm thời xóa annotation HiltViewModel để có thể khởi tạo trực tiếp
+class DashboardViewModel : ViewModel() {
     
     // State cho dữ liệu thống kê học tập
     private val _learningStats = MutableStateFlow(LearningStats())
