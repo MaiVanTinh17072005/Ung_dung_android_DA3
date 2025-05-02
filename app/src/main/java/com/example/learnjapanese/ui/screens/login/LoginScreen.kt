@@ -13,23 +13,17 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.unit.dp
-import com.example.learnjapanese.ui.viewmodels.LoginViewModel
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.statusBars
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Surface
-
-// Thay đổi import
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.example.learnjapanese.ui.viewmodels.LoginViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
@@ -39,26 +33,26 @@ fun LoginScreen(
     onForgotPasswordClick: () -> Unit,
     onLoginSuccess: () -> Unit
 ) {
-    val systemUiController = rememberSystemUiController()
-    val statusBarColor = Color(0xFFF5F5F5) // Màu xám nhạt cho status bar
+    var passwordVisible by remember { mutableStateOf(false) }
     
+    val colors = object {
+        val primary = Color(0xFF2E7D32)
+        val primaryLight = Color(0xFF60AD5E)
+        val primaryDark = Color(0xFF005005)
+        val surface = Color(0xFFF1F8E9)
+    }
+
+    val systemUiController = rememberSystemUiController()
     SideEffect {
         systemUiController.setStatusBarColor(
-            color = statusBarColor,
-            darkIcons = true // Icon màu tối vì nền xám nhạt
+            color = colors.surface,
+            darkIcons = true
         )
     }
 
-    var passwordVisible by remember { mutableStateOf(false) }
-
-    val primaryColor = Color(0xFF2B80E5) // Màu xanh đậm (blue dark)
-
-    val iconColor = Color(0xFF0D47A1) // Xanh đậm
-
-
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = Color(0xFFF5F5F5) // Màu xám nhạt
+        color = colors.surface
     ) {
         Column(
             modifier = Modifier
@@ -70,14 +64,14 @@ fun LoginScreen(
             Text(
                 text = "LearnJapanese",
                 style = MaterialTheme.typography.headlineLarge.copy(
-                    color = primaryColor,
+                    color = colors.primaryDark,
                     fontWeight = FontWeight.ExtraBold,
                     letterSpacing = 0.5.sp,
                     fontSize = 30.sp,
                     textAlign = TextAlign.Center,
                     lineHeight = 32.sp,
                     shadow = Shadow(
-                        color = primaryColor.copy(alpha = 0.3f),
+                        color = colors.primary.copy(alpha = 0.3f),
                         offset = Offset(1f, 1f),
                         blurRadius = 2f
                     )
@@ -118,15 +112,15 @@ fun LoginScreen(
                     Icon(
                         imageVector = Icons.Default.Email,
                         contentDescription = "Email Icon",
-                        tint = iconColor
+                        tint = colors.primaryDark
                     )
                 },
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = primaryColor,
-                    focusedLabelColor = primaryColor,
-                    focusedLeadingIconColor = iconColor,
-                    cursorColor = primaryColor,
-                    unfocusedLeadingIconColor = iconColor.copy(alpha = 1f)
+                    focusedBorderColor = colors.primary,
+                    focusedLabelColor = colors.primary,
+                    focusedLeadingIconColor = colors.primaryDark,
+                    cursorColor = colors.primary,
+                    unfocusedLeadingIconColor = colors.primaryDark.copy(alpha = 1f)
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -155,7 +149,7 @@ fun LoginScreen(
                     Icon(
                         imageVector = Icons.Default.Lock,
                         contentDescription = "Password Icon",
-                        tint = iconColor
+                        tint = colors.primaryDark
                     )
                 },
                 trailingIcon = {
@@ -163,18 +157,18 @@ fun LoginScreen(
                         Icon(
                             imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
                             contentDescription = if (passwordVisible) "Ẩn mật khẩu" else "Hiện mật khẩu",
-                            tint = iconColor
+                            tint = colors.primaryDark
                         )
                     }
                 },
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = primaryColor,
-                    focusedLabelColor = primaryColor,
-                    focusedLeadingIconColor = iconColor,
-                    focusedTrailingIconColor = iconColor,
-                    cursorColor = primaryColor,
-                    unfocusedLeadingIconColor = iconColor.copy( alpha =1f),
-                    unfocusedTrailingIconColor = iconColor.copy(alpha = 1f)
+                    focusedBorderColor = colors.primary,
+                    focusedLabelColor = colors.primary,
+                    focusedLeadingIconColor = colors.primaryDark,
+                    focusedTrailingIconColor = colors.primaryDark,
+                    cursorColor = colors.primary,
+                    unfocusedLeadingIconColor = colors.primaryDark.copy(alpha = 1f),
+                    unfocusedTrailingIconColor = colors.primaryDark.copy(alpha = 1f)
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
@@ -191,7 +185,7 @@ fun LoginScreen(
                     Text(
                         text = "Quên mật khẩu?",
                         style = MaterialTheme.typography.bodyMedium.copy(
-                            color = primaryColor,
+                            color = colors.primary,
                             fontWeight = FontWeight.Medium
                         )
                     )
@@ -208,12 +202,14 @@ fun LoginScreen(
                     .height(56.dp),
                 shape = RoundedCornerShape(28.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = primaryColor,
+                    containerColor = colors.primary,
                     contentColor = Color.White
                 ),
                 elevation = ButtonDefaults.buttonElevation(
                     defaultElevation = 6.dp,
-                    pressedElevation = 8.dp
+                    pressedElevation = 8.dp,
+                    hoveredElevation = 8.dp,
+                    focusedElevation = 8.dp
                 )
             ) {
                 Text(
@@ -237,11 +233,12 @@ fun LoginScreen(
                         color = Color(0xFF212121) ,
                     )
                 )
+                // Fix the error in the "Đăng ký" button:
                 TextButton(onClick = onRegisterClick) {
                     Text(
                         text = "Đăng ký",
                         style = MaterialTheme.typography.bodyMedium.copy(
-                            color = primaryColor, // Giữ nguyên màu primary không cần alpha
+                            color = colors.primaryDark,
                             fontWeight = FontWeight.Bold
                         )
                     )
