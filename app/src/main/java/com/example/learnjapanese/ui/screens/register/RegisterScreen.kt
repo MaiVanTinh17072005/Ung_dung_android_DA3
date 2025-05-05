@@ -92,7 +92,7 @@ fun RegisterScreen(
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 12.dp)
+                    .padding(bottom = 5.dp)
             )
 
             OutlinedTextField(
@@ -126,7 +126,7 @@ fun RegisterScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 12.dp)
+                    .padding(bottom = 5.dp)
             )
 
             OutlinedTextField(
@@ -160,7 +160,7 @@ fun RegisterScreen(
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 12.dp)
+                    .padding(bottom = 5.dp)
             )
 
             OutlinedTextField(
@@ -206,7 +206,7 @@ fun RegisterScreen(
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 12.dp)
+                    .padding(bottom = 5.dp)
             )
 
             OutlinedTextField(
@@ -252,7 +252,7 @@ fun RegisterScreen(
                 ),
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 24.dp)
+                    .padding(bottom = 5.dp)
             )
 
             Button(
