@@ -21,22 +21,48 @@ import androidx.compose.ui.draw.clip
 import com.example.learnjapanese.R
 import com.example.learnjapanese.ui.theme.MauChinh
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextDecoration
 import com.example.learnjapanese.ui.theme.xanh_la_1
 import com.example.learnjapanese.ui.theme.xanh_la_2
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-// Add this import at the top
 import androidx.compose.ui.text.font.FontStyle
-// Add these imports at the top
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Icon
 import androidx.compose.foundation.border
+import androidx.compose.animation.*
+import kotlinx.coroutines.delay
+import com.example.learnjapanese.ui.theme.Cam
 
 @Composable
 fun WelcomeScreen(
     onContinueClick: () -> Unit
 ) {
+    var firstTextCharCount by remember { mutableStateOf(0) }
+    var secondTextCharCount by remember { mutableStateOf(0) }
+    var buttonVisible by remember { mutableStateOf(false) }
+
+    val firstText = "Ứng dụng học tiếng nhật chất lượng"
+    val secondText = "LearnJapanese"
+    val threeText = "Chiến đấu nào!!!"
+    var thirdTextCharCount by remember { mutableStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        firstText.forEachIndexed { index, _ ->
+            delay(30)
+            firstTextCharCount = index + 2
+        }
+        secondText.forEachIndexed { index, _ ->
+            delay(55)
+            secondTextCharCount = index + 1
+        }
+        // Add animation for third text
+        threeText.forEachIndexed { index, _ ->
+            delay(40)
+            thirdTextCharCount = index + 1
+        }
+        buttonVisible = true
+    }
+
     val systemUiController = rememberSystemUiController()
     SideEffect {
         systemUiController.setStatusBarColor(
@@ -59,7 +85,7 @@ fun WelcomeScreen(
                     .background(Color.White.copy(alpha = 0.45f))
             )
         }
-        
+
         Box(
             modifier = Modifier
                 .fillMaxSize(0.87f)
@@ -83,7 +109,7 @@ fun WelcomeScreen(
                     .fillMaxSize()
                     .background(Color.White.copy(alpha = 0.2f))
             )
-            
+
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -95,19 +121,18 @@ fun WelcomeScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(top = 10.dp)
                 ) {
-
                     Text(
-                        text = "Ứng dụng học tiếng nhật chất lượng",
+                        text = firstText.take(firstTextCharCount),
                         fontSize = 18.sp,
                         textAlign = TextAlign.Center,
                         fontWeight = FontWeight.Normal,
                         fontStyle = FontStyle.Italic,
                         color = xanh_la_2
                     )
-                    Spacer(modifier = Modifier.height(5.dp))
-                    
+                    Spacer(modifier = Modifier.height(1.dp))
+
                     Text(
-                        text = "LearnJapanese",
+                        text = secondText.take(secondTextCharCount),
                         style = TextStyle(
                             fontSize = 28.sp,
                             fontWeight = FontWeight.SemiBold,
@@ -122,32 +147,55 @@ fun WelcomeScreen(
                         letterSpacing = 1.sp
                     )
                 }
-                
-                Button(
-                    onClick = onContinueClick,
-                    modifier = Modifier
-                        .wrapContentWidth()
-                        .padding(bottom = 20.dp)
-                        .height(50.dp),
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = MauChinh)
+
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 20.dp)
+                    Text(
+                        text = threeText.take(thirdTextCharCount),
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.Medium,
+                        fontStyle = FontStyle.Italic,
+                        color = Cam,
+                        modifier = Modifier.padding(bottom = 1.dp)
+                    )
+                    
+                    AnimatedVisibility(
+                        visible = buttonVisible,
+                        enter = fadeIn() + slideInVertically(
+                            initialOffsetY = { 40 }
+                        )
                     ) {
-                        Text(
-                            text = "Tiếp tục",
-                            fontSize = 18.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Icon(
-                            imageVector = Icons.Filled.ArrowForward,
-                            contentDescription = "Next",
-                            modifier = Modifier.size(26.dp)
-                        )
+                        Button(
+                            onClick = onContinueClick,
+                            modifier = Modifier
+                                .wrapContentWidth()
+                                .padding(bottom = 15.dp)
+                                .height(50.dp),
+                            shape = RoundedCornerShape(16.dp),
+                            colors = ButtonDefaults.buttonColors(containerColor = MauChinh)
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.Center,
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(horizontal = 20.dp)
+                            ) {
+                                Text(
+                                    text = "Tiếp tục",
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.White 
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Icon(
+                                    imageVector = Icons.Filled.ArrowForward,
+                                    contentDescription = "Next",
+                                    modifier = Modifier.size(26.dp),
+                                    tint = Color.White
+                                )
+                            }
+                        }
                     }
                 }
             }
