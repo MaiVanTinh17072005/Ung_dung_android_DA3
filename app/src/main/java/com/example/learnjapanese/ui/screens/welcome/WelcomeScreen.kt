@@ -31,6 +31,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material3.Icon
+import androidx.compose.foundation.border
 
 @Composable
 fun WelcomeScreen(
@@ -64,6 +65,11 @@ fun WelcomeScreen(
                 .fillMaxSize(0.87f)
                 .padding(16.dp)
                 .clip(RoundedCornerShape(40.dp))
+                .border(
+                    width = 1.2.dp,
+                    color = xanh_la_1.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(40.dp)
+                )
                 .align(Alignment.Center)
         ) {
             Image(
@@ -87,7 +93,7 @@ fun WelcomeScreen(
             ) {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier.padding(top = 0.dp)
+                    modifier = Modifier.padding(top = 10.dp)
                 ) {
 
                     Text(
@@ -98,7 +104,7 @@ fun WelcomeScreen(
                         fontStyle = FontStyle.Italic,
                         color = xanh_la_2
                     )
-                    Spacer(modifier = Modifier.height(0.dp))
+                    Spacer(modifier = Modifier.height(5.dp))
                     
                     Text(
                         text = "LearnJapanese",
@@ -106,7 +112,7 @@ fun WelcomeScreen(
                             fontSize = 28.sp,
                             fontWeight = FontWeight.SemiBold,
                             shadow = Shadow(
-                                color = Color.Black.copy(alpha = 0.25f),
+                                color = Color.Black.copy(alpha = 0.5f),
                                 offset = Offset(2f, 2f),
                                 blurRadius = 2f
                             )
