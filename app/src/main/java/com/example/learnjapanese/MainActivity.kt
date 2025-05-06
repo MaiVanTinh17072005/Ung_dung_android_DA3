@@ -15,6 +15,7 @@ import com.example.learnjapanese.ui.screens.changepassword.ChangePasswordScreen
 import com.example.learnjapanese.ui.screens.forgotpassword.ForgotPasswordScreen
 import com.example.learnjapanese.ui.screens.login.LoginScreen
 import com.example.learnjapanese.ui.screens.register.RegisterScreen
+import com.example.learnjapanese.ui.screens.welcome.WelcomeScreen
 import com.example.learnjapanese.ui.theme.LearnJapaneseTheme
 
 class MainActivity : ComponentActivity() {
@@ -33,7 +34,13 @@ class MainActivity : ComponentActivity() {
 fun AppNavigation() {
     val navController = rememberNavController()
     
-    NavHost(navController = navController, startDestination = "login") {
+    NavHost(navController = navController, startDestination = "welcome") {
+        composable("welcome") {
+            WelcomeScreen(
+                onContinueClick = { navController.navigate("login") }
+            )
+        }
+        
         composable("login") {
             LoginScreen(
                 onRegisterClick = { navController.navigate("register") },
@@ -47,12 +54,14 @@ fun AppNavigation() {
                 onRegisterSuccess = { navController.navigate("login") }
             )
         }
+        
         composable("forgot_password") {
             ForgotPasswordScreen(
                 onBackClick = { navController.popBackStack() },
                 onSubmitOtp = { navController.navigate("change_password") }
             )
         }
+        
         composable("change_password") {
             ChangePasswordScreen(
                 onBackClick = { navController.popBackStack() },
