@@ -40,6 +40,7 @@ import com.example.learnjapanese.ui.theme.MauChinh
 import com.example.learnjapanese.ui.theme.MauChinhDam
 import androidx.compose.foundation.border
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontStyle
 import com.example.learnjapanese.ui.theme.Xanh_la_qmk
 import com.example.learnjapanese.ui.theme.xanhnhat
 
@@ -83,7 +84,6 @@ fun LoginScreen(
                     .background(Color.White.copy(alpha = 0f))
             )
 
-            // Content Box
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
@@ -118,7 +118,7 @@ fun LoginScreen(
                             color = MauChinhDam,
                             fontWeight = FontWeight.ExtraBold,
                             letterSpacing = 0.5.sp,
-                            fontSize = 30.sp,
+                            fontSize = 35.sp,
                             textAlign = TextAlign.Center,
                             lineHeight = 32.sp,
                             shadow = Shadow(
@@ -129,7 +129,7 @@ fun LoginScreen(
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 8.dp)  // Reduced padding
+                            .padding(bottom = 10.dp)
                     )
 
                     Text(
@@ -237,7 +237,9 @@ fun LoginScreen(
                                 text = "Quên mật khẩu?",
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     color = Xanh_la_qmk,
-                                    fontWeight = FontWeight.Medium
+                                    fontWeight = FontWeight.W400,
+                                    fontStyle = FontStyle.Italic,
+                                    fontSize = 17.sp,
                                 )
                             )
                         }
@@ -281,7 +283,9 @@ fun LoginScreen(
                         Text(
                             text = "Chưa có tài khoản? ",
                             style = MaterialTheme.typography.bodyMedium.copy(
-                                color = Color.Black
+                                color = Color.Black,
+                                fontStyle = FontStyle.Italic,
+                                fontSize = 16.sp
                             )
                         )
                         TextButton(onClick = onRegisterClick) {
@@ -289,7 +293,8 @@ fun LoginScreen(
                                 text = "Đăng ký",
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     color = MauChinhDam,
-                                    fontWeight = FontWeight.Bold
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 18.sp
                                 )
                             )
                         }
