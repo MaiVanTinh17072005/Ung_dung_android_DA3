@@ -42,6 +42,7 @@ import androidx.compose.foundation.border
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontStyle
 import com.example.learnjapanese.ui.theme.Xanh_la_qmk
+import com.example.learnjapanese.ui.theme.mau_chu_o_text
 import com.example.learnjapanese.ui.theme.xanhnhat
 
 @Composable
@@ -146,7 +147,16 @@ fun LoginScreen(
                     OutlinedTextField(
                         value = viewModel.username,
                         onValueChange = { viewModel.updateUsername(it.replace("\n", "")) },
-                        label = { Text("Email") },
+                        label = {
+                            Text(
+                                "Email",
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontWeight = FontWeight.W600,
+                                    color = mau_chu_o_text.copy(alpha = 0.7f),
+                                    fontStyle = FontStyle.Italic
+                                )
+                            )
+                        },
                         singleLine = true,
                         isError = viewModel.emailError != null,
                         supportingText = {
@@ -172,7 +182,9 @@ fun LoginScreen(
                             focusedLabelColor = MauChinh,
                             focusedLeadingIconColor = MauChinhDam,
                             cursorColor = MauChinh,
-                            unfocusedLeadingIconColor = MauChinhDam.copy(alpha = 1f)
+                            unfocusedLeadingIconColor = MauChinhDam,
+                            unfocusedLabelColor = MauChinhDam.copy(alpha = 0.7f),
+                            unfocusedBorderColor = MauChinhDam.copy(alpha = 0.5f)
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
@@ -182,7 +194,16 @@ fun LoginScreen(
                     OutlinedTextField(
                         value = viewModel.password,
                         onValueChange = { viewModel.updatePassword(it) },
-                        label = { Text("Mật khẩu") },
+                        label = {
+                            Text(
+                                "Mật khẩu",
+                                style = MaterialTheme.typography.bodyMedium.copy(
+                                    fontWeight = FontWeight.W600,
+                                    color = mau_chu_o_text.copy(alpha = 0.7f),
+                                    fontStyle = FontStyle.Italic
+                                )
+                            )
+                        },
                         singleLine = true,
                         isError = viewModel.passwordError != null,
                         supportingText = {
@@ -219,8 +240,10 @@ fun LoginScreen(
                             focusedLeadingIconColor = MauChinhDam,
                             focusedTrailingIconColor = MauChinhDam,
                             cursorColor = MauChinh,
-                            unfocusedLeadingIconColor = MauChinhDam.copy(alpha = 1f),
-                            unfocusedTrailingIconColor = MauChinhDam.copy(alpha = 1f)
+                            unfocusedLeadingIconColor = MauChinhDam,
+                            unfocusedTrailingIconColor = MauChinhDam,
+                            unfocusedLabelColor = MauChinhDam.copy(alpha = 0.7f),
+                            unfocusedBorderColor = MauChinhDam.copy(alpha = 0.5f)
                         ),
                         modifier = Modifier
                             .fillMaxWidth()

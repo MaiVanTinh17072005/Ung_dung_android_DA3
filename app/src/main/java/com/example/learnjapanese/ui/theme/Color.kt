@@ -5,7 +5,7 @@ import androidx.compose.ui.graphics.Color
 val xanh_la_1 = Color(0xFF2E9B32)
 val xanh_la_2 = Color(0xC81A6AC0)
 
-val Tim40 = Color(0xFF6650a4)
+val mau_chu_o_text = Color(0xED0F7303)
 val xanhnhat = Color(0xBFEEECE2)
 val Cam = Color(0xFF009696)
 
