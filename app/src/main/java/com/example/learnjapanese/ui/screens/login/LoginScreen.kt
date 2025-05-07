@@ -38,9 +38,10 @@ import com.example.learnjapanese.R
 import kotlinx.coroutines.delay
 import com.example.learnjapanese.ui.theme.MauChinh
 import com.example.learnjapanese.ui.theme.MauChinhDam
-import com.example.learnjapanese.ui.theme.MauNen
 import androidx.compose.foundation.border
 import androidx.compose.ui.draw.clip
+import com.example.learnjapanese.ui.theme.Xanh_la_qmk
+import com.example.learnjapanese.ui.theme.xanhnhat
 
 @Composable
 fun LoginScreen(
@@ -79,7 +80,7 @@ fun LoginScreen(
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(Color.White.copy(alpha = 0.12f))
+                    .background(Color.White.copy(alpha = 0f))
             )
 
             // Content Box
@@ -97,16 +98,10 @@ fun LoginScreen(
                     .align(Alignment.Center)
             ) {
                 // Inner background
-                Image(
-                    painter = painterResource(id = R.drawable.hinh_nen_1),
-                    contentDescription = "Inner Background Image",
-                    modifier = Modifier.fillMaxSize(),
-                    contentScale = ContentScale.Crop
-                )
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(Color.White.copy(alpha = 0.5f))
+                        .background(xanhnhat.copy(alpha = 0.6f))
                 )
 
                 // Main Content
@@ -241,7 +236,7 @@ fun LoginScreen(
                             Text(
                                 text = "Quên mật khẩu?",
                                 style = MaterialTheme.typography.bodyMedium.copy(
-                                    color = MauChinh,
+                                    color = Xanh_la_qmk,
                                     fontWeight = FontWeight.Medium
                                 )
                             )
@@ -286,7 +281,7 @@ fun LoginScreen(
                         Text(
                             text = "Chưa có tài khoản? ",
                             style = MaterialTheme.typography.bodyMedium.copy(
-                                color = Color(0xFF212121)
+                                color = Color.Black
                             )
                         )
                         TextButton(onClick = onRegisterClick) {
