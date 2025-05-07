@@ -33,36 +33,56 @@ class LoginViewModel : ViewModel() {
         return hasUpperCase && hasLowerCase && hasDigit && hasSpecialChar && isLongEnough
     }
     
+    private fun validateEmail(email: String): String? {
+        return when {
+            email.isEmpty() -> 
+                "Email không được để trống"
+            !email.contains("@") -> 
+                "Email phải chứa 1 ký tự @ và 1 ký tự ."
+            email.contains(" ") -> 
+                "Email không được chứa khoảng trắng"
+            email.matches(".*[!#\$%^&*()+=\\[\\]{}|;:\"'<>?~`].*".toRegex()) ->
+                "Email không được chứa ký tự đặc biệt (chỉ cho phép @ và .)"
+            !email.matches("[a-zA-Z0-9._-]+@[a-z]+\\.[a-z]+".toRegex()) ->
+                "Ví dụ email hợp lệ: example@gmail.com"
+            else -> null
+        }
+    }
+
+    private fun validatePassword(password: String): String? {
+        return when {
+            password.isEmpty() -> 
+                "Mật khẩu không được để trống"
+            !password.any { it.isUpperCase() } -> 
+                "Mật khẩu phải chứa ít nhất 1 chữ hoa"
+            !password.any { it.isLowerCase() } -> 
+                "Mật khẩu phải chứa ít nhất 1 chữ thường"
+            !password.any { it.isDigit() } -> 
+                "Mật khẩu phải chứa ít nhất 1 chữ số"
+            !password.any { !it.isLetterOrDigit() } -> 
+                "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt (!@#$%^&*...)"
+            password.length < 8 ->
+                "Mật khẩu phải có ít nhất 8 ký tự"
+            else -> null
+        }
+    }
+
     fun updateUsername(newUsername: String) {
         username = newUsername
-        emailError = if (newUsername.isNotEmpty() && !isValidEmail(newUsername)) {
-            "Vui lòng nhập địa chỉ email hợp lệ"
-        } else null
+        emailError = validateEmail(newUsername)
     }
-    
+
     fun updatePassword(newPassword: String) {
         password = newPassword
-        passwordError = if (newPassword.isNotEmpty() && !isPasswordStrong(newPassword)) {
-            "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt"
-        } else null
+        passwordError = validatePassword(newPassword)
     }
-    
+
     fun validateInputs(): Boolean {
-        emailError = if (username.isEmpty()) {
-            "Email không được để trống"
-        } else if (!isValidEmail(username)) {
-            "Vui lòng nhập địa chỉ email hợp lệ"
-        } else null
-
-        passwordError = if (password.isEmpty()) {
-            "Mật khẩu không được để trống"
-        } else if (!isPasswordStrong(password)) {
-            "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt"
-        } else null
-
+        emailError = validateEmail(username)
+        passwordError = validatePassword(password)
         return emailError == null && passwordError == null
     }
-    
+
     fun login() {
         if (validateInputs()) {
             // Thực hiện logic đăng nhập ở đây

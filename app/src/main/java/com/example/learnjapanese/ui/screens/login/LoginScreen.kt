@@ -55,6 +55,13 @@ fun LoginScreen(
     var isVisible by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
 
+    DisposableEffect(Unit) {
+        onDispose {
+            viewModel.updateUsername("")
+            viewModel.updatePassword("")
+        }
+    }
+
     LaunchedEffect(Unit) {
         delay(20)
         isVisible = true
@@ -144,9 +151,15 @@ fun LoginScreen(
                         modifier = Modifier.padding(bottom = 25.dp)
                     )
 
+                    // For Email TextField
                     OutlinedTextField(
                         value = viewModel.username,
                         onValueChange = { viewModel.updateUsername(it.replace("\n", "")) },
+                        textStyle = MaterialTheme.typography.bodyMedium.copy(
+                            color = Color.Black.copy(alpha = 0.7f),
+                            fontWeight = FontWeight.W500,
+                            fontSize = 14.sp
+                        ),
                         label = {
                             Text(
                                 "Email",
@@ -163,7 +176,10 @@ fun LoginScreen(
                             viewModel.emailError?.let {
                                 Text(
                                     text = it,
-                                    color = MaterialTheme.colorScheme.error
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontWeight = FontWeight.W300,
+                                        color = Color.Red.copy(alpha = 0.6f)
+                                    )
                                 )
                             }
                         },
@@ -191,9 +207,15 @@ fun LoginScreen(
                             .padding(bottom = 4.dp)
                     )
 
+                    // For Password TextField
                     OutlinedTextField(
                         value = viewModel.password,
                         onValueChange = { viewModel.updatePassword(it) },
+                        textStyle = MaterialTheme.typography.bodyMedium.copy(
+                            color = Color.Black.copy(alpha = 0.7f),
+                            fontWeight = FontWeight.W500,
+                            fontSize = 14.sp
+                        ),
                         label = {
                             Text(
                                 "Mật khẩu",
@@ -210,7 +232,10 @@ fun LoginScreen(
                             viewModel.passwordError?.let {
                                 Text(
                                     text = it,
-                                    color = MaterialTheme.colorScheme.error
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontWeight = FontWeight.W300,
+                                        color = Color.Red.copy(alpha = 0.6f)
+                                    )
                                 )
                             }
                         },
