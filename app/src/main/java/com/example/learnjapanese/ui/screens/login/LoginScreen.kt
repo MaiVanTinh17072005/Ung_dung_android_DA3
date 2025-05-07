@@ -118,7 +118,7 @@ fun LoginScreen(
                             color = MauChinhDam,
                             fontWeight = FontWeight.ExtraBold,
                             letterSpacing = 0.5.sp,
-                            fontSize = 35.sp,
+                            fontSize = 27.sp,
                             textAlign = TextAlign.Center,
                             lineHeight = 32.sp,
                             shadow = Shadow(
@@ -136,10 +136,11 @@ fun LoginScreen(
                         text = "Đăng nhập để tiếp tục",
                         style = MaterialTheme.typography.bodyLarge.copy(
                             color = Color.Black.copy(alpha = 0.7f),
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 15.sp
 
                         ),
-                        modifier = Modifier.padding(bottom = 20.dp)
+                        modifier = Modifier.padding(bottom = 25.dp)
                     )
 
                     OutlinedTextField(
@@ -223,13 +224,13 @@ fun LoginScreen(
                         ),
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 4.dp)
+                            .padding(bottom = 0.dp)
                     )
 
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(bottom = 20.dp),
+                            .padding(bottom = 10.dp),
                         contentAlignment = Alignment.CenterEnd
                     ) {
                         TextButton(onClick = onForgotPasswordClick) {
@@ -237,9 +238,9 @@ fun LoginScreen(
                                 text = "Quên mật khẩu?",
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     color = Xanh_la_qmk,
-                                    fontWeight = FontWeight.W400,
+                                    fontWeight = FontWeight.W500,
                                     fontStyle = FontStyle.Italic,
-                                    fontSize = 17.sp,
+                                    fontSize = 14.sp,
                                 )
                             )
                         }
@@ -285,7 +286,7 @@ fun LoginScreen(
                             style = MaterialTheme.typography.bodyMedium.copy(
                                 color = Color.Black,
                                 fontStyle = FontStyle.Italic,
-                                fontSize = 16.sp
+                                fontSize = 13.sp
                             )
                         )
                         TextButton(onClick = onRegisterClick) {
@@ -294,7 +295,7 @@ fun LoginScreen(
                                 style = MaterialTheme.typography.bodyMedium.copy(
                                     color = MauChinhDam,
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 18.sp
+                                    fontSize = 15.sp
                                 )
                             )
                         }
