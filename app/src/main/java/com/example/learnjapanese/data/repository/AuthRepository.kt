@@ -1,10 +1,25 @@
 import retrofit2.Response
+import android.util.Log
 
 class AuthRepository {
+    companion object {
+        private const val TAG = "AuthRepository"
+    }
+
     suspend fun login(email: String, password: String): Response<LoginResponse> {
-        println("AuthRepository: Gọi API login với email: $email")
-        val response = RetrofitClient.authApi.login(LoginRequest(email, password))
-        println("AuthRepository: Nhận response - Status: ${response.code()}")
-        return response
+        Log.d(TAG, "AuthRepository: Starting login process for email: $email")
+        try {
+            val response = RetrofitClient.authApi.login(LoginRequest(email, password))
+            Log.d(TAG, "AuthRepository: API Response - Status: ${response.code()}")
+            if (response.isSuccessful) {
+                Log.d(TAG, "AuthRepository: Login successful")
+            } else {
+                Log.e(TAG, "AuthRepository: Login failed with error: ${response.errorBody()?.string()}")
+            }
+            return response
+        } catch (e: Exception) {
+            Log.e(TAG, "AuthRepository: Exception during login", e)
+            throw e
+        }
     }
 }

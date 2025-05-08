@@ -8,10 +8,15 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import android.util.Log
 
 class LoginViewModel(
     private val authRepository: AuthRepository = AuthRepository()
 ) : ViewModel() {
+    companion object {
+        private const val TAG = "LoginViewModel"
+    }
+
     var username by mutableStateOf("")
         private set
     
@@ -95,38 +100,38 @@ class LoginViewModel(
 
     fun login() {
         if (validateInputs()) {
+            Log.d(TAG, "Starting login process for user: $username")
             viewModelScope.launch {
                 try {
-                    // Cập nhật UI sang trạng thái loading
                     _loginState.value = LoginState.Loading
+                    Log.d(TAG, "Login state changed to Loading")
 
-                    // Gọi API thông qua repository
                     val response = authRepository.login(username, password)
+                    Log.d(TAG, "Received API response with status: ${response.code()}")
 
-                    // Xử lý response
                     if (response.isSuccessful) {
-                        // Login thành công
                         response.body()?.let { loginResponse ->
+                            Log.d(TAG, "Login successful for user: ${loginResponse.user.name}")
                             _loginState.value = LoginState.Success(
                                 token = loginResponse.token,
                                 user = loginResponse.user
                             )
-                            // Lưu token vào SharedPreferences hoặc DataStore
                             saveToken(loginResponse.token)
+                            Log.d(TAG, "Token saved successfully")
                         }
                     } else {
-                        // Login thất bại
-                        _loginState.value = LoginState.Error(
-                            "Đăng nhập thất bại: ${response.message()}"
-                        )
+                        val errorMessage = "Đăng nhập thất bại: ${response.message()}"
+                        Log.e(TAG, errorMessage)
+                        _loginState.value = LoginState.Error(errorMessage)
                     }
                 } catch (e: Exception) {
-                    // Xử lý lỗi mạng hoặc lỗi khác
-                    _loginState.value = LoginState.Error(
-                        "Lỗi: ${e.message ?: "Không thể kết nối đến server"}"
-                    )
+                    val errorMessage = "Lỗi: ${e.message ?: "Không thể kết nối đến server"}"
+                    Log.e(TAG, errorMessage, e)
+                    _loginState.value = LoginState.Error(errorMessage)
                 }
             }
+        } else {
+            Log.w(TAG, "Login validation failed - Email error: $emailError, Password error: $passwordError")
         }
     }
 
