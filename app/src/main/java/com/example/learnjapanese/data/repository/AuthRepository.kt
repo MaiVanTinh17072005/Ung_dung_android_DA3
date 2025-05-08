@@ -1,5 +1,9 @@
+package com.example.learnjapanese.data.repository
+
 import retrofit2.Response
 import android.util.Log
+import com.example.learnjapanese.data.model.LoginRequest
+import com.example.learnjapanese.data.model.LoginResponse
 
 class AuthRepository {
     companion object {

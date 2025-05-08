@@ -1,7 +1,8 @@
 package com.example.learnjapanese.ui.viewmodels
 
-import AuthRepository
-import LoginState
+// Sửa lại các import
+import com.example.learnjapanese.data.repository.AuthRepository
+import com.example.learnjapanese.data.model.LoginState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -111,13 +112,16 @@ class LoginViewModel(
 
                     if (response.isSuccessful) {
                         response.body()?.let { loginResponse ->
-                            Log.d(TAG, "Login successful for user: ${loginResponse.user.name}")
-                            _loginState.value = LoginState.Success(
-                                token = loginResponse.token,
-                                user = loginResponse.user
-                            )
-                            saveToken(loginResponse.token)
-                            Log.d(TAG, "Token saved successfully")
+                            if (loginResponse.success && loginResponse.data != null) {
+                                Log.d(TAG, "Login successful for user: ${loginResponse.data.email}")
+                                _loginState.value = LoginState.Success(
+                                    userData = loginResponse.data
+                                )
+                                Log.d(TAG, "Login completed successfully: ${loginResponse.message}")
+                            } else {
+                                _loginState.value = LoginState.Error(loginResponse.message)
+                                Log.e(TAG, "Login failed: ${loginResponse.message}")
+                            }
                         }
                     } else {
                         val errorMessage = "Đăng nhập thất bại: ${response.message()}"
@@ -135,8 +139,4 @@ class LoginViewModel(
         }
     }
 
-    // Hàm lưu token
-    private fun saveToken(token: String) {
-        // Implement lưu token vào SharedPreferences hoặc DataStore
-    }
 }

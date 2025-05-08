@@ -1,3 +1,5 @@
+package com.example.learnjapanese.data.model
+
 // Request model gửi lên server
 data class LoginRequest(
     val email: String,
@@ -6,13 +8,12 @@ data class LoginRequest(
 
 // Response model nhận từ server
 data class LoginResponse(
-    val token: String,
-    val user: User
+    val success: Boolean,
+    val data: UserData,
+    val message: String
 )
 
-data class User(
-    val id: String,
-    val email: String,
-    val name: String
-    // Thêm các trường khác nếu cần
+data class UserData(
+    val user_id: String,
+    val email: String
 )

@@ -44,6 +44,10 @@ import androidx.compose.ui.text.font.FontStyle
 import com.example.learnjapanese.ui.theme.Xanh_la_qmk
 import com.example.learnjapanese.ui.theme.mau_chu_o_text
 import com.example.learnjapanese.ui.theme.xanhnhat
+import android.widget.Toast
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.ui.platform.LocalContext
+import com.example.learnjapanese.data.model.LoginState
 
 @Composable
 fun LoginScreen(
@@ -52,8 +56,23 @@ fun LoginScreen(
     onForgotPasswordClick: () -> Unit,
     onLoginSuccess: () -> Unit
 ) {
+    val context = LocalContext.current
     var isVisible by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
+
+    LaunchedEffect(viewModel.loginState) {
+        when (viewModel.loginState) {
+            is LoginState.Success -> {
+                Toast.makeText(context, "Đăng nhập thành công", Toast.LENGTH_SHORT).show()
+                delay(2000)
+                onLoginSuccess()
+            }
+            is LoginState.Error -> {
+                Toast.makeText(context, (viewModel.loginState as LoginState.Error).message, Toast.LENGTH_SHORT).show()
+            }
+            else -> {}
+        }
+    }
 
     DisposableEffect(Unit) {
         onDispose {
