@@ -48,6 +48,16 @@ import android.widget.Toast
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import com.example.learnjapanese.data.model.LoginState
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Snackbar
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.draw.shadow
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
@@ -59,16 +69,30 @@ fun LoginScreen(
     val context = LocalContext.current
     var isVisible by remember { mutableStateOf(false) }
     var passwordVisible by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(viewModel.loginState) {
         when (viewModel.loginState) {
             is LoginState.Success -> {
-                Toast.makeText(context, "Đăng nhập thành công", Toast.LENGTH_SHORT).show()
-                delay(2000)
-                onLoginSuccess()
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = "Đăng nhập thành công",
+                        duration = SnackbarDuration.Short,
+                        actionLabel = null
+                    )
+                    delay(100)
+                    onLoginSuccess()
+                }
             }
             is LoginState.Error -> {
-                Toast.makeText(context, (viewModel.loginState as LoginState.Error).message, Toast.LENGTH_SHORT).show()
+                scope.launch {
+                    snackbarHostState.showSnackbar(
+                        message = "Đăng nhập thất bại",
+                        duration = SnackbarDuration.Short,
+                        actionLabel = null
+                    )
+                }
             }
             else -> {}
         }
@@ -366,6 +390,57 @@ fun LoginScreen(
                                 )
                             )
                         }
+                    }
+                }
+            }
+
+            // Add SnackbarHost
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .padding(16.dp)
+            ) { data ->
+                val isSuccess = data.visuals.message == "Đăng nhập thành công"
+                val backgroundColor = if (isSuccess) Xanh_la_qmk else Color.Red.copy(alpha = 0.9f)
+                val icon = if (isSuccess) Icons.Default.CheckCircle else Icons.Default.Error
+                
+                Snackbar(
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .clip(RoundedCornerShape(16.dp))
+                        .shadow(
+                            elevation = 8.dp,
+                            shape = RoundedCornerShape(16.dp)
+                        ),
+                    containerColor = backgroundColor,
+                    contentColor = Color.White,
+                    action = data.visuals.actionLabel?.let { actionLabel ->
+                        {
+                            TextButton(onClick = { data.performAction() }) {
+                                Text(actionLabel)
+                            }
+                        }
+                    }
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    ) {
+                        Icon(
+                            imageVector = icon,
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Text(
+                            text = data.visuals.message,
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.Medium,
+                                fontSize = 16.sp
+                            )
+                        )
                     }
                 }
             }
