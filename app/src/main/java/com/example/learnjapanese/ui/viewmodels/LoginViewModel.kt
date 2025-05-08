@@ -1,11 +1,17 @@
 package com.example.learnjapanese.ui.viewmodels
 
+import AuthRepository
+import LoginState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
 
-class LoginViewModel : ViewModel() {
+class LoginViewModel(
+    private val authRepository: AuthRepository = AuthRepository()
+) : ViewModel() {
     var username by mutableStateOf("")
         private set
     
@@ -83,11 +89,49 @@ class LoginViewModel : ViewModel() {
         return emailError == null && passwordError == null
     }
 
+    // Thêm state để theo dõi trạng thái login
+    private val _loginState = mutableStateOf<LoginState>(LoginState.Initial)
+    val loginState: LoginState by _loginState
+
     fun login() {
         if (validateInputs()) {
-            // Thực hiện logic đăng nhập ở đây
-            // Thông thường sẽ gọi đến repository
+            viewModelScope.launch {
+                try {
+                    // Cập nhật UI sang trạng thái loading
+                    _loginState.value = LoginState.Loading
 
+                    // Gọi API thông qua repository
+                    val response = authRepository.login(username, password)
+
+                    // Xử lý response
+                    if (response.isSuccessful) {
+                        // Login thành công
+                        response.body()?.let { loginResponse ->
+                            _loginState.value = LoginState.Success(
+                                token = loginResponse.token,
+                                user = loginResponse.user
+                            )
+                            // Lưu token vào SharedPreferences hoặc DataStore
+                            saveToken(loginResponse.token)
+                        }
+                    } else {
+                        // Login thất bại
+                        _loginState.value = LoginState.Error(
+                            "Đăng nhập thất bại: ${response.message()}"
+                        )
+                    }
+                } catch (e: Exception) {
+                    // Xử lý lỗi mạng hoặc lỗi khác
+                    _loginState.value = LoginState.Error(
+                        "Lỗi: ${e.message ?: "Không thể kết nối đến server"}"
+                    )
+                }
+            }
         }
+    }
+
+    // Hàm lưu token
+    private fun saveToken(token: String) {
+        // Implement lưu token vào SharedPreferences hoặc DataStore
     }
 }
