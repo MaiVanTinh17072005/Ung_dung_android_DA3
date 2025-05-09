@@ -72,6 +72,24 @@ fun RegisterScreen(
                     modifier = Modifier.padding(bottom = 24.dp)
                 )
 
+                // Modify the OutlinedTextField common properties
+                val textFieldColors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MauChinh,
+                    focusedLabelColor = MauChinh,
+                    focusedLeadingIconColor = MauChinhDam,
+                    cursorColor = MauChinh,
+                    unfocusedLeadingIconColor = MauChinhDam.copy(alpha = 1f),
+                    // Darker text color for input
+                    focusedTextColor = Color.Black.copy(alpha = 0.9f),
+                    unfocusedTextColor = Color.Black.copy(alpha = 0.9f),
+                    // Error colors
+                    errorBorderColor = Color.Red.copy(alpha = 0.8f),
+                    errorLabelColor = Color.Red.copy(alpha = 0.8f),
+                    errorLeadingIconColor = Color.Red.copy(alpha = 0.8f),
+                    errorSupportingTextColor = Color.Red.copy(alpha = 0.8f)
+                )
+
+                // Update each OutlinedTextField to use textFieldColors
                 OutlinedTextField(
                     value = viewModel.fullName,
                     onValueChange = { viewModel.updateFullName(it.replace("\n", "")) },
@@ -82,7 +100,8 @@ fun RegisterScreen(
                         viewModel.fullNameError?.let {
                             Text(
                                 text = it,
-                                color = MaterialTheme.colorScheme.error
+                                color = Color.Red.copy(alpha = 0.7f),
+                                fontWeight = FontWeight.Medium
                             )
                         }
                     },
@@ -93,18 +112,14 @@ fun RegisterScreen(
                             tint = MauChinhDam
                         )
                     },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MauChinh,
-                        focusedLabelColor = MauChinh,
-                        focusedLeadingIconColor = MauChinhDam,
-                        cursorColor = MauChinh,
-                        unfocusedLeadingIconColor = MauChinhDam.copy(alpha = 1f)
-                    ),
+                    colors = textFieldColors,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 5.dp)
+                        .padding(bottom = 5.dp),
+                    shape = RoundedCornerShape(12.dp) // Add rounded corners
                 )
 
+                // For email field
                 OutlinedTextField(
                     value = viewModel.email,
                     onValueChange = { viewModel.updateEmail(it.replace("\n", "")) },
@@ -113,10 +128,12 @@ fun RegisterScreen(
                     isError = viewModel.emailError != null,
                     supportingText = {
                         viewModel.emailError?.let {
-                            Text(
-                                text = it,
-                                color = MaterialTheme.colorScheme.error
-                            )
+                                Text(
+                                    text = it,
+                                    color = Color.Red.copy(alpha = 0.7f),
+                                    fontWeight = FontWeight.Medium
+                                )
+
                         }
                     },
                     leadingIcon = {
@@ -126,19 +143,15 @@ fun RegisterScreen(
                             tint = MauChinhDam
                         )
                     },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MauChinh,
-                        focusedLabelColor = MauChinh,
-                        focusedLeadingIconColor = MauChinhDam,
-                        cursorColor = MauChinh,
-                        unfocusedLeadingIconColor = MauChinhDam.copy(alpha = 1f)
-                    ),
+                    colors = textFieldColors, // Add this line and remove the existing colors property
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 5.dp)
+                        .padding(bottom = 5.dp),
+                    shape = RoundedCornerShape(12.dp)
                 )
 
+                // For phone field
                 OutlinedTextField(
                     value = viewModel.phone,
                     onValueChange = { viewModel.updatePhone(it.replace("\n", "")) },
@@ -147,10 +160,12 @@ fun RegisterScreen(
                     isError = viewModel.phoneError != null,
                     supportingText = {
                         viewModel.phoneError?.let {
-                            Text(
-                                text = it,
-                                color = MaterialTheme.colorScheme.error
-                            )
+                                Text(
+                                    text = it,
+                                    color = Color.Red.copy(alpha = 0.7f),
+                                    fontWeight = FontWeight.Medium
+                                )
+
                         }
                     },
                     leadingIcon = {
@@ -160,19 +175,15 @@ fun RegisterScreen(
                             tint = MauChinhDam
                         )
                     },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MauChinh,
-                        focusedLabelColor = MauChinh,
-                        focusedLeadingIconColor = MauChinhDam,
-                        cursorColor = MauChinh,
-                        unfocusedLeadingIconColor = MauChinhDam.copy(alpha = 1f)
-                    ),
+                    colors = textFieldColors, // Add this line and remove the existing colors property
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 5.dp)
+                        .padding(bottom = 5.dp),
+                    shape = RoundedCornerShape(12.dp)
                 )
 
+                // For password field
                 OutlinedTextField(
                     value = viewModel.password,
                     onValueChange = { viewModel.updatePassword(it.replace("\n", "")) },
@@ -181,10 +192,11 @@ fun RegisterScreen(
                     isError = viewModel.passwordError != null,
                     supportingText = {
                         viewModel.passwordError?.let {
-                            Text(
-                                text = it,
-                                color = MaterialTheme.colorScheme.error
-                            )
+                                Text(
+                                    text = it,
+                                    color = Color.Red.copy(alpha = 0.7f),
+                                    fontWeight = FontWeight.Medium
+                                )
                         }
                     },
                     visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -216,9 +228,11 @@ fun RegisterScreen(
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 5.dp)
+                        .padding(bottom = 5.dp),
+                    shape = RoundedCornerShape(12.dp)
                 )
 
+                // For confirm password field
                 OutlinedTextField(
                     value = viewModel.confirmPassword,
                     onValueChange = { viewModel.updateConfirmPassword(it.replace("\n", "")) },
@@ -229,7 +243,8 @@ fun RegisterScreen(
                         viewModel.confirmPasswordError?.let {
                             Text(
                                 text = it,
-                                color = MaterialTheme.colorScheme.error
+                                color = Color.Red.copy(alpha = 0.7f),
+                                fontWeight = FontWeight.Medium
                             )
                         }
                     },
@@ -262,7 +277,8 @@ fun RegisterScreen(
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 5.dp)
+                        .padding(bottom = 5.dp),
+                    shape = RoundedCornerShape(12.dp)
                 )
 
                 Button(
