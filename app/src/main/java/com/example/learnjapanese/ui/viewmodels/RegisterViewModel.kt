@@ -41,46 +41,85 @@ class RegisterViewModel : ViewModel() {
         return email.matches(emailPattern.toRegex())
     }
 
-    private fun isPasswordStrong(password: String): Boolean {
-        val hasUpperCase = password.any { it.isUpperCase() }
-        val hasLowerCase = password.any { it.isLowerCase() }
-        val hasDigit = password.any { it.isDigit() }
-        val hasSpecialChar = password.any { !it.isLetterOrDigit() }
-        val isLongEnough = password.length >= 8
-        return hasUpperCase && hasLowerCase && hasDigit && hasSpecialChar && isLongEnough
+    private fun isValidPhone(phone: String): Boolean {
+        val phonePattern = "^0[0-9]{9}$"
+        return phone.matches(phonePattern.toRegex())
+    }
+
+    private fun isValidFullName(name: String): Boolean {
+        // Chỉ cho phép chữ cái, dấu cách và dấu tiếng Việt
+        val namePattern = "^[\\p{L}\\s]+$"
+        return name.matches(namePattern.toRegex())
+    }
+
+    private fun validatePasswordStrength(password: String): String? {
+        if (password.isEmpty()) {
+            return "Vui lòng nhập mật khẩu"
+        }
+        
+        val errors = mutableListOf<String>()
+        
+        if (password.length < 8) {
+            errors.add("ít nhất 8 ký tự")
+        }
+        if (!password.any { it.isUpperCase() }) {
+            errors.add("chữ hoa")
+        }
+        if (!password.any { it.isLowerCase() }) {
+            errors.add("chữ thường")
+        }
+        if (!password.any { it.isDigit() }) {
+            errors.add("số")
+        }
+        if (!password.any { !it.isLetterOrDigit() }) {
+            errors.add("ký tự đặc biệt")
+        }
+        
+        return if (errors.isEmpty()) null else "Mật khẩu phải có ${errors.joinToString(", ")}"
     }
     
     fun updateFullName(newFullName: String) {
         fullName = newFullName
-        fullNameError = if (newFullName.isEmpty()) {
-            "Vui lòng nhập họ tên"
-        } else null
+        fullNameError = when {
+            newFullName.isEmpty() -> "Vui lòng nhập họ tên"
+            newFullName.length < 8 -> "Họ tên phải có ít nhất 8 ký tự"
+            !isValidFullName(newFullName) -> "Họ tên không được chứa ký tự đặc biệt hoặc số"
+            else -> null
+        }
     }
     
     fun updateEmail(newEmail: String) {
         email = newEmail
-        emailError = if (newEmail.isNotEmpty() && !isValidEmail(newEmail)) {
-            "Vui lòng nhập địa chỉ email hợp lệ"
+        emailError = if (newEmail.isEmpty()) {
+            "Vui lòng nhập địa chỉ email"
+        } else if (!isValidEmail(newEmail)) {
+            "Vui lòng nhập địa chỉ email hợp lệ. Ví dụ: tinh@gmail.com"
         } else null
     }
     
     fun updatePhone(newPhone: String) {
-        phone = newPhone
-        phoneError = if (newPhone.isEmpty()) {
-            "Vui lòng nhập số điện thoại"
-        } else null
+        // Giới hạn độ dài số điện thoại là 10 số
+        if (newPhone.length <= 10) {
+            phone = newPhone
+            phoneError = when {
+                newPhone.isEmpty() -> "Vui lòng nhập số điện thoại"
+                !newPhone.startsWith("0") -> "Số điện thoại phải bắt đầu bằng số 0"
+                !isValidPhone(newPhone) -> "Số điện thoại phải có 10 chữ số"
+                else -> null
+            }
+        }
     }
     
     fun updatePassword(newPassword: String) {
         password = newPassword
-        passwordError = if (newPassword.isNotEmpty() && !isPasswordStrong(newPassword)) {
-            "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt"
-        } else null
+        passwordError = validatePasswordStrength(newPassword)
     }
     
     fun updateConfirmPassword(newConfirmPassword: String) {
         confirmPassword = newConfirmPassword
-        confirmPasswordError = if (newConfirmPassword != password) {
+        confirmPasswordError = if (newConfirmPassword.isEmpty()) {
+            "Vui lòng xác nhận mật khẩu"
+        } else if (newConfirmPassword != password) {
             "Mật khẩu xác nhận không khớp"
         } else null
     }
