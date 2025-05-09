@@ -4,8 +4,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import kotlinx.coroutines.launch
+import java.security.MessageDigest
+import androidx.compose.runtime.State
+import androidx.lifecycle.viewModelScope
+import com.example.learnjapanese.data.model.RegisterResponse
+import com.example.learnjapanese.data.repository.AuthRepository
 
 class RegisterViewModel : ViewModel() {
+    private val authRepository = AuthRepository()
     var fullName by mutableStateOf("")
         private set
     
@@ -138,10 +145,37 @@ class RegisterViewModel : ViewModel() {
                confirmPasswordError == null
     }
     
+    private var _isLoading = mutableStateOf(false)
+    val isLoading: State<Boolean> = _isLoading
+
+    private var _registrationResult = mutableStateOf<Result<RegisterResponse>?>(null)
+    val registrationResult: State<Result<RegisterResponse>?> = _registrationResult
+
     fun register() {
         if (validateInputs()) {
-            // Thực hiện logic đăng ký ở đây
-            // Thông thường sẽ gọi đến repository
+            viewModelScope.launch {
+                _isLoading.value = true
+                try {
+                    val response = authRepository.register(
+                        fullName = fullName,
+                        email = email,
+                        phone = phone,
+                        password = password
+                    )
+                    
+                    if (response.isSuccessful) {
+                        _registrationResult.value = Result.success(response.body()!!)
+                    } else {
+                        _registrationResult.value = Result.failure(
+                            Exception(response.errorBody()?.string() ?: "Đăng ký thất bại")
+                        )
+                    }
+                } catch (e: Exception) {
+                    _registrationResult.value = Result.failure(e)
+                } finally {
+                    _isLoading.value = false
+                }
+            }
         }
     }
 }

@@ -4,6 +4,8 @@ import retrofit2.http.POST
 import android.util.Log
 import com.example.learnjapanese.data.model.LoginRequest
 import com.example.learnjapanese.data.model.LoginResponse
+import com.example.learnjapanese.data.model.RegisterRequest
+import com.example.learnjapanese.data.model.RegisterResponse
 
 interface AuthApi {
     companion object {
@@ -15,4 +17,8 @@ interface AuthApi {
         Log.d(TAG, "Calling login API with email: ${loginRequest.email}")
         return this.login(loginRequest)
     }
+
+    @POST("api/auth/register")
+    suspend fun register(@Body registerRequest: RegisterRequest): Response<RegisterResponse>
+
 }

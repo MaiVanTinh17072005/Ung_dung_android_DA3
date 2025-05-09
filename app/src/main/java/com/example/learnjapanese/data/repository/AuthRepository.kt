@@ -4,6 +4,9 @@ import retrofit2.Response
 import android.util.Log
 import com.example.learnjapanese.data.model.LoginRequest
 import com.example.learnjapanese.data.model.LoginResponse
+import com.example.learnjapanese.data.model.RegisterRequest
+import com.example.learnjapanese.data.model.RegisterResponse
+import java.security.MessageDigest
 
 class AuthRepository {
     companion object {
@@ -25,5 +28,38 @@ class AuthRepository {
             Log.e(TAG, "AuthRepository: Exception during login", e)
             throw e
         }
+    }
+
+    suspend fun register(fullName: String, email: String, phone: String, password: String): Response<RegisterResponse> {
+        Log.d(TAG, "AuthRepository: Starting registration process for email: $email")
+        try {
+            // Mã hóa mật khẩu bằng SHA-256
+            val hashedPassword = hashPassword(password)
+            
+            val registerRequest = RegisterRequest(
+                fullName = fullName,
+                email = email,
+                phone = phone,
+                password = hashedPassword
+            )
+            
+            val response = RetrofitClient.authApi.register(registerRequest)
+            Log.d(TAG, "AuthRepository: API Response - Status: ${response.code()}")
+            
+            if (response.isSuccessful) {
+                Log.d(TAG, "AuthRepository: Registration successful")
+            } else {
+                Log.e(TAG, "AuthRepository: Registration failed with error: ${response.errorBody()?.string()}")
+            }
+            return response
+        } catch (e: Exception) {
+            Log.e(TAG, "AuthRepository: Exception during registration", e)
+            throw e
+        }
+    }
+
+    private fun hashPassword(password: String): String {
+        val bytes = MessageDigest.getInstance("SHA-256").digest(password.toByteArray())
+        return bytes.joinToString("") { "%02x".format(it) }
     }
 }

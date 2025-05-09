@@ -9,11 +9,11 @@ data class LoginRequest(
 // Response model nhận từ server
 data class LoginResponse(
     val success: Boolean,
-    val data: UserData,
+    val data: UserDataLogin,
     val message: String
 )
 
-data class UserData(
+data class UserDataLogin(
     val user_id: String,
     val email: String
 )
