@@ -5,11 +5,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.launch
-import java.security.MessageDigest
 import androidx.compose.runtime.State
 import androidx.lifecycle.viewModelScope
-import com.example.learnjapanese.data.model.RegisterResponse
 import com.example.learnjapanese.data.repository.AuthRepository
+import kotlinx.coroutines.delay
 
 class RegisterViewModel : ViewModel() {
     private val authRepository = AuthRepository()
@@ -148,8 +147,11 @@ class RegisterViewModel : ViewModel() {
     private var _isLoading = mutableStateOf(false)
     val isLoading: State<Boolean> = _isLoading
 
-    private var _registrationResult = mutableStateOf<Result<RegisterResponse>?>(null)
-    val registrationResult: State<Result<RegisterResponse>?> = _registrationResult
+    private var _showMessage = mutableStateOf<String?>(null)
+    val showMessage: State<String?> = _showMessage
+
+    private var _registerSuccess = mutableStateOf(false)
+    val registerSuccess: State<Boolean> = _registerSuccess
 
     fun register() {
         if (validateInputs()) {
@@ -164,18 +166,29 @@ class RegisterViewModel : ViewModel() {
                     )
                     
                     if (response.isSuccessful) {
-                        _registrationResult.value = Result.success(response.body()!!)
+                        _showMessage.value = "Đăng ký tài khoản thành công! Vui lòng đăng nhập để tiếp tục."
+                        _registerSuccess.value = true
                     } else {
-                        _registrationResult.value = Result.failure(
-                            Exception(response.errorBody()?.string() ?: "Đăng ký thất bại")
-                        )
+                        when (response.code()) {
+                            409 -> _showMessage.value = "Email hoặc số điện thoại đã được sử dụng"
+                            400 -> _showMessage.value = "Thông tin đăng ký không hợp lệ"
+                            500 -> _showMessage.value = "Lỗi máy chủ, vui lòng thử lại sau"
+                            else -> _showMessage.value = "Đăng ký thất bại: ${response.errorBody()?.string() ?: "Lỗi không xác định"}"
+                        }
+                        _registerSuccess.value = false
                     }
                 } catch (e: Exception) {
-                    _registrationResult.value = Result.failure(e)
+                    _showMessage.value = "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại."
+                    _registerSuccess.value = false
                 } finally {
                     _isLoading.value = false
                 }
             }
         }
+    }
+
+    fun resetState() {
+        _registerSuccess.value = false
+        _showMessage.value = null
     }
 }
