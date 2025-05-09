@@ -55,6 +55,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -145,7 +146,9 @@ fun VocabularyFlashcardScreen(
                                 text = topic?.name ?: "Flashcard",
                                 style = MaterialTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.Bold
-                                )
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                         else -> {
@@ -201,30 +204,43 @@ fun VocabularyFlashcardScreen(
                                 .fillMaxSize(),
                             contentAlignment = Alignment.Center
                         ) {
-                            Text(
-                                text = "Không có từ vựng nào trong chủ đề này",
-                                style = MaterialTheme.typography.bodyLarge,
-                                textAlign = TextAlign.Center,
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
                                 modifier = Modifier.padding(16.dp)
-                            )
+                            ) {
+                                Text(
+                                    text = "Không có từ vựng nào để học",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    textAlign = TextAlign.Center
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Button(
+                                    onClick = onBack,
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = MaterialTheme.colorScheme.primary
+                                    )
+                                ) {
+                                    Text("Quay lại")
+                                }
+                            }
                         }
                     } else {
-                        // Progress indicator
+                        // Hiển thị thông tin tiến độ
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                                .padding(horizontal = 16.dp)
                         ) {
                             Row(
                                 modifier = Modifier.fillMaxWidth(),
                                 horizontalArrangement = Arrangement.SpaceBetween
                             ) {
                                 Text(
-                                    text = "Tiến độ:",
+                                    text = "Thẻ ${currentCardIndex + 1} / ${words.size}",
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                                 Text(
-                                    text = "${currentCardIndex + 1}/${words?.size ?: 0}",
+                                    text = "Đã học: ${learnedWords.size}",
                                     style = MaterialTheme.typography.bodyMedium.copy(
                                         fontWeight = FontWeight.Bold
                                     ),
@@ -235,232 +251,251 @@ fun VocabularyFlashcardScreen(
                             Spacer(modifier = Modifier.height(8.dp))
                             
                             LinearProgressIndicator(
-                                progress = { (currentCardIndex + 1).toFloat() / (words?.size ?: 1) },
+                                progress = { (currentCardIndex + 1).toFloat() / words.size },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .height(8.dp)
-                                    .clip(RoundedCornerShape(4.dp)),
+                                    .clip(CircleShape),
                                 color = MaterialTheme.colorScheme.primary,
                                 trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
                             )
                         }
                         
-                        // Instruction
-                        if (!isFlipped) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.KeyboardArrowLeft,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = "Chạm vào thẻ để xem nghĩa",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
-                                )
-                            }
-                        }
-                        
-                        Spacer(modifier = Modifier.height(16.dp))
+                        Spacer(modifier = Modifier.height(24.dp))
                         
                         // Flashcard
-                        if (words != null && currentCardIndex < words.size) {
-                            val currentWord = words[currentCardIndex]
-                            val isCurrentWordLearned = learnedWords.contains(currentWord.id) || currentWord.isLearned
-                            
-                            // Flashcard
-                            Box(
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .padding(horizontal = 16.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            // Card front (Japanese)
+                            Card(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(350.dp)
-                                    .padding(horizontal = 16.dp)
+                                    .height(300.dp)
+                                    .graphicsLayer {
+                                        rotationY = rotation
+                                        cameraDistance = 8 * density
+                                    }
+                                    .clickable { isFlipped = !isFlipped },
+                                shape = RoundedCornerShape(16.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = if (!isFlipped) 
+                                        MaterialTheme.colorScheme.primaryContainer 
+                                    else 
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                                ),
+                                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
                             ) {
-                                Card(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .graphicsLayer {
-                                            rotationY = rotation
-                                            cameraDistance = 8 * density
-                                        }
-                                        .clip(RoundedCornerShape(16.dp))
-                                        .clickable { isFlipped = !isFlipped },
-                                    colors = CardDefaults.cardColors(
-                                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                                    ),
-                                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-                                ) {
-                                    if (rotation < 90f) {
-                                        // Front of card (Japanese word)
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .padding(24.dp),
-                                            contentAlignment = Alignment.Center
+                                if (!isFlipped) {
+                                    // Front side - Japanese
+                                    Box(
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally
                                         ) {
-                                            Column(
-                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            Text(
+                                                text = words[currentCardIndex].word,
+                                                style = MaterialTheme.typography.headlineLarge,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                                textAlign = TextAlign.Center
+                                            )
+                                            
+                                            Spacer(modifier = Modifier.height(16.dp))
+                                            
+                                            Text(
+                                                text = words[currentCardIndex].reading,
+                                                style = MaterialTheme.typography.titleLarge,
+                                                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
+                                                textAlign = TextAlign.Center
+                                            )
+                                            
+                                            Spacer(modifier = Modifier.height(24.dp))
+                                            
+                                            Row(
+                                                horizontalArrangement = Arrangement.Center,
+                                                verticalAlignment = Alignment.CenterVertically
                                             ) {
                                                 Text(
-                                                    text = currentWord.word,
-                                                    style = MaterialTheme.typography.displayMedium,
-                                                    fontWeight = FontWeight.Bold,
+                                                    text = "Nhấn để xem nghĩa",
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.5f)
+                                                )
+                                            }
+                                        }
+                                    }
+                                } else {
+                                    // Back side - Meaning
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .graphicsLayer { rotationY = 180f },
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Column(
+                                            horizontalAlignment = Alignment.CenterHorizontally,
+                                            modifier = Modifier.padding(16.dp)
+                                        ) {
+                                            Text(
+                                                text = "Nghĩa",
+                                                style = MaterialTheme.typography.titleSmall,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                textAlign = TextAlign.Center
+                                            )
+                                            
+                                            Spacer(modifier = Modifier.height(16.dp))
+                                            
+                                            Text(
+                                                text = words[currentCardIndex].meaning,
+                                                style = MaterialTheme.typography.headlineSmall,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onSurface,
+                                                textAlign = TextAlign.Center
+                                            )
+                                            
+                                            if (!words[currentCardIndex].exampleSentence.isNullOrEmpty()) {
+                                                Spacer(modifier = Modifier.height(24.dp))
+                                                
+                                                Divider(
+                                                    modifier = Modifier
+                                                        .width(64.dp)
+                                                        .padding(vertical = 8.dp),
+                                                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                                                    thickness = 2.dp
+                                                )
+                                                
+                                                Spacer(modifier = Modifier.height(8.dp))
+                                                
+                                                Text(
+                                                    text = "Ví dụ",
+                                                    style = MaterialTheme.typography.titleSmall,
+                                                    color = MaterialTheme.colorScheme.primary,
                                                     textAlign = TextAlign.Center
                                                 )
                                                 
-                                                Spacer(modifier = Modifier.height(16.dp))
+                                                Spacer(modifier = Modifier.height(8.dp))
                                                 
-                                                Text(
-                                                    text = currentWord.reading,
-                                                    style = MaterialTheme.typography.headlineSmall,
-                                                    textAlign = TextAlign.Center,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                                                )
-                                                
-                                                Spacer(modifier = Modifier.height(24.dp))
-                                                
-                                                IconButton(
-                                                    onClick = { /* Play pronunciation */ },
-                                                    modifier = Modifier
-                                                        .clip(CircleShape)
-                                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                                                        .size(48.dp)
+                                                // Hiển thị ví dụ
+                                                Column(
+                                                    horizontalAlignment = Alignment.CenterHorizontally
                                                 ) {
-                                                    Icon(
-                                                        imageVector = Icons.Default.VolumeUp,
-                                                        contentDescription = "Nghe phát âm",
-                                                        tint = MaterialTheme.colorScheme.primary,
-                                                        modifier = Modifier.size(24.dp)
-                                                    )
-                                                }
-                                            }
-                                        }
-                                    } else {
-                                        // Back of card (Meaning and example)
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .graphicsLayer { rotationY = 180f } // Counter-rotate
-                                                .padding(24.dp)
-                                        ) {
-                                            Column(
-                                                modifier = Modifier.fillMaxSize(),
-                                                horizontalAlignment = Alignment.CenterHorizontally,
-                                                verticalArrangement = Arrangement.Center
-                                            ) {
-                                                Text(
-                                                    text = currentWord.meaning,
-                                                    style = MaterialTheme.typography.headlineMedium,
-                                                    fontWeight = FontWeight.Bold,
-                                                    textAlign = TextAlign.Center,
-                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                                )
-                                                
-                                                if (!currentWord.exampleSentence.isNullOrEmpty()) {
-                                                    Spacer(modifier = Modifier.height(24.dp))
-                                                    
-                                                    Divider(
-                                                        modifier = Modifier
-                                                            .fillMaxWidth(0.7f)
-                                                            .padding(vertical = 8.dp),
-                                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.2f)
-                                                    )
-                                                    
-                                                    Spacer(modifier = Modifier.height(16.dp))
-                                                    
                                                     Text(
-                                                        text = currentWord.exampleSentence ?: "",
+                                                        text = words[currentCardIndex].exampleSentence ?: "",
                                                         style = MaterialTheme.typography.bodyLarge,
-                                                        textAlign = TextAlign.Center,
-                                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                        color = MaterialTheme.colorScheme.onSurface,
+                                                        textAlign = TextAlign.Center
                                                     )
                                                     
-                                                    if (!currentWord.exampleSentenceTranslation.isNullOrEmpty()) {
-                                                        Spacer(modifier = Modifier.height(8.dp))
-                                                        
+                                                    Spacer(modifier = Modifier.height(4.dp))
+                                                    
+                                                    if (!words[currentCardIndex].exampleSentenceTranslation.isNullOrEmpty()) {
                                                         Text(
-                                                            text = currentWord.exampleSentenceTranslation ?: "",
+                                                            text = words[currentCardIndex].exampleSentenceTranslation ?: "",
                                                             style = MaterialTheme.typography.bodyMedium,
-                                                            textAlign = TextAlign.Center,
-                                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                                                            textAlign = TextAlign.Center
                                                         )
                                                     }
                                                 }
+                                            }
+                                            
+                                            Spacer(modifier = Modifier.height(24.dp))
+                                            
+                                            Row(
+                                                horizontalArrangement = Arrangement.Center,
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                Text(
+                                                    text = "Nhấn để xem từ",
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                                )
                                             }
                                         }
                                     }
                                 }
                             }
-                            
-                            Spacer(modifier = Modifier.height(24.dp))
-                            
-                            // Navigation and action buttons
-                            Row(
+                        }
+                        
+                        Spacer(modifier = Modifier.height(16.dp))
+                        
+                        // Controls
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            // Previous button - Disabled when on first card
+                            IconButton(
+                                onClick = moveToPrevCard,
+                                enabled = currentCardIndex > 0,
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                // Previous button
-                                Button(
-                                    onClick = moveToPrevCard,
-                                    enabled = currentCardIndex > 0,
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.secondary,
-                                        disabledContainerColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
-                                    )
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.KeyboardArrowLeft,
-                                        contentDescription = "Previous"
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text("Trước")
-                                }
-                                
-                                // Mark as learned button
-                                Button(
-                                    onClick = markCurrentWordAsLearned,
-                                    enabled = !isCurrentWordLearned,
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = if (isCurrentWordLearned) 
-                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                                        else 
-                                            MaterialTheme.colorScheme.primary
-                                    )
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Check,
-                                        contentDescription = "Đã học"
-                                    )
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Text(text = if (isCurrentWordLearned) "Đã học" else "Đánh dấu đã học")
-                                }
-                                
-                                // Next button
-                                Button(
-                                    onClick = moveToNextCard,
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = if (words != null && currentCardIndex == words.size - 1)
-                                            MaterialTheme.colorScheme.tertiary
+                                    .clip(CircleShape)
+                                    .size(48.dp)
+                                    .background(
+                                        color = if (currentCardIndex > 0)
+                                            MaterialTheme.colorScheme.primaryContainer
                                         else
-                                            MaterialTheme.colorScheme.secondary
+                                            MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
                                     )
-                                ) {
-                                    Text(if (words != null && currentCardIndex == words.size - 1) "Hoàn thành" else "Tiếp")
-                                    Spacer(modifier = Modifier.width(4.dp))
-                                    Icon(
-                                        imageVector = Icons.Default.KeyboardArrowRight,
-                                        contentDescription = "Next"
-                                    )
-                                }
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.KeyboardArrowLeft,
+                                    contentDescription = "Thẻ trước",
+                                    tint = if (currentCardIndex > 0)
+                                        MaterialTheme.colorScheme.onPrimaryContainer
+                                    else
+                                        MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                                )
+                            }
+                            
+                            // Mark as learned button
+                            Button(
+                                onClick = markCurrentWordAsLearned,
+                                modifier = Modifier.weight(1f),
+                                colors = ButtonDefaults.buttonColors(
+                                    containerColor = if (learnedWords.contains(words[currentCardIndex].id))
+                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                                    else
+                                        MaterialTheme.colorScheme.primary
+                                )
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = null
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = if (learnedWords.contains(words[currentCardIndex].id))
+                                        "Đã học"
+                                    else
+                                        "Đánh dấu đã học"
+                                )
+                            }
+                            
+                            // Next or Complete button
+                            IconButton(
+                                onClick = moveToNextCard,
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .size(48.dp)
+                                    .background(MaterialTheme.colorScheme.primaryContainer)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.KeyboardArrowRight,
+                                    contentDescription = if (currentCardIndex < words.size - 1)
+                                        "Thẻ tiếp theo"
+                                    else
+                                        "Hoàn thành",
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
                             }
                         }
                     }
@@ -490,12 +525,12 @@ fun VocabularyFlashcardScreen(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Button(
-                                onClick = { viewModel.loadWords() },
+                                onClick = onBack,
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = MaterialTheme.colorScheme.primary
                                 )
                             ) {
-                                Text("Thử lại")
+                                Text("Quay lại")
                             }
                         }
                     }

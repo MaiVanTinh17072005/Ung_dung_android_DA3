@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -200,126 +201,127 @@ fun VocabularyScreen(
             )
         }
     ) { innerPadding ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
-                .background(MaterialTheme.colorScheme.background)
+                .background(MaterialTheme.colorScheme.background),
+            contentPadding = PaddingValues(bottom = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             // Hiển thị hộp tìm kiếm nếu không ở chế độ tìm kiếm active
             if (!isSearchActive) {
-                // Search Box
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(MaterialTheme.colorScheme.surface)
-                        .clickable { isSearchActive = true }
-                        .padding(12.dp)
-                ) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
+                item {
+                    // Search Box
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(MaterialTheme.colorScheme.surface)
+                            .clickable { isSearchActive = true }
+                            .padding(12.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Search icon",
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                            modifier = Modifier.size(20.dp)
-                        )
-                        
-                        Spacer(modifier = Modifier.width(8.dp))
-                        
-                        Text(
-                            "Tìm kiếm chủ đề từ vựng...",
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Search icon",
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                modifier = Modifier.size(20.dp)
+                            )
+                            
+                            Spacer(modifier = Modifier.width(8.dp))
+                            
+                            Text(
+                                "Tìm kiếm chủ đề từ vựng...",
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                        }
                     }
                 }
             }
             
             // Hiển thị thanh trạng thái tìm kiếm nếu có từ khóa
-            AnimatedVisibility(
-                visible = searchQuery.isNotEmpty(),
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        text = "Kết quả cho \"$searchQuery\"",
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                    
-                    Button(
-                        onClick = { 
-                            searchQuery = ""
-                            viewModel.clearSearch()
-                            focusManager.clearFocus()
-                            if (isSearchActive) {
-                                isSearchActive = false
-                            }
-                        },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        ),
-                        shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.padding(start = 8.dp)
+            if (searchQuery.isNotEmpty()) {
+                item {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text("Hủy")
+                        Text(
+                            text = "Kết quả cho \"$searchQuery\"",
+                            style = MaterialTheme.typography.titleSmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                        
+                        Button(
+                            onClick = { 
+                                searchQuery = ""
+                                viewModel.clearSearch()
+                                focusManager.clearFocus()
+                                if (isSearchActive) {
+                                    isSearchActive = false
+                                }
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                            ),
+                            shape = RoundedCornerShape(8.dp),
+                            modifier = Modifier.padding(start = 8.dp)
+                        ) {
+                            Text("Hủy")
+                        }
                     }
                 }
             }
 
             // Favorite Topics Section (chỉ hiển thị khi không tìm kiếm)
-            AnimatedVisibility(
-                visible = searchQuery.isEmpty(),
-                enter = fadeIn(),
-                exit = fadeOut()
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Text(
-                        text = "Chủ đề yêu thích",
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                    
-                    Spacer(modifier = Modifier.height(12.dp))
-                    
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+            if (searchQuery.isEmpty()) {
+                item {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
                     ) {
-                        // Hiển thị chủ đề yêu thích (có tối đa 2 chủ đề)
+                        Text(
+                            text = "Chủ đề yêu thích",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        
+                        Spacer(modifier = Modifier.height(12.dp))
+                        
                         if (favoriteTopics.isNotEmpty()) {
-                            FavoriteTopicCard(
-                                topic = favoriteTopics[0],
-                                modifier = Modifier.weight(1f),
-                                onClick = { onTopicClick(favoriteTopics[0].id) }
-                            )
-                            
-                            if (favoriteTopics.size > 1) {
-                                FavoriteTopicCard(
-                                    topic = favoriteTopics[1],
-                                    modifier = Modifier.weight(1f),
-                                    onClick = { onTopicClick(favoriteTopics[1].id) }
-                                )
-                            } else {
-                                // Spacer để giữ cân đối nếu chỉ có 1 chủ đề yêu thích
-                                Spacer(modifier = Modifier.weight(1f))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                if (favoriteTopics.isNotEmpty()) {
+                                    FavoriteTopicCard(
+                                        topic = favoriteTopics[0],
+                                        modifier = Modifier.weight(1f),
+                                        onClick = { onTopicClick(favoriteTopics[0].id) }
+                                    )
+                                    
+                                    if (favoriteTopics.size > 1) {
+                                        FavoriteTopicCard(
+                                            topic = favoriteTopics[1],
+                                            modifier = Modifier.weight(1f),
+                                            onClick = { onTopicClick(favoriteTopics[1].id) }
+                                        )
+                                    } else {
+                                        // Spacer để giữ cân đối nếu chỉ có 1 chủ đề yêu thích
+                                        Spacer(modifier = Modifier.weight(1f))
+                                    }
+                                }
                             }
                         } else {
                             // Hiển thị thông báo nếu không có chủ đề yêu thích
@@ -348,23 +350,27 @@ fun VocabularyScreen(
                 }
             }
             
-            // All Topics
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, end = 16.dp, top = 16.dp)
-            ) {
-                Text(
-                    text = if (searchQuery.isEmpty()) "Tất cả chủ đề" else "Kết quả tìm kiếm",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                // Hiển thị danh sách chủ đề
-                when (topicsResource) {
-                    is Resource.Loading -> {
+            // All Topics header
+            item {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 16.dp, end = 16.dp, top = 16.dp)
+                ) {
+                    Text(
+                        text = if (searchQuery.isEmpty()) "Tất cả chủ đề" else "Kết quả tìm kiếm",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+            
+            // Hiển thị danh sách chủ đề
+            when (topicsResource) {
+                is Resource.Loading -> {
+                    item {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -374,23 +380,21 @@ fun VocabularyScreen(
                             CircularProgressIndicator()
                         }
                     }
-                    
-                    is Resource.Success -> {
-                        val topics = (topicsResource as Resource.Success<List<VocabularyTopic>>).data
-                        if (topics?.isNotEmpty() == true) {
-                            LazyColumn(
-                                contentPadding = PaddingValues(bottom = 16.dp),
-                                verticalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                items(topics) { topic ->
-                                    TopicCard(
-                                        topic = topic,
-                                        onClick = { onTopicClick(topic.id) },
-                                        onFavoriteClick = { viewModel.toggleFavorite(topic.id) }
-                                    )
-                                }
-                            }
-                        } else {
+                }
+                
+                is Resource.Success -> {
+                    val topics = (topicsResource as Resource.Success<List<VocabularyTopic>>).data
+                    if (topics?.isNotEmpty() == true) {
+                        items(topics) { topic ->
+                            TopicCard(
+                                topic = topic,
+                                onClick = { onTopicClick(topic.id) },
+                                onFavoriteClick = { viewModel.toggleFavorite(topic.id) },
+                                modifier = Modifier.padding(horizontal = 16.dp)
+                            )
+                        }
+                    } else {
+                        item {
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -432,8 +436,10 @@ fun VocabularyScreen(
                             }
                         }
                     }
-                    
-                    is Resource.Error -> {
+                }
+                
+                is Resource.Error -> {
+                    item {
                         val errorMessage = (topicsResource as Resource.Error<List<VocabularyTopic>>).message
                         Box(
                             modifier = Modifier
@@ -495,7 +501,10 @@ fun FavoriteTopicCard(
                 Text(
                     text = topic.category,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false)
                 )
                 
                 Spacer(modifier = Modifier.width(8.dp))
@@ -571,10 +580,11 @@ fun FavoriteTopicCard(
 fun TopicCard(
     topic: VocabularyTopic,
     onClick: () -> Unit = {},
-    onFavoriteClick: () -> Unit = {}
+    onFavoriteClick: () -> Unit = {},
+    modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .clickable { onClick() },
         shape = RoundedCornerShape(12.dp),
@@ -596,7 +606,10 @@ fun TopicCard(
                 Text(
                     text = topic.name,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f)
                 )
                 
                 Icon(
@@ -618,7 +631,10 @@ fun TopicCard(
                 Text(
                     text = topic.category,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.primary
+                    color = MaterialTheme.colorScheme.primary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false)
                 )
                 
                 Spacer(modifier = Modifier.width(8.dp))

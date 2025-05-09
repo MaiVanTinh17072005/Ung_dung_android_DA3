@@ -13,6 +13,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -64,8 +66,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -179,7 +183,9 @@ fun VocabularyQuizScreen(
                                 text = "Kiểm tra: ${topic?.name ?: ""}",
                                 style = MaterialTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.Bold
-                                )
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                         else -> {
@@ -256,249 +262,266 @@ fun VocabularyQuizScreen(
                     } else {
                         val currentQuestion = questions[currentQuestionIndex]
                         
-                        // Quiz progress
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp)
+                        // Sử dụng LazyColumn với một item để cho phép cuộn nếu màn hình nhỏ
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            contentPadding = PaddingValues(bottom = 16.dp)
                         ) {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(
-                                    text = "Câu hỏi ${currentQuestionIndex + 1} / ${questions?.size ?: 0}",
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                                Text(
-                                    text = "Đúng: $correctAnswers",
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontWeight = FontWeight.Bold
-                                    ),
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                            
-                            Spacer(modifier = Modifier.height(8.dp))
-                            
-                            LinearProgressIndicator(
-                                progress = { (currentQuestionIndex + 1).toFloat() / (questions?.size ?: 1) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(8.dp)
-                                    .clip(RoundedCornerShape(4.dp)),
-                                color = MaterialTheme.colorScheme.primary,
-                                trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                            )
-                        }
-                        
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
-                        // Question
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant
-                            ),
-                            shape = RoundedCornerShape(16.dp),
-                            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp),
-                                horizontalAlignment = Alignment.CenterHorizontally
-                            ) {
-                                Text(
-                                    text = if (currentQuestion.type == QuizQuestionType.JAPANESE_TO_MEANING) 
-                                        "Nghĩa của từ này là gì?" 
-                                    else 
-                                        "Từ tiếng Nhật nào có nghĩa sau?",
-                                    style = MaterialTheme.typography.labelLarge,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                                )
-                                
-                                Spacer(modifier = Modifier.height(16.dp))
-                                
-                                if (currentQuestion.type == QuizQuestionType.JAPANESE_TO_MEANING) {
-                                    // Hiển thị từ tiếng Nhật và yêu cầu chọn nghĩa
-                                    Text(
-                                        text = currentQuestion.questionWord.word,
-                                        style = MaterialTheme.typography.headlineLarge,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    
-                                    Text(
-                                        text = currentQuestion.questionWord.reading,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                                    )
-                                } else {
-                                    // Hiển thị nghĩa và yêu cầu chọn từ tiếng Nhật
-                                    Text(
-                                        text = currentQuestion.questionWord.meaning,
-                                        style = MaterialTheme.typography.titleLarge,
-                                        fontWeight = FontWeight.Bold,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        textAlign = TextAlign.Center
-                                    )
-                                }
-                                
-                                IconButton(
-                                    onClick = {},
+                            // Quiz progress
+                            item {
+                                Column(
                                     modifier = Modifier
-                                        .clip(CircleShape)
-                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-                                        .size(40.dp)
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 8.dp)
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Default.VolumeUp,
-                                        contentDescription = "Nghe phát âm",
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(20.dp)
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            text = "Câu hỏi ${currentQuestionIndex + 1} / ${questions?.size ?: 0}",
+                                            style = MaterialTheme.typography.bodyMedium
+                                        )
+                                        Text(
+                                            text = "Đúng: $correctAnswers",
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                    }
+                                    
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    
+                                    LinearProgressIndicator(
+                                        progress = { (currentQuestionIndex + 1).toFloat() / (questions?.size ?: 1) },
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(8.dp)
+                                            .clip(RoundedCornerShape(4.dp)),
+                                        color = MaterialTheme.colorScheme.primary,
+                                        trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
                                     )
                                 }
                             }
-                        }
-                        
-                        Spacer(modifier = Modifier.height(24.dp))
-                        
-                        // Answer options
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            currentQuestion.answers.forEachIndexed { index, answer ->
-                                val isSelected = selectedAnswerIndex == index
-                                val isCorrect = index == currentQuestion.correctAnswerIndex
-                                val showResult = answerSubmitted
-                                
-                                val backgroundColor = when {
-                                    !showResult && isSelected -> MaterialTheme.colorScheme.primaryContainer
-                                    showResult && isCorrect -> MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                                    showResult && isSelected && !isCorrect -> MaterialTheme.colorScheme.error.copy(alpha = 0.2f)
-                                    else -> MaterialTheme.colorScheme.surface
-                                }
-                                
-                                val borderColor = when {
-                                    !showResult && isSelected -> MaterialTheme.colorScheme.primary
-                                    showResult && isCorrect -> MaterialTheme.colorScheme.primary
-                                    showResult && isSelected && !isCorrect -> MaterialTheme.colorScheme.error
-                                    else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
-                                }
-                                
-                                val textColor = when {
-                                    !showResult && isSelected -> MaterialTheme.colorScheme.onPrimaryContainer
-                                    showResult && isCorrect -> MaterialTheme.colorScheme.primary
-                                    showResult && isSelected && !isCorrect -> MaterialTheme.colorScheme.error
-                                    else -> MaterialTheme.colorScheme.onSurface
-                                }
+                            
+                            // Question
+                            item {
+                                Spacer(modifier = Modifier.height(8.dp))
                                 
                                 Card(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .border(
-                                            width = 2.dp,
-                                            color = borderColor,
-                                            shape = RoundedCornerShape(12.dp)
-                                        )
-                                        .clickable(enabled = !answerSubmitted) {
-                                            selectAnswer(index)
-                                        },
+                                        .padding(horizontal = 16.dp),
                                     colors = CardDefaults.cardColors(
-                                        containerColor = backgroundColor
+                                        containerColor = MaterialTheme.colorScheme.surfaceVariant
                                     ),
-                                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                                    shape = RoundedCornerShape(16.dp),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                                 ) {
-                                    Row(
+                                    Column(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .padding(16.dp),
-                                        verticalAlignment = Alignment.CenterVertically
+                                        horizontalAlignment = Alignment.CenterHorizontally
                                     ) {
-                                        if (showResult) {
-                                            Icon(
-                                                imageVector = if (isCorrect) Icons.Default.Check else Icons.Default.Close,
-                                                contentDescription = null,
-                                                tint = if (isCorrect) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
-                                                modifier = Modifier.size(24.dp)
+                                        Text(
+                                            text = if (currentQuestion.type == QuizQuestionType.JAPANESE_TO_MEANING) 
+                                                "Nghĩa của từ này là gì?" 
+                                            else 
+                                                "Từ tiếng Nhật nào có nghĩa sau?",
+                                            style = MaterialTheme.typography.labelLarge,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
+                                        )
+                                        
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        
+                                        if (currentQuestion.type == QuizQuestionType.JAPANESE_TO_MEANING) {
+                                            // Hiển thị từ tiếng Nhật và yêu cầu chọn nghĩa
+                                            Text(
+                                                text = currentQuestion.questionWord.word,
+                                                style = MaterialTheme.typography.headlineMedium,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                textAlign = TextAlign.Center
                                             )
-                                            Spacer(modifier = Modifier.width(12.dp))
+                                            
+                                            Text(
+                                                text = currentQuestion.questionWord.reading,
+                                                style = MaterialTheme.typography.titleMedium,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
+                                                textAlign = TextAlign.Center
+                                            )
+                                        } else {
+                                            // Hiển thị nghĩa và yêu cầu chọn từ tiếng Nhật
+                                            Text(
+                                                text = currentQuestion.questionWord.meaning,
+                                                style = MaterialTheme.typography.titleLarge,
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                                textAlign = TextAlign.Center
+                                            )
                                         }
                                         
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            if (currentQuestion.type == QuizQuestionType.JAPANESE_TO_MEANING) {
-                                                // Hiển thị nghĩa
-                                                Text(
-                                                    text = answer.meaning,
-                                                    style = MaterialTheme.typography.bodyLarge,
-                                                    color = textColor
+                                        IconButton(
+                                            onClick = {},
+                                            modifier = Modifier
+                                                .clip(CircleShape)
+                                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                                                .size(40.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.VolumeUp,
+                                                contentDescription = "Nghe phát âm",
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            // Answer options
+                            item {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                                ) {
+                                    currentQuestion.answers.forEachIndexed { index, answer ->
+                                        val isSelected = selectedAnswerIndex == index
+                                        val isCorrect = index == currentQuestion.correctAnswerIndex
+                                        val showResult = answerSubmitted
+                                        
+                                        val backgroundColor = when {
+                                            !showResult && isSelected -> MaterialTheme.colorScheme.primaryContainer
+                                            showResult && isCorrect -> MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                                            showResult && isSelected && !isCorrect -> MaterialTheme.colorScheme.error.copy(alpha = 0.2f)
+                                            else -> MaterialTheme.colorScheme.surface
+                                        }
+                                        
+                                        val borderColor = when {
+                                            !showResult && isSelected -> MaterialTheme.colorScheme.primary
+                                            showResult && isCorrect -> MaterialTheme.colorScheme.primary
+                                            showResult && isSelected && !isCorrect -> MaterialTheme.colorScheme.error
+                                            else -> MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                                        }
+                                        
+                                        val textColor = when {
+                                            !showResult && isSelected -> MaterialTheme.colorScheme.onPrimaryContainer
+                                            showResult && isCorrect -> MaterialTheme.colorScheme.primary
+                                            showResult && isSelected && !isCorrect -> MaterialTheme.colorScheme.error
+                                            else -> MaterialTheme.colorScheme.onSurface
+                                        }
+                                        
+                                        Card(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .clip(RoundedCornerShape(12.dp))
+                                                .border(
+                                                    width = 2.dp,
+                                                    color = borderColor,
+                                                    shape = RoundedCornerShape(12.dp)
                                                 )
-                                            } else {
-                                                // Hiển thị từ tiếng Nhật và cách đọc
-                                                Text(
-                                                    text = answer.word,
-                                                    style = MaterialTheme.typography.bodyLarge,
-                                                    color = textColor,
-                                                    fontWeight = FontWeight.Medium
-                                                )
-                                                Text(
-                                                    text = answer.reading,
-                                                    style = MaterialTheme.typography.bodyMedium,
-                                                    color = textColor.copy(alpha = 0.7f)
-                                                )
+                                                .clickable(enabled = !answerSubmitted) {
+                                                    selectAnswer(index)
+                                                },
+                                            colors = CardDefaults.cardColors(
+                                                containerColor = backgroundColor
+                                            ),
+                                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                                        ) {
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(12.dp),
+                                                verticalAlignment = Alignment.CenterVertically
+                                            ) {
+                                                if (showResult) {
+                                                    Icon(
+                                                        imageVector = if (isCorrect) Icons.Default.Check else Icons.Default.Close,
+                                                        contentDescription = null,
+                                                        tint = if (isCorrect) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+                                                        modifier = Modifier.size(20.dp)
+                                                    )
+                                                    Spacer(modifier = Modifier.width(8.dp))
+                                                }
+                                                
+                                                Column(modifier = Modifier.weight(1f)) {
+                                                    if (currentQuestion.type == QuizQuestionType.JAPANESE_TO_MEANING) {
+                                                        // Hiển thị nghĩa
+                                                        Text(
+                                                            text = answer.meaning,
+                                                            style = MaterialTheme.typography.bodyLarge,
+                                                            color = textColor
+                                                        )
+                                                    } else {
+                                                        // Hiển thị từ tiếng Nhật và cách đọc
+                                                        Text(
+                                                            text = answer.word,
+                                                            style = MaterialTheme.typography.bodyLarge,
+                                                            color = textColor,
+                                                            fontWeight = FontWeight.Medium
+                                                        )
+                                                        Text(
+                                                            text = answer.reading,
+                                                            style = MaterialTheme.typography.bodyMedium,
+                                                            color = textColor.copy(alpha = 0.7f)
+                                                        )
+                                                    }
+                                                }
                                             }
                                         }
                                     }
                                 }
                             }
-                        }
-                        
-                        Spacer(modifier = Modifier.weight(1f))
-                        
-                        // Controls
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 16.dp)
-                        ) {
-                            if (!answerSubmitted) {
-                                // Show submit button if an answer is selected
-                                Button(
-                                    onClick = submitAnswer,
-                                    enabled = selectedAnswerIndex >= 0,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary,
-                                        disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                                    )
+                            
+                            // Controls
+                            item {
+                                Spacer(modifier = Modifier.height(24.dp))
+                                
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp, vertical = 16.dp)
                                 ) {
-                                    Text("Kiểm tra")
-                                }
-                            } else {
-                                // Show continue button after submitting
-                                Button(
-                                    onClick = moveToNextQuestion,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = if (currentQuestionIndex == questions.size - 1)
-                                            MaterialTheme.colorScheme.tertiary
-                                        else
-                                            MaterialTheme.colorScheme.primary
-                                    )
-                                ) {
-                                    Text(
-                                        text = if (currentQuestionIndex == questions.size - 1)
-                                            "Hoàn thành"
-                                        else
-                                            "Câu tiếp theo"
-                                    )
+                                    if (!answerSubmitted) {
+                                        // Show submit button if an answer is selected
+                                        Button(
+                                            onClick = submitAnswer,
+                                            enabled = selectedAnswerIndex >= 0,
+                                            modifier = Modifier.fillMaxWidth(),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = MaterialTheme.colorScheme.primary,
+                                                disabledContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                                            )
+                                        ) {
+                                            Text("Kiểm tra")
+                                        }
+                                    } else {
+                                        // Show continue button after submitting
+                                        Button(
+                                            onClick = moveToNextQuestion,
+                                            modifier = Modifier.fillMaxWidth(),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = if (currentQuestionIndex == questions.size - 1)
+                                                    MaterialTheme.colorScheme.tertiary
+                                                else
+                                                    MaterialTheme.colorScheme.primary
+                                            )
+                                        ) {
+                                            Text(
+                                                text = if (currentQuestionIndex == questions.size - 1)
+                                                    "Hoàn thành"
+                                                else
+                                                    "Câu tiếp theo"
+                                            )
+                                        }
+                                    }
                                 }
                             }
                         }

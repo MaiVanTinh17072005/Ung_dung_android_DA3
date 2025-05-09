@@ -28,6 +28,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.StarOutline
@@ -63,6 +64,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -99,7 +101,9 @@ fun VocabularyDetailScreen(
                                 topic?.name ?: "Chi tiết chủ đề",
                                 style = MaterialTheme.typography.titleLarge.copy(
                                     fontWeight = FontWeight.Bold
-                                )
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                         else -> {
@@ -142,158 +146,183 @@ fun VocabularyDetailScreen(
             is Resource.Success -> {
                 val topic = (topicDetailResource as Resource.Success<VocabularyTopic>).data
                 
-                Column(
+                LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
                         .padding(innerPadding)
-                        .background(MaterialTheme.colorScheme.background)
+                        .background(MaterialTheme.colorScheme.background),
+                    state = listState,
+                    contentPadding = PaddingValues(bottom = 16.dp)
                 ) {
                     // Topic info
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                        ),
-                        shape = RoundedCornerShape(16.dp),
-                        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-                    ) {
-                        Column(
+                    item {
+                        Card(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(16.dp)
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                            ),
+                            shape = RoundedCornerShape(16.dp),
+                            elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                         ) {
-                            // Topic header
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Text(
-                                        text = topic?.category ?: "",
-                                        style = MaterialTheme.typography.labelMedium,
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                    
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    
-                                    Text(
-                                        text = "•",
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                    
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    
-                                    Text(
-                                        text = "${topic?.totalWords ?: 0} từ",
-                                        style = MaterialTheme.typography.bodySmall
-                                    )
-                                }
-                                
-                                IconButton(onClick = { viewModel.toggleFavorite() }) {
-                                    Icon(
-                                        imageVector = if (topic?.isFavorite == true) Icons.Default.Star else Icons.Default.StarOutline,
-                                        contentDescription = "Favorite",
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                            }
-                            
-                            Spacer(modifier = Modifier.height(16.dp))
-                            
-                            // Progress
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "Tiến độ học:",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.weight(1f)
-                                )
-                                
-                                Text(
-                                    text = "${((topic?.progress ?: 0f) * 100).toInt()}%",
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontWeight = FontWeight.Bold
-                                    ),
-                                    color = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                            
-                            Spacer(modifier = Modifier.height(8.dp))
-                            
-                            LinearProgressIndicator(
-                                progress = { topic?.progress ?: 0f },
+                            Column(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .height(8.dp)
-                                    .clip(RoundedCornerShape(4.dp)),
-                                color = MaterialTheme.colorScheme.primary,
-                                trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                            )
-                            
-                            Spacer(modifier = Modifier.height(16.dp))
-                            
-                            // Action buttons
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    .padding(16.dp)
                             ) {
-                                Button(
-                                    onClick = { onStartFlashcards(topicId) },
-                                    modifier = Modifier.weight(1f),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.primary
-                                    )
+                                // Topic header
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Default.PlayArrow,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text("Flashcards")
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Text(
+                                            text = topic?.category ?: "",
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        
+                                        Text(
+                                            text = "•",
+                                            color = MaterialTheme.colorScheme.primary
+                                        )
+                                        
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        
+                                        Text(
+                                            text = "${topic?.totalWords ?: 0} từ",
+                                            style = MaterialTheme.typography.bodySmall
+                                        )
+                                    }
+                                    
+                                    IconButton(onClick = { viewModel.toggleFavorite() }) {
+                                        Icon(
+                                            imageVector = if (topic?.isFavorite == true) Icons.Default.Star else Icons.Default.StarOutline,
+                                            contentDescription = "Favorite",
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            modifier = Modifier.size(24.dp)
+                                        )
+                                    }
                                 }
                                 
-                                Button(
-                                    onClick = { onStartQuiz(topicId) },
-                                    modifier = Modifier.weight(1f),
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.secondary
-                                    )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                
+                                // Progress
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Quiz,
-                                        contentDescription = null,
-                                        modifier = Modifier.size(20.dp)
+                                    Text(
+                                        text = "Tiến độ học tập",
+                                        style = MaterialTheme.typography.titleSmall
                                     )
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text("Quiz")
+                                    Text(
+                                        text = "${(topic?.progress ?: 0f * 100).toInt()}%",
+                                        style = MaterialTheme.typography.titleSmall.copy(
+                                            fontWeight = FontWeight.Bold
+                                        ),
+                                        color = MaterialTheme.colorScheme.primary
+                                    )
+                                }
+                                
+                                Spacer(modifier = Modifier.height(8.dp))
+                                
+                                LinearProgressIndicator(
+                                    progress = { topic?.progress ?: 0f },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(8.dp)
+                                        .clip(CircleShape),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+                                )
+                                
+                                Spacer(modifier = Modifier.height(16.dp))
+                                
+                                // Study options
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    Button(
+                                        onClick = { onStartFlashcards(topicId) },
+                                        modifier = Modifier.weight(1f),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.primary
+                                        ),
+                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 12.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Default.PlayArrow,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            "Thẻ ghi nhớ", 
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                    
+                                    Button(
+                                        onClick = { onStartQuiz(topicId) },
+                                        modifier = Modifier.weight(1f),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = MaterialTheme.colorScheme.secondary
+                                        ),
+                                        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 12.dp)
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.Outlined.Quiz,
+                                            contentDescription = null,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(4.dp))
+                                        Text(
+                                            "Kiểm tra",
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
                                 }
                             }
                         }
                     }
                     
-                    // Words list
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(start = 16.dp, end = 16.dp, top = 16.dp)
-                    ) {
-                        Text(
-                            text = "Danh sách từ vựng",
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Bold
-                        )
-                        
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
-                        when (wordsResource) {
-                            is Resource.Loading -> {
+                    // Word list header
+                    item {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = "Danh sách từ vựng",
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.weight(1f)
+                            )
+                            
+                            Text(
+                                text = "${topic?.progress?.times(topic.totalWords)?.toInt() ?: 0}/${topic?.totalWords ?: 0} từ",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+                    }
+                    
+                    // Word list
+                    when (val resource = wordsResource) {
+                        is Resource.Loading -> {
+                            item {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -303,25 +332,16 @@ fun VocabularyDetailScreen(
                                     CircularProgressIndicator()
                                 }
                             }
-                            
-                            is Resource.Success -> {
-                                val words = (wordsResource as Resource.Success<List<VocabularyWord>>).data
-                                if (words?.isNotEmpty() == true) {
-                                    LazyColumn(
-                                        state = listState,
-                                        contentPadding = PaddingValues(bottom = 16.dp),
-                                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                                    ) {
-                                        items(words) { word ->
-                                            WordCard(
-                                                word = word,
-                                                onMarkLearned = { 
-                                                    viewModel.markWordAsLearned(word.id)
-                                                }
-                                            )
-                                        }
-                                    }
-                                } else {
+                        }
+                        
+                        is Resource.Success -> {
+                            val words = resource.data
+                            if (words?.isNotEmpty() == true) {
+                                items(words) { word ->
+                                    WordCard(word = word)
+                                }
+                            } else {
+                                item {
                                     Box(
                                         modifier = Modifier
                                             .fillMaxWidth()
@@ -330,14 +350,16 @@ fun VocabularyDetailScreen(
                                     ) {
                                         Text(
                                             text = "Không có từ vựng nào trong chủ đề này",
-                                            style = MaterialTheme.typography.bodyLarge
+                                            style = MaterialTheme.typography.bodyLarge,
+                                            textAlign = TextAlign.Center
                                         )
                                     }
                                 }
                             }
-                            
-                            is Resource.Error -> {
-                                val errorMessage = (wordsResource as Resource.Error<List<VocabularyWord>>).message
+                        }
+                        
+                        is Resource.Error -> {
+                            item {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -352,9 +374,18 @@ fun VocabularyDetailScreen(
                                         )
                                         Spacer(modifier = Modifier.height(8.dp))
                                         Text(
-                                            text = errorMessage ?: "Đã xảy ra lỗi không xác định",
+                                            text = resource.message ?: "Đã xảy ra lỗi không xác định",
                                             style = MaterialTheme.typography.bodyMedium
                                         )
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Button(
+                                            onClick = { viewModel.loadWords() },
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = MaterialTheme.colorScheme.primary
+                                            )
+                                        ) {
+                                            Text("Thử lại")
+                                        }
                                     }
                                 }
                             }
@@ -364,7 +395,7 @@ fun VocabularyDetailScreen(
             }
             
             is Resource.Error -> {
-                val errorMessage = (topicDetailResource as Resource.Error<VocabularyTopic>).message
+                // Hiển thị lỗi
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -382,18 +413,18 @@ fun VocabularyDetailScreen(
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
-                            text = errorMessage ?: "Đã xảy ra lỗi không xác định",
+                            text = (topicDetailResource as Resource.Error).message ?: "Đã xảy ra lỗi không xác định",
                             style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Button(
-                            onClick = { viewModel.loadWords() },
+                            onClick = onBack,
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primary
                             )
                         ) {
-                            Text("Thử lại")
+                            Text("Quay lại")
                         }
                     }
                 }
@@ -403,112 +434,78 @@ fun VocabularyDetailScreen(
 }
 
 @Composable
-fun WordCard(
-    word: VocabularyWord,
-    onMarkLearned: () -> Unit = {}
-) {
+fun WordCard(word: VocabularyWord) {
     Card(
         modifier = Modifier
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
         shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = if (word.isLearned) 
+                MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+            else 
+                MaterialTheme.colorScheme.surface
         ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Column(
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            Column(
+                modifier = Modifier.weight(1f)
             ) {
-                Column(modifier = Modifier.weight(1f)) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
                     Text(
                         text = word.word,
-                        style = MaterialTheme.typography.titleLarge,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
                     
-                    Text(
-                        text = word.reading,
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    
+                    if (word.isLearned) {
+                        Icon(
+                            imageVector = Icons.Default.Check,
+                            contentDescription = "Đã học",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
                 }
-                
-                IconButton(onClick = {}) {
-                    Icon(
-                        imageVector = Icons.Default.VolumeUp,
-                        contentDescription = "Nghe phát âm",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            Text(
-                text = word.meaning,
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.Medium,
-                color = MaterialTheme.colorScheme.secondary
-            )
-            
-            if (!word.exampleSentence.isNullOrEmpty()) {
-                Spacer(modifier = Modifier.height(12.dp))
-                
-                Divider(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
-                )
-                
-                Spacer(modifier = Modifier.height(12.dp))
                 
                 Text(
-                    text = "Ví dụ:",
-                    style = MaterialTheme.typography.labelMedium,
+                    text = word.reading,
+                    style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                 )
                 
                 Spacer(modifier = Modifier.height(4.dp))
                 
                 Text(
-                    text = word.exampleSentence ?: "",
+                    text = word.meaning,
                     style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Normal
+                    color = MaterialTheme.colorScheme.onSurface
                 )
-                
-                if (!word.exampleSentenceTranslation.isNullOrEmpty()) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    
-                    Text(
-                        text = word.exampleSentenceTranslation ?: "",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                        fontWeight = FontWeight.Normal
-                    )
-                }
             }
             
-            Spacer(modifier = Modifier.height(12.dp))
-            
-            Button(
-                onClick = onMarkLearned,
-                modifier = Modifier.align(Alignment.End),
-                enabled = !word.isLearned,
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = if (word.isLearned) 
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                    else 
-                        MaterialTheme.colorScheme.primary
-                )
+            IconButton(
+                onClick = { /* Play pronunciation */ },
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
             ) {
-                Text(text = if (word.isLearned) "Đã học" else "Đánh dấu đã học")
+                Icon(
+                    imageVector = Icons.Default.VolumeUp,
+                    contentDescription = "Nghe phát âm",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(20.dp)
+                )
             }
         }
     }
