@@ -78,7 +78,16 @@ fun ForgotPasswordScreen(
                     ),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 16.dp)
+                        .padding(bottom = 16.dp),
+                    isError = viewModel.emailError != null,
+                    supportingText = {
+                        viewModel.emailError?.let { error ->
+                            Text(
+                                text = error,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+                    }
                 )
 
                 Button(
