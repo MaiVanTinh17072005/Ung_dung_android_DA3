@@ -122,7 +122,6 @@ class LoginViewModel(
 
                     // Hash password before sending to API
                     val hashedPassword = hashPassword(password)
-                    Log.d(TAG, "pass hard: $hashedPassword")
                     val response = authRepository.login(username, hashedPassword)
                     Log.d(TAG, "Received API response with status: ${response.code()}")
 
