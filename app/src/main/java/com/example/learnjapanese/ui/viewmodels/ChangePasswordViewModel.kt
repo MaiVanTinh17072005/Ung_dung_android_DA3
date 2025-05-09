@@ -18,22 +18,35 @@ class ChangePasswordViewModel : ViewModel() {
     var confirmPasswordError by mutableStateOf<String?>(null)
         private set
 
-    private fun isPasswordStrong(password: String): Boolean {
-        val hasUpperCase = password.any { it.isUpperCase() }
-        val hasLowerCase = password.any { it.isLowerCase() }
-        val hasDigit = password.any { it.isDigit() }
-        val hasSpecialChar = password.any { !it.isLetterOrDigit() }
-        val isLongEnough = password.length >= 8
-        return hasUpperCase && hasLowerCase && hasDigit && hasSpecialChar && isLongEnough
+    private fun validatePasswordStrength(password: String): String? {
+        if (password.isEmpty()) {
+            return "Vui lòng nhập mật khẩu mới"
+        }
+        
+        val errors = mutableListOf<String>()
+        
+        if (password.length < 8) {
+            errors.add("ít nhất 8 ký tự")
+        }
+        if (!password.any { it.isUpperCase() }) {
+            errors.add("chữ hoa")
+        }
+        if (!password.any { it.isLowerCase() }) {
+            errors.add("chữ thường")
+        }
+        if (!password.any { it.isDigit() }) {
+            errors.add("số")
+        }
+        if (!password.any { !it.isLetterOrDigit() }) {
+            errors.add("ký tự đặc biệt")
+        }
+        
+        return if (errors.isEmpty()) null else "Mật khẩu phải có ${errors.joinToString(", ")}"
     }
     
     fun updateNewPassword(password: String) {
         newPassword = password
-        newPasswordError = if (password.isEmpty()) {
-            "Vui lòng nhập mật khẩu mới"
-        } else if (!isPasswordStrong(password)) {
-            "Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ hoa, chữ thường, số và ký tự đặc biệt"
-        } else null
+        newPasswordError = validatePasswordStrength(password)
     }
     
     fun updateConfirmPassword(password: String) {

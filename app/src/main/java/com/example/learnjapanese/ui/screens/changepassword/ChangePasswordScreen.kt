@@ -149,8 +149,10 @@ fun ChangePasswordScreen(
 
             Button(
                 onClick = {
-                    viewModel.changePassword()
-                    onPasswordChanged()
+                    if (viewModel.validateInputs()) {
+                        viewModel.changePassword()
+                        onPasswordChanged()
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
