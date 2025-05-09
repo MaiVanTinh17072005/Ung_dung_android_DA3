@@ -40,8 +40,12 @@ class VocabularyDetailViewModel @Inject constructor(
     private val _isFavorite = MutableStateFlow(false)
     val isFavorite: StateFlow<Boolean> = _isFavorite.asStateFlow()
     
+    // Lưu trữ số lượng từ vựng thực tế từ API đếm
+    private var vocabularyCount: Int? = null
+    
     init {
         loadTopicDetail()
+        loadVocabularyCount()
         loadWords()
     }
     
@@ -63,7 +67,13 @@ class VocabularyDetailViewModel @Inject constructor(
                         
                         if (topicResponse != null) {
                             val topic = topicResponse.toUiTopic()
-                            _topicDetail.value = Resource.Success(topic)
+                            
+                            // Áp dụng số lượng từ vựng từ API đếm nếu đã có
+                            val updatedTopic = vocabularyCount?.let {
+                                topic.copy(totalWords = it)
+                            } ?: topic
+                            
+                            _topicDetail.value = Resource.Success(updatedTopic)
                             _isFavorite.value = false // Mặc định chưa đánh dấu yêu thích
                         } else {
                             _topicDetail.value = Resource.Error("Không tìm thấy chủ đề")
@@ -75,6 +85,37 @@ class VocabularyDetailViewModel @Inject constructor(
                 )
             } catch (e: Exception) {
                 _topicDetail.value = Resource.Error(e.message ?: "Đã xảy ra lỗi không xác định")
+            }
+        }
+    }
+    
+    /**
+     * Tải số lượng từ vựng từ API đếm
+     */
+    private fun loadVocabularyCount() {
+        viewModelScope.launch {
+            try {
+                vocabularyRepository.getVocabularyCountByTopics().fold(
+                    onSuccess = { countResponses ->
+                        val countInfo = countResponses.find { it.topicId == topicId }
+                        if (countInfo != null) {
+                            vocabularyCount = countInfo.vocabularyCount
+                            
+                            // Cập nhật lại thông tin chủ đề nếu đã có
+                            (_topicDetail.value as? Resource.Success)?.data?.let { currentTopic ->
+                                _topicDetail.value = Resource.Success(
+                                    currentTopic.copy(totalWords = countInfo.vocabularyCount)
+                                )
+                            }
+                        }
+                    },
+                    onFailure = { 
+                        // Nếu không lấy được số lượng từ API đếm, 
+                        // sẽ sử dụng kích thước danh sách từ vựng thay thế
+                    }
+                )
+            } catch (e: Exception) {
+                // Bỏ qua lỗi và sử dụng phương pháp đếm thay thế
             }
         }
     }
@@ -92,14 +133,23 @@ class VocabularyDetailViewModel @Inject constructor(
                         val words = wordResponses.toUiWordList()
                         _words.value = Resource.Success(words)
                         
-                        // Cập nhật tổng số từ trong chủ đề
-                        (_topicDetail.value as? Resource.Success)?.data?.let { currentTopic ->
-                            _topicDetail.value = Resource.Success(
-                                currentTopic.copy(
-                                    totalWords = words.size,
-                                    words = words
+                        // Chỉ cập nhật tổng số từ trong chủ đề nếu không có số liệu từ API đếm
+                        if (vocabularyCount == null) {
+                            (_topicDetail.value as? Resource.Success)?.data?.let { currentTopic ->
+                                _topicDetail.value = Resource.Success(
+                                    currentTopic.copy(
+                                        totalWords = words.size,
+                                        words = words
+                                    )
                                 )
-                            )
+                            }
+                        } else {
+                            // Vẫn cập nhật danh sách từ, nhưng giữ nguyên số lượng từ API đếm
+                            (_topicDetail.value as? Resource.Success)?.data?.let { currentTopic ->
+                                _topicDetail.value = Resource.Success(
+                                    currentTopic.copy(words = words)
+                                )
+                            }
                         }
                     },
                     onFailure = { exception ->

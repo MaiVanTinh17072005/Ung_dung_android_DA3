@@ -3,6 +3,7 @@ package com.example.learnjapanese.data.repository
 import com.example.learnjapanese.data.api.VocabularyApiService
 import com.example.learnjapanese.data.model.CompleteTopicRequest
 import com.example.learnjapanese.data.model.CompleteTopicResponse
+import com.example.learnjapanese.data.model.VocabularyCountResponse
 import com.example.learnjapanese.data.model.VocabularyTopicResponse
 import com.example.learnjapanese.data.model.VocabularyWordResponse
 import kotlinx.coroutines.Dispatchers
@@ -51,6 +52,31 @@ class VocabularyRepository @Inject constructor(
                     Result.success(response.body() ?: emptyList())
                 } else {
                     Result.failure(IOException("Không thể tải danh sách từ vựng: ${response.code()}"))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+    
+    /**
+     * Lấy số lượng từ vựng theo từng chủ đề
+     * @return Kết quả bao gồm trạng thái thành công/thất bại và dữ liệu
+     */
+    suspend fun getVocabularyCountByTopics(): Result<List<VocabularyCountResponse>> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = vocabularyApiService.getVocabularyCountByTopics()
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        if (it.success) {
+                            Result.success(it.data)
+                        } else {
+                            Result.failure(IOException(it.message))
+                        }
+                    } ?: Result.failure(IOException("Phản hồi trống từ API"))
+                } else {
+                    Result.failure(IOException("Không thể lấy số lượng từ vựng theo chủ đề: ${response.code()}"))
                 }
             } catch (e: Exception) {
                 Result.failure(e)

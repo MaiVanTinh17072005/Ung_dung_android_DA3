@@ -2,6 +2,7 @@ package com.example.learnjapanese.data.api
 
 import com.example.learnjapanese.data.model.CompleteTopicRequest
 import com.example.learnjapanese.data.model.CompleteTopicResponse
+import com.example.learnjapanese.data.model.VocabularyCountListResponse
 import com.example.learnjapanese.data.model.VocabularyTopicResponse
 import com.example.learnjapanese.data.model.VocabularyWordResponse
 import retrofit2.Response
@@ -29,6 +30,13 @@ interface VocabularyApiService {
      */
     @GET("/api/vocabulary-topics/{topicId}/vocabulary")
     suspend fun getVocabularyWords(@Path("topicId") topicId: String): Response<List<VocabularyWordResponse>>
+    
+    /**
+     * Lấy số lượng từ vựng theo từng chủ đề
+     * @return Danh sách chủ đề và số lượng từ vựng
+     */
+    @GET("/api/vocabulary/count-by-topics")
+    suspend fun getVocabularyCountByTopics(): Response<VocabularyCountListResponse>
     
     /**
      * Đánh dấu hoàn thành một chủ đề từ vựng

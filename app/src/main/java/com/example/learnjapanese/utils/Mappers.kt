@@ -1,5 +1,6 @@
 package com.example.learnjapanese.utils
 
+import com.example.learnjapanese.data.model.VocabularyCountResponse
 import com.example.learnjapanese.data.model.VocabularyTopic
 import com.example.learnjapanese.data.model.VocabularyTopicResponse
 import com.example.learnjapanese.data.model.VocabularyWord
@@ -35,6 +36,33 @@ fun VocabularyTopicResponse.toUiTopic(): VocabularyTopic {
         name = this.name,
         category = this.level,
         totalWords = 0, // Sẽ được cập nhật khi lấy danh sách từ vựng
+        progress = 0f, // Sẽ được cập nhật từ thông tin tiến độ
+        isFavorite = false, // Mặc định chưa yêu thích
+        words = emptyList() // Sẽ được cập nhật khi lấy danh sách từ vựng
+    )
+}
+
+/**
+ * Cập nhật thông tin số lượng từ vựng cho danh sách chủ đề
+ */
+fun List<VocabularyTopic>.updateWordCount(countResponses: List<VocabularyCountResponse>): List<VocabularyTopic> {
+    val countMap = countResponses.associateBy { it.topicId }
+    return map { topic ->
+        countMap[topic.id]?.let { countInfo ->
+            topic.copy(totalWords = countInfo.vocabularyCount)
+        } ?: topic
+    }
+}
+
+/**
+ * Chuyển đổi từ VocabularyCountResponse sang VocabularyTopic
+ */
+fun VocabularyCountResponse.toUiTopic(): VocabularyTopic {
+    return VocabularyTopic(
+        id = this.topicId,
+        name = this.topicName,
+        category = this.level,
+        totalWords = this.vocabularyCount,
         progress = 0f, // Sẽ được cập nhật từ thông tin tiến độ
         isFavorite = false, // Mặc định chưa yêu thích
         words = emptyList() // Sẽ được cập nhật khi lấy danh sách từ vựng

@@ -26,6 +26,26 @@ data class VocabularyWordResponse(
 )
 
 /**
+ * Đối tượng đếm từ vựng theo chủ đề nhận từ API
+ */
+data class VocabularyCountResponse(
+    @SerializedName("topic_id") val topicId: String,
+    @SerializedName("topic_name") val topicName: String,
+    @SerializedName("topic_description") val topicDescription: String,
+    @SerializedName("level") val level: String,
+    @SerializedName("vocabulary_count") val vocabularyCount: Int
+)
+
+/**
+ * Wrapper cho phản hồi API đếm từ vựng theo chủ đề
+ */
+data class VocabularyCountListResponse(
+    @SerializedName("success") val success: Boolean,
+    @SerializedName("data") val data: List<VocabularyCountResponse>,
+    @SerializedName("message") val message: String
+)
+
+/**
  * Request body cho API đánh dấu hoàn thành chủ đề
  */
 data class CompleteTopicRequest(

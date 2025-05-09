@@ -1,5 +1,8 @@
 package com.example.learnjapanese.screens.vocabulary
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -18,13 +21,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowForward
+import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.Star
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -33,9 +42,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -48,7 +60,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -69,31 +86,112 @@ fun VocabularyScreen(
     val favoriteTopics by viewModel.favoriteTopics.collectAsState()
     
     var searchQuery by remember { mutableStateOf("") }
+    var isSearchActive by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
+    val focusRequester = remember { FocusRequester() }
     
     // Effect để search khi query thay đổi
     LaunchedEffect(searchQuery) {
-        if (searchQuery.isNotEmpty()) {
-            viewModel.searchTopics(searchQuery)
+        if (searchQuery.isEmpty() && !isSearchActive) {
+            // Không thực hiện tìm kiếm nếu người dùng chưa nhấn vào ô tìm kiếm
+            return@LaunchedEffect
         }
+        viewModel.searchTopics(searchQuery)
     }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        "Chủ đề từ vựng",
-                        style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold
+                    if (isSearchActive) {
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .focusRequester(focusRequester),
+                            placeholder = {
+                                Text(
+                                    "Tìm kiếm chủ đề từ vựng...",
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                )
+                            },
+                            leadingIcon = {
+                                Icon(
+                                    imageVector = Icons.Default.Search,
+                                    contentDescription = "Search icon",
+                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                )
+                            },
+                            trailingIcon = {
+                                if (searchQuery.isNotEmpty()) {
+                                    IconButton(onClick = { searchQuery = "" }) {
+                                        Icon(
+                                            imageVector = Icons.Default.Clear,
+                                            contentDescription = "Xóa tìm kiếm",
+                                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                        )
+                                    }
+                                }
+                            },
+                            shape = RoundedCornerShape(12.dp),
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                containerColor = MaterialTheme.colorScheme.surface,
+                                focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)
+                            ),
+                            singleLine = true,
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                            keyboardActions = KeyboardActions(
+                                onSearch = {
+                                    viewModel.searchTopics(searchQuery)
+                                    focusManager.clearFocus()
+                                }
+                            )
                         )
-                    )
+                        
+                        // Tự động yêu cầu focus khi chuyển sang chế độ tìm kiếm
+                        LaunchedEffect(isSearchActive) {
+                            if (isSearchActive) {
+                                focusRequester.requestFocus()
+                            }
+                        }
+                    } else {
+                        Text(
+                            "Chủ đề từ vựng",
+                            style = MaterialTheme.typography.titleLarge.copy(
+                                fontWeight = FontWeight.Bold
+                            )
+                        )
+                    }
                 },
                 navigationIcon = {
-                    IconButton(onClick = onBack) {
+                    IconButton(onClick = { 
+                        if (isSearchActive) {
+                            isSearchActive = false
+                            searchQuery = ""
+                            viewModel.clearSearch()
+                            focusManager.clearFocus()
+                        } else {
+                            onBack()
+                        }
+                    }) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Quay lại"
+                            contentDescription = if (isSearchActive) "Hủy tìm kiếm" else "Quay lại"
                         )
+                    }
+                },
+                actions = {
+                    if (!isSearchActive) {
+                        IconButton(onClick = { 
+                            isSearchActive = true 
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Search,
+                                contentDescription = "Tìm kiếm"
+                            )
+                        }
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -108,35 +206,31 @@ fun VocabularyScreen(
                 .padding(innerPadding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            // Search Box
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Card(
+            // Hiển thị hộp tìm kiếm nếu không ở chế độ tìm kiếm active
+            if (!isSearchActive) {
+                // Search Box
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp)
-                        .clickable { /* Show search dialog */ },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.surface)
+                        .clickable { isSearchActive = true }
+                        .padding(12.dp)
                 ) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 16.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
                             imageVector = Icons.Default.Search,
-                            contentDescription = "Search",
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            contentDescription = "Search icon",
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            modifier = Modifier.size(20.dp)
                         )
+                        
                         Spacer(modifier = Modifier.width(8.dp))
+                        
                         Text(
                             "Tìm kiếm chủ đề từ vựng...",
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
@@ -145,63 +239,109 @@ fun VocabularyScreen(
                     }
                 }
             }
-
-            // Favorite Topics Section (Most used)
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            
+            // Hiển thị thanh trạng thái tìm kiếm nếu có từ khóa
+            AnimatedVisibility(
+                visible = searchQuery.isNotEmpty(),
+                enter = fadeIn(),
+                exit = fadeOut()
             ) {
-                Text(
-                    text = "Chủ đề yêu thích",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
-                )
-                
-                Spacer(modifier = Modifier.height(12.dp))
-                
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    // Hiển thị chủ đề yêu thích (có tối đa 2 chủ đề)
-                    if (favoriteTopics.isNotEmpty()) {
-                        FavoriteTopicCard(
-                            topic = favoriteTopics[0],
-                            modifier = Modifier.weight(1f),
-                            onClick = { onTopicClick(favoriteTopics[0].id) }
-                        )
-                        
-                        if (favoriteTopics.size > 1) {
+                    Text(
+                        text = "Kết quả cho \"$searchQuery\"",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    
+                    Button(
+                        onClick = { 
+                            searchQuery = ""
+                            viewModel.clearSearch()
+                            focusManager.clearFocus()
+                            if (isSearchActive) {
+                                isSearchActive = false
+                            }
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier.padding(start = 8.dp)
+                    ) {
+                        Text("Hủy")
+                    }
+                }
+            }
+
+            // Favorite Topics Section (chỉ hiển thị khi không tìm kiếm)
+            AnimatedVisibility(
+                visible = searchQuery.isEmpty(),
+                enter = fadeIn(),
+                exit = fadeOut()
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        text = "Chủ đề yêu thích",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    
+                    Spacer(modifier = Modifier.height(12.dp))
+                    
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        // Hiển thị chủ đề yêu thích (có tối đa 2 chủ đề)
+                        if (favoriteTopics.isNotEmpty()) {
                             FavoriteTopicCard(
-                                topic = favoriteTopics[1],
+                                topic = favoriteTopics[0],
                                 modifier = Modifier.weight(1f),
-                                onClick = { onTopicClick(favoriteTopics[1].id) }
+                                onClick = { onTopicClick(favoriteTopics[0].id) }
                             )
-                        } else {
-                            // Spacer để giữ cân đối nếu chỉ có 1 chủ đề yêu thích
-                            Spacer(modifier = Modifier.weight(1f))
-                        }
-                    } else {
-                        // Hiển thị thông báo nếu không có chủ đề yêu thích
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(120.dp),
-                            shape = RoundedCornerShape(16.dp),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                            )
-                        ) {
-                            Box(
-                                modifier = Modifier.fillMaxSize(),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = "Bạn chưa có chủ đề yêu thích",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                            
+                            if (favoriteTopics.size > 1) {
+                                FavoriteTopicCard(
+                                    topic = favoriteTopics[1],
+                                    modifier = Modifier.weight(1f),
+                                    onClick = { onTopicClick(favoriteTopics[1].id) }
                                 )
+                            } else {
+                                // Spacer để giữ cân đối nếu chỉ có 1 chủ đề yêu thích
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
+                        } else {
+                            // Hiển thị thông báo nếu không có chủ đề yêu thích
+                            Card(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(120.dp),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                                )
+                            ) {
+                                Box(
+                                    modifier = Modifier.fillMaxSize(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = "Bạn chưa có chủ đề yêu thích",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                    )
+                                }
                             }
                         }
                     }
@@ -215,7 +355,7 @@ fun VocabularyScreen(
                     .padding(start = 16.dp, end = 16.dp, top = 16.dp)
             ) {
                 Text(
-                    text = "Tất cả chủ đề",
+                    text = if (searchQuery.isEmpty()) "Tất cả chủ đề" else "Kết quả tìm kiếm",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold
                 )
@@ -257,10 +397,38 @@ fun VocabularyScreen(
                                     .height(200.dp),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = "Không có chủ đề nào phù hợp",
-                                    style = MaterialTheme.typography.bodyLarge
-                                )
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Text(
+                                        text = if (searchQuery.isEmpty()) 
+                                            "Không có chủ đề nào" 
+                                        else 
+                                            "Không tìm thấy chủ đề \"$searchQuery\"",
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                    )
+                                    
+                                    if (searchQuery.isNotEmpty()) {
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Button(
+                                            onClick = { 
+                                                searchQuery = ""
+                                                viewModel.clearSearch()
+                                                if (isSearchActive) {
+                                                    isSearchActive = false
+                                                    focusManager.clearFocus()
+                                                }
+                                            },
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = MaterialTheme.colorScheme.primary
+                                            )
+                                        ) {
+                                            Text("Hiển thị tất cả chủ đề")
+                                        }
+                                    }
+                                }
                             }
                         }
                     }

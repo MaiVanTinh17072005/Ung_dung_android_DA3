@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.example.learnjapanese.data.model.VocabularyTopic
 import com.example.learnjapanese.data.repository.VocabularyRepository
 import com.example.learnjapanese.utils.Resource
+import com.example.learnjapanese.utils.removeAccent
 import com.example.learnjapanese.utils.toUiTopicList
+import com.example.learnjapanese.utils.updateWordCount
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -29,6 +31,9 @@ class VocabularyViewModel @Inject constructor(
     private val _favoriteTopics = MutableStateFlow<List<VocabularyTopic>>(emptyList())
     val favoriteTopics: StateFlow<List<VocabularyTopic>> = _favoriteTopics.asStateFlow()
     
+    // Lưu trữ danh sách gốc để phục vụ tìm kiếm
+    private var originalTopics: List<VocabularyTopic> = emptyList()
+    
     init {
         loadTopics()
     }
@@ -41,14 +46,33 @@ class VocabularyViewModel @Inject constructor(
             _topics.value = Resource.Loading()
             
             try {
-                vocabularyRepository.getVocabularyTopics().fold(
+                // Lấy danh sách chủ đề
+                val topicsResult = vocabularyRepository.getVocabularyTopics()
+                
+                topicsResult.fold(
                     onSuccess = { topicResponses ->
-                        val uiTopics = topicResponses.toUiTopicList()
-                        _topics.value = Resource.Success(uiTopics)
+                        var uiTopics = topicResponses.toUiTopicList()
                         
-                        // Hiện tại chưa có API cho chủ đề yêu thích nên giả định 2 chủ đề đầu là yêu thích
-                        // Trong thực tế sẽ cần API riêng hoặc truy vấn local database để lấy
-                        _favoriteTopics.value = uiTopics.take(2).map { it.copy(isFavorite = true) }
+                        // Lấy số lượng từ vựng theo chủ đề
+                        val countResult = vocabularyRepository.getVocabularyCountByTopics()
+                        
+                        countResult.fold(
+                            onSuccess = { countResponses ->
+                                // Cập nhật số lượng từ vựng cho các chủ đề
+                                uiTopics = uiTopics.updateWordCount(countResponses)
+                                originalTopics = uiTopics
+                                _topics.value = Resource.Success(uiTopics)
+                                
+                                // Cập nhật danh sách chủ đề yêu thích
+                                _favoriteTopics.value = uiTopics.filter { it.isFavorite }.take(2)
+                            },
+                            onFailure = { exception ->
+                                // Nếu không lấy được số lượng từ vựng, vẫn hiển thị danh sách chủ đề
+                                originalTopics = uiTopics
+                                _topics.value = Resource.Success(uiTopics)
+                                _favoriteTopics.value = uiTopics.take(2).map { it.copy(isFavorite = true) }
+                            }
+                        )
                     },
                     onFailure = { exception ->
                         _topics.value = Resource.Error(exception.message ?: "Không thể tải danh sách chủ đề từ vựng")
@@ -62,28 +86,37 @@ class VocabularyViewModel @Inject constructor(
     
     /**
      * Tìm kiếm chủ đề từ vựng theo từ khóa
+     * Hỗ trợ tìm kiếm không phân biệt chữ hoa/thường và dấu
      */
     fun searchTopics(query: String) {
-        val currentTopics = (_topics.value as? Resource.Success)?.data ?: return
-        
         if (query.isBlank()) {
-            _topics.value = Resource.Success(currentTopics)
+            _topics.value = Resource.Success(originalTopics)
             return
         }
         
-        val filteredTopics = currentTopics.filter { topic ->
-            topic.name.contains(query, ignoreCase = true) || 
-            topic.category.contains(query, ignoreCase = true)
+        // Chuyển query thành chữ thường không dấu để so sánh
+        val normalizedQuery = query.removeAccent()
+        
+        val filteredTopics = originalTopics.filter { topic ->
+            topic.name.removeAccent().contains(normalizedQuery) || 
+            topic.category.removeAccent().contains(normalizedQuery)
         }
         
         _topics.value = Resource.Success(filteredTopics)
     }
     
     /**
+     * Hủy tìm kiếm và khôi phục danh sách ban đầu
+     */
+    fun clearSearch() {
+        _topics.value = Resource.Success(originalTopics)
+    }
+    
+    /**
      * Đánh dấu/bỏ đánh dấu chủ đề yêu thích
      */
     fun toggleFavorite(topicId: String) {
-        val currentTopics = (_topics.value as? Resource.Success)?.data?.toMutableList() ?: return
+        val currentTopics = originalTopics.toMutableList()
         val index = currentTopics.indexOfFirst { it.id == topicId }
         
         if (index >= 0) {
@@ -91,7 +124,17 @@ class VocabularyViewModel @Inject constructor(
             val updatedTopic = topic.copy(isFavorite = !topic.isFavorite)
             currentTopics[index] = updatedTopic
             
-            _topics.value = Resource.Success(currentTopics)
+            originalTopics = currentTopics
+            
+            // Cập nhật danh sách hiển thị hiện tại (có thể đang ở chế độ tìm kiếm)
+            val displayedTopics = (_topics.value as? Resource.Success)?.data ?: emptyList()
+            val displayIndex = displayedTopics.indexOfFirst { it.id == topicId }
+            
+            if (displayIndex >= 0) {
+                val updatedDisplayList = displayedTopics.toMutableList()
+                updatedDisplayList[displayIndex] = updatedTopic
+                _topics.value = Resource.Success(updatedDisplayList)
+            }
             
             // Cập nhật danh sách yêu thích
             _favoriteTopics.value = currentTopics.filter { it.isFavorite }.take(2)
