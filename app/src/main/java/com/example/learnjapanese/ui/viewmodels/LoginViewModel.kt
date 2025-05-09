@@ -124,7 +124,7 @@ class LoginViewModel(
                             }
                         }
                     } else {
-                        val errorMessage = "Đăng nhập thất bại: ${response.message()}"
+                        val errorMessage = "Đăng nhập thất bại"
                         Log.e(TAG, errorMessage)
                         _loginState.value = LoginState.Error(errorMessage)
                     }
@@ -139,4 +139,9 @@ class LoginViewModel(
         }
     }
 
+    fun resetAllNotifications() {
+        emailError = null
+        passwordError = null
+        _loginState.value = LoginState.Initial
+    }
 }

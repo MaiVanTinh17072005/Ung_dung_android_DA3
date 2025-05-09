@@ -98,10 +98,16 @@ fun LoginScreen(
         }
     }
 
+    // Add this LaunchedEffect to reset notifications when screen is shown
+    LaunchedEffect(Unit) {
+        viewModel.resetAllNotifications()
+    }
+
     DisposableEffect(Unit) {
         onDispose {
             viewModel.updateUsername("")
             viewModel.updatePassword("")
+            viewModel.resetAllNotifications()
         }
     }
 
@@ -122,7 +128,7 @@ fun LoginScreen(
         )
     ) {
         Box(modifier = Modifier.fillMaxSize()) {
-            // Background Image and Overlay
+            // Background Image and Overlay remain unchanged
             Image(
                 painter = painterResource(id = R.drawable.hinh_nen_1),
                 contentDescription = "Background Image",
@@ -135,6 +141,7 @@ fun LoginScreen(
                     .background(Color.White.copy(alpha = 0f))
             )
 
+            // Outer container remains unchanged
             Box(
                 modifier = Modifier
                     .fillMaxWidth(0.9f)
@@ -155,293 +162,354 @@ fun LoginScreen(
                         .background(xanhnhat.copy(alpha = 0.6f))
                 )
 
-                // Main Content
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(horizontal = 20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center  // Changed to Center
-                ) {
+                // Extract inner content to separate composable
+                LoginContent(
+                    viewModel = viewModel,
+                    onRegisterClick = onRegisterClick,
+                    onForgotPasswordClick = onForgotPasswordClick,
+                    onLoginSuccess = onLoginSuccess
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LoginContent(
+    viewModel: LoginViewModel,
+    onRegisterClick: () -> Unit,
+    onForgotPasswordClick: () -> Unit,
+    onLoginSuccess: () -> Unit
+) {
+    var isContentVisible by remember { mutableStateOf(true) }
+    var passwordVisible by remember { mutableStateOf(false) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+
+    // Reset content visibility when navigating away
+    DisposableEffect(Unit) {
+        onDispose {
+            isContentVisible = false
+            viewModel.updateUsername("")
+            viewModel.updatePassword("")
+            viewModel.resetAllNotifications()
+        }
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
+        // Main Content
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "LearnJapanese",
+                style = MaterialTheme.typography.headlineLarge.copy(
+                    color = MauChinhDam,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 0.5.sp,
+                    fontSize = 27.sp,
+                    textAlign = TextAlign.Center,
+                    lineHeight = 32.sp,
+                    shadow = Shadow(
+                        color = MauChinh.copy(alpha = 0.3f),
+                        offset = Offset(1f, 1f),
+                        blurRadius = 2f
+                    )
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 10.dp)
+            )
+
+            Text(
+                text = "Đăng nhập để tiếp tục",
+                style = MaterialTheme.typography.bodyLarge.copy(
+                    color = Color.Black.copy(alpha = 0.7f),
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 15.sp
+
+                ),
+                modifier = Modifier.padding(bottom = 25.dp)
+            )
+
+            // For Email TextField
+            OutlinedTextField(
+                value = viewModel.username,
+                onValueChange = { viewModel.updateUsername(it.replace("\n", "")) },
+                textStyle = MaterialTheme.typography.bodyMedium.copy(
+                    color = Color.Black.copy(alpha = 0.7f),
+                    fontWeight = FontWeight.W500,
+                    fontSize = 14.sp
+                ),
+                label = {
                     Text(
-                        text = "LearnJapanese",
-                        style = MaterialTheme.typography.headlineLarge.copy(
-                            color = MauChinhDam,
-                            fontWeight = FontWeight.ExtraBold,
-                            letterSpacing = 0.5.sp,
-                            fontSize = 27.sp,
-                            textAlign = TextAlign.Center,
-                            lineHeight = 32.sp,
-                            shadow = Shadow(
-                                color = MauChinh.copy(alpha = 0.3f),
-                                offset = Offset(1f, 1f),
-                                blurRadius = 2f
-                            )
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 10.dp)
-                    )
-
-                    Text(
-                        text = "Đăng nhập để tiếp tục",
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            color = Color.Black.copy(alpha = 0.7f),
-                            fontWeight = FontWeight.Medium,
-                            fontSize = 15.sp
-
-                        ),
-                        modifier = Modifier.padding(bottom = 25.dp)
-                    )
-
-                    // For Email TextField
-                    OutlinedTextField(
-                        value = viewModel.username,
-                        onValueChange = { viewModel.updateUsername(it.replace("\n", "")) },
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(
-                            color = Color.Black.copy(alpha = 0.7f),
-                            fontWeight = FontWeight.W500,
-                            fontSize = 14.sp
-                        ),
-                        label = {
-                            Text(
-                                "Email",
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontWeight = FontWeight.W600,
-                                    color = mau_chu_o_text.copy(alpha = 0.7f),
-                                    fontStyle = FontStyle.Italic
-                                )
-                            )
-                        },
-                        singleLine = true,
-                        isError = viewModel.emailError != null,
-                        supportingText = {
-                            viewModel.emailError?.let {
-                                Text(
-                                    text = it,
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontWeight = FontWeight.W300,
-                                        color = Color.Red.copy(alpha = 0.6f)
-                                    )
-                                )
-                            }
-                        },
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Email
-                        ),
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Email,
-                                contentDescription = "Email Icon",
-                                tint = MauChinhDam
-                            )
-                        },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MauChinh,
-                            focusedLabelColor = MauChinh,
-                            focusedLeadingIconColor = MauChinhDam,
-                            cursorColor = MauChinh,
-                            unfocusedLeadingIconColor = MauChinhDam,
-                            unfocusedLabelColor = MauChinhDam.copy(alpha = 0.7f),
-                            unfocusedBorderColor = MauChinhDam.copy(alpha = 0.5f)
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 4.dp)
-                    )
-
-                    // For Password TextField
-                    OutlinedTextField(
-                        value = viewModel.password,
-                        onValueChange = { viewModel.updatePassword(it) },
-                        textStyle = MaterialTheme.typography.bodyMedium.copy(
-                            color = Color.Black.copy(alpha = 0.7f),
-                            fontWeight = FontWeight.W500,
-                            fontSize = 14.sp
-                        ),
-                        label = {
-                            Text(
-                                "Mật khẩu",
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    fontWeight = FontWeight.W600,
-                                    color = mau_chu_o_text.copy(alpha = 0.7f),
-                                    fontStyle = FontStyle.Italic
-                                )
-                            )
-                        },
-                        singleLine = true,
-                        isError = viewModel.passwordError != null,
-                        supportingText = {
-                            viewModel.passwordError?.let {
-                                Text(
-                                    text = it,
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontWeight = FontWeight.W300,
-                                        color = Color.Red.copy(alpha = 0.6f)
-                                    )
-                                )
-                            }
-                        },
-                        visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
-                        keyboardOptions = KeyboardOptions(
-                            keyboardType = KeyboardType.Password
-                        ),
-                        leadingIcon = {
-                            Icon(
-                                imageVector = Icons.Default.Lock,
-                                contentDescription = "Password Icon",
-                                tint = MauChinhDam
-                            )
-                        },
-                        trailingIcon = {
-                            IconButton(onClick = { passwordVisible = !passwordVisible }) {
-                                Icon(
-                                    imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
-                                    contentDescription = if (passwordVisible) "Ẩn mật khẩu" else "Hiện mật khẩu",
-                                    tint = MauChinhDam
-                                )
-                            }
-                        },
-                        colors = OutlinedTextFieldDefaults.colors(
-                            focusedBorderColor = MauChinh,
-                            focusedLabelColor = MauChinh,
-                            focusedLeadingIconColor = MauChinhDam,
-                            focusedTrailingIconColor = MauChinhDam,
-                            cursorColor = MauChinh,
-                            unfocusedLeadingIconColor = MauChinhDam,
-                            unfocusedTrailingIconColor = MauChinhDam,
-                            unfocusedLabelColor = MauChinhDam.copy(alpha = 0.7f),
-                            unfocusedBorderColor = MauChinhDam.copy(alpha = 0.5f)
-                        ),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 0.dp)
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 10.dp),
-                        contentAlignment = Alignment.CenterEnd
-                    ) {
-                        TextButton(onClick = onForgotPasswordClick) {
-                            Text(
-                                text = "Quên mật khẩu?",
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    color = Xanh_la_qmk,
-                                    fontWeight = FontWeight.W500,
-                                    fontStyle = FontStyle.Italic,
-                                    fontSize = 14.sp,
-                                )
-                            )
-                        }
-                    }
-
-                    Button(
-                        onClick = {
-                            viewModel.login()
-                            onLoginSuccess()
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(50.dp),
-                        shape = RoundedCornerShape(28.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MauChinh,
-                            contentColor = Color.White
-                        ),
-                        elevation = ButtonDefaults.buttonElevation(
-                            defaultElevation = 6.dp,
-                            pressedElevation = 8.dp,
-                            hoveredElevation = 8.dp,
-                            focusedElevation = 8.dp
+                        "Email",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.W600,
+                            color = mau_chu_o_text.copy(alpha = 0.7f),
+                            fontStyle = FontStyle.Italic
                         )
-                    ) {
+                    )
+                },
+                singleLine = true,
+                isError = viewModel.emailError != null,
+                supportingText = {
+                    viewModel.emailError?.let {
                         Text(
-                            "Đăng nhập",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.ExtraBold,
-                                letterSpacing = 1.sp
-                            )
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(20.dp))
-
-                    Row(
-                        horizontalArrangement = Arrangement.Center,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "Chưa có tài khoản? ",
+                            text = it,
                             style = MaterialTheme.typography.bodyMedium.copy(
-                                color = Color.Black,
-                                fontStyle = FontStyle.Italic,
-                                fontSize = 13.sp
+                                fontWeight = FontWeight.W300,
+                                color = Color.Red.copy(alpha = 0.6f)
                             )
                         )
-                        TextButton(onClick = onRegisterClick) {
-                            Text(
-                                text = "Đăng ký",
-                                style = MaterialTheme.typography.bodyMedium.copy(
-                                    color = MauChinhDam,
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 15.sp
-                                )
-                            )
-                        }
                     }
+                },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email
+                ),
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Email,
+                        contentDescription = "Email Icon",
+                        tint = MauChinhDam
+                    )
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MauChinh,
+                    focusedLabelColor = MauChinh,
+                    focusedLeadingIconColor = MauChinhDam,
+                    cursorColor = MauChinh,
+                    unfocusedLeadingIconColor = MauChinhDam,
+                    unfocusedLabelColor = MauChinhDam.copy(alpha = 0.7f),
+                    unfocusedBorderColor = MauChinhDam.copy(alpha = 0.5f)
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 4.dp)
+            )
+
+            // For Password TextField
+            OutlinedTextField(
+                value = viewModel.password,
+                onValueChange = { viewModel.updatePassword(it) },
+                textStyle = MaterialTheme.typography.bodyMedium.copy(
+                    color = Color.Black.copy(alpha = 0.7f),
+                    fontWeight = FontWeight.W500,
+                    fontSize = 14.sp
+                ),
+                label = {
+                    Text(
+                        "Mật khẩu",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.W600,
+                            color = mau_chu_o_text.copy(alpha = 0.7f),
+                            fontStyle = FontStyle.Italic
+                        )
+                    )
+                },
+                singleLine = true,
+                isError = viewModel.passwordError != null,
+                supportingText = {
+                    viewModel.passwordError?.let {
+                        Text(
+                            text = it,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.W300,
+                                color = Color.Red.copy(alpha = 0.6f)
+                            )
+                        )
+                    }
+                },
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Password
+                ),
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Lock,
+                        contentDescription = "Password Icon",
+                        tint = MauChinhDam
+                    )
+                },
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                            contentDescription = if (passwordVisible) "Ẩn mật khẩu" else "Hiện mật khẩu",
+                            tint = MauChinhDam
+                        )
+                    }
+                },
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MauChinh,
+                    focusedLabelColor = MauChinh,
+                    focusedLeadingIconColor = MauChinhDam,
+                    focusedTrailingIconColor = MauChinhDam,
+                    cursorColor = MauChinh,
+                    unfocusedLeadingIconColor = MauChinhDam,
+                    unfocusedTrailingIconColor = MauChinhDam,
+                    unfocusedLabelColor = MauChinhDam.copy(alpha = 0.7f),
+                    unfocusedBorderColor = MauChinhDam.copy(alpha = 0.5f)
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 0.dp)
+            )
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 10.dp),
+                contentAlignment = Alignment.CenterEnd
+            ) {
+                TextButton(onClick = onForgotPasswordClick) {
+                    Text(
+                        text = "Quên mật khẩu?",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = Xanh_la_qmk,
+                            fontWeight = FontWeight.W500,
+                            fontStyle = FontStyle.Italic,
+                            fontSize = 14.sp,
+                        )
+                    )
                 }
             }
 
-            // Add SnackbarHost
-            SnackbarHost(
-                hostState = snackbarHostState,
+            // In LoginContent composable, modify the Button onClick:
+            Button(
+                onClick = {
+                    viewModel.login() // Remove onLoginSuccess() from here
+                },
                 modifier = Modifier
-                    .align(Alignment.Center)
-                    .padding(16.dp)
-            ) { data ->
-                val isSuccess = data.visuals.message == "Đăng nhập thành công"
-                val backgroundColor = if (isSuccess) Xanh_la_qmk else Color.Red.copy(alpha = 0.9f)
-                val icon = if (isSuccess) Icons.Default.CheckCircle else Icons.Default.Error
-                
-                Snackbar(
-                    modifier = Modifier
-                        .fillMaxWidth(0.9f)
-                        .clip(RoundedCornerShape(16.dp))
-                        .shadow(
-                            elevation = 8.dp,
-                            shape = RoundedCornerShape(16.dp)
-                        ),
-                    containerColor = backgroundColor,
-                    contentColor = Color.White,
-                    action = data.visuals.actionLabel?.let { actionLabel ->
-                        {
-                            TextButton(onClick = { data.performAction() }) {
-                                Text(actionLabel)
-                            }
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(28.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MauChinh,
+                    contentColor = Color.White
+                ),
+                elevation = ButtonDefaults.buttonElevation(
+                    defaultElevation = 6.dp,
+                    pressedElevation = 8.dp,
+                    hoveredElevation = 8.dp,
+                    focusedElevation = 8.dp
+                )
+            ) {
+                Text(
+                    "Đăng nhập",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.ExtraBold,
+                        letterSpacing = 1.sp
+                    )
+                )
+            }
+
+            // And in LoginScreen composable, modify the LaunchedEffect:
+            LaunchedEffect(viewModel.loginState) {
+                when (viewModel.loginState) {
+                    is LoginState.Success -> {
+                        scope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = "Đăng nhập thành công",
+                                duration = SnackbarDuration.Short,
+                                actionLabel = null
+                            )
+                            delay(1000) // Increase delay to show snackbar
+                            onLoginSuccess()
                         }
                     }
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.padding(horizontal = 8.dp)
-                    ) {
-                        Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(24.dp)
-                        )
-                        Text(
-                            text = data.visuals.message,
-                            style = MaterialTheme.typography.bodyLarge.copy(
-                                fontWeight = FontWeight.Medium,
-                                fontSize = 16.sp
+                    is LoginState.Error -> {
+                        scope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = (viewModel.loginState as LoginState.Error).message,
+                                duration = SnackbarDuration.Short,
+                                actionLabel = null
                             )
-                        )
+                        }
                     }
+                    else -> {}
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            Row(
+                horizontalArrangement = Arrangement.Center,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = "Chưa có tài khoản? ",
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        color = Color.Black,
+                        fontStyle = FontStyle.Italic,
+                        fontSize = 13.sp
+                    )
+                )
+                TextButton(onClick = onRegisterClick) {
+                    Text(
+                        text = "Đăng ký",
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            color = MauChinhDam,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 15.sp
+                        )
+                    )
+                }
+            }
+        }
+
+        // Add SnackbarHost
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(16.dp)
+        ) { data ->
+            val isSuccess = data.visuals.message == "Đăng nhập thành công"
+            val backgroundColor = if (isSuccess) Xanh_la_qmk else Color.Red.copy(alpha = 0.9f)
+            val icon = if (isSuccess) Icons.Default.CheckCircle else Icons.Default.Error
+
+            Snackbar(
+                modifier = Modifier
+                    .fillMaxWidth(0.9f)
+                    .clip(RoundedCornerShape(16.dp))
+                    .shadow(
+                        elevation = 8.dp,
+                        shape = RoundedCornerShape(16.dp)
+                    ),
+                containerColor = backgroundColor,
+                contentColor = Color.White,
+                action = data.visuals.actionLabel?.let { actionLabel ->
+                    {
+                        TextButton(onClick = { data.performAction() }) {
+                            Text(actionLabel)
+                        }
+                    }
+                }
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(
+                        text = data.visuals.message,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            fontWeight = FontWeight.Medium,
+                            fontSize = 16.sp
+                        )
+                    )
                 }
             }
         }
