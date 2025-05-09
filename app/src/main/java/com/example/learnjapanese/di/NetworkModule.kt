@@ -23,7 +23,7 @@ object NetworkModule {
      * Cung cấp BASE_URL cho Retrofit
      */
     @Provides
-    fun provideBaseUrl() = "http://10.0.2.2:3000" // Thay đổi thành URL thực tế của API
+    fun provideBaseUrl() = "http://192.168.68.156:3000" // Thay đổi thành URL thực tế của API
     
     /**
      * Cung cấp Gson cho việc parse JSON

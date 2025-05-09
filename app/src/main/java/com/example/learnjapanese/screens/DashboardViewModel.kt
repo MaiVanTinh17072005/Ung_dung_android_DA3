@@ -36,8 +36,7 @@ class DashboardViewModel : ViewModel() {
             // Chẳng hạn: userRepository.getCurrentUserStats()
             _learningStats.value = LearningStats(
                 wordsLearntToday = 30,
-                currentStreak = 5,
-                accuracy = 80
+                currentStreak = 5
             )
         }
     }
@@ -58,9 +57,9 @@ class DashboardViewModel : ViewModel() {
             // Trong thực tế, dữ liệu này sẽ được lấy từ repository
             // Chẳng hạn: learningProgressRepository.getLearningFeatures()
             _learningFeatures.value = listOf(
-                LearningFeature("Từ vựng N5", 0.3f),
+                LearningFeature("Bảng chữ cái", 0.3f),
                 LearningFeature("Ngữ pháp", 0.5f),
-                LearningFeature("Chữ Kanji", 0.2f),
+                LearningFeature("Từ vựng", 0.2f),
                 LearningFeature("Bài tập", 0.6f)
             )
         }

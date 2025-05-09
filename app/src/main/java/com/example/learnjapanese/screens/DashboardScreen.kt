@@ -86,6 +86,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.learnjapanese.R
 import com.example.learnjapanese.ui.theme.LearnJapaneseTheme
+import com.example.learnjapanese.ui.theme.Xanh_d
+import com.example.learnjapanese.ui.theme.Xanh_d1
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -124,9 +126,10 @@ fun DashboardScreen(
             TopAppBar(
                 title = {
                     Text(
-                        "Học Tiếng Nhật",
+                        "LearnJapanese",
                         style = MaterialTheme.typography.titleLarge.copy(
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            color = Xanh_d1.copy(alpha = 0.9f)
                         )
                     )
                 },
@@ -305,38 +308,11 @@ fun DashboardScreen(
                     .padding(horizontal = 16.dp)
                     .padding(top = 8.dp, bottom = 16.dp)
             ) {
-                Card(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp)
-                        .clickable { isSearchActive = true },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
-                    ),
-                    elevation = CardDefaults.cardElevation(
-                        defaultElevation = 0.dp
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Search",
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            "Tìm kiếm chức năng...",
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                    }
-                }
+                Text(
+                    text = "Cùng LearnJapanese chinh phục thử thách tiếng Nhật",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = Xanh_d.copy(alpha = 0.7f)
+                )
             }
 
             if (isSearchActive) {
@@ -446,7 +422,7 @@ fun LearningStatsCard(stats: LearningStats) {
             ) {
                 StatItem(
                     value = "${stats.wordsLearntToday}", 
-                    label = "Từ mới hôm nay", 
+                    label = "Từ vựng đã học",
                     accentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                 )
                 Divider(
@@ -465,11 +441,6 @@ fun LearningStatsCard(stats: LearningStats) {
                         .height(40.dp)
                         .width(1.dp),
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
-                )
-                StatItem(
-                    value = "${stats.accuracy}%", 
-                    label = "Độ chính xác", 
-                    accentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
                 )
             }
         }
