@@ -10,6 +10,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import android.util.Log
+import java.security.MessageDigest
+import java.nio.charset.StandardCharsets
 
 class LoginViewModel(
     private val authRepository: AuthRepository = AuthRepository()
@@ -99,6 +101,17 @@ class LoginViewModel(
     private val _loginState = mutableStateOf<LoginState>(LoginState.Initial)
     val loginState: LoginState by _loginState
 
+    private fun hashPassword(password: String): String {
+        Log.d(TAG, "Original password: $password")
+        val bytes = password.encodeToByteArray()
+        Log.d(TAG, "Password bytes: ${bytes.joinToString(", ") { it.toString() }}")
+        val md = MessageDigest.getInstance("SHA-256")
+        val digest = md.digest(bytes)
+        val hash = digest.joinToString("") { "%02x".format(it) }
+        Log.d(TAG, "Generated hash: $hash")
+        return hash
+    }
+
     fun login() {
         if (validateInputs()) {
             Log.d(TAG, "Starting login process for user: $username")
@@ -107,7 +120,10 @@ class LoginViewModel(
                     _loginState.value = LoginState.Loading
                     Log.d(TAG, "Login state changed to Loading")
 
-                    val response = authRepository.login(username, password)
+                    // Hash password before sending to API
+                    val hashedPassword = hashPassword(password)
+                    Log.d(TAG, "pass hard: $hashedPassword")
+                    val response = authRepository.login(username, hashedPassword)
                     Log.d(TAG, "Received API response with status: ${response.code()}")
 
                     if (response.isSuccessful) {
