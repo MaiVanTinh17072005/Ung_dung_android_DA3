@@ -1,5 +1,6 @@
 package com.example.learnjapanese.di
 
+import com.example.learnjapanese.data.api.GrammarApiService
 import com.example.learnjapanese.data.api.VocabularyApiService
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -43,9 +44,9 @@ object NetworkModule {
         
         return OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
-            .writeTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(120, TimeUnit.SECONDS)
+            .readTimeout(120, TimeUnit.SECONDS)
+            .writeTimeout(120, TimeUnit.SECONDS)
             .build()
     }
     
@@ -69,5 +70,14 @@ object NetworkModule {
     @Singleton
     fun provideVocabularyApiService(retrofit: Retrofit): VocabularyApiService {
         return retrofit.create(VocabularyApiService::class.java)
+    }
+    
+    /**
+     * Cung cấp GrammarApiService
+     */
+    @Provides
+    @Singleton
+    fun provideGrammarApiService(retrofit: Retrofit): GrammarApiService {
+        return retrofit.create(GrammarApiService::class.java)
     }
 } 
