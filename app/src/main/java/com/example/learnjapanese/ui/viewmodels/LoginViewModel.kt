@@ -120,7 +120,6 @@ class LoginViewModel(
                     _loginState.value = LoginState.Loading
                     Log.d(TAG, "Login state changed to Loading")
 
-                    // Hash password before sending to API
                     val hashedPassword = hashPassword(password)
                     val response = authRepository.login(username, hashedPassword)
                     Log.d(TAG, "Received API response with status: ${response.code()}")
@@ -128,23 +127,18 @@ class LoginViewModel(
                     if (response.isSuccessful) {
                         response.body()?.let { loginResponse ->
                             if (loginResponse.success && loginResponse.data != null) {
-                                Log.d(TAG, "Login successful for user: ${loginResponse.data.email}")
                                 _loginState.value = LoginState.Success(
                                     userData = loginResponse.data
                                 )
-                                Log.d(TAG, "Login completed successfully: ${loginResponse.message}")
                             } else {
-                                _loginState.value = LoginState.Error(loginResponse.message)
-                                Log.e(TAG, "Login failed: ${loginResponse.message}")
+                                _loginState.value = LoginState.Error("đăng nhập thất bại")
                             }
                         }
                     } else {
-                        val errorMessage = "Đăng nhập thất bại"
-                        Log.e(TAG, errorMessage)
-                        _loginState.value = LoginState.Error(errorMessage)
+                        _loginState.value = LoginState.Error("đăng nhập thất bại") 
                     }
                 } catch (e: Exception) {
-                    val errorMessage = "Lỗi: ${e.message ?: "Không thể kết nối đến server"}"
+                    val errorMessage = "không thể kết nối đến server" // Changed and simplified
                     Log.e(TAG, errorMessage, e)
                     _loginState.value = LoginState.Error(errorMessage)
                 }
