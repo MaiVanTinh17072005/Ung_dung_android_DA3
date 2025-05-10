@@ -4,8 +4,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.learnjapanese.data.repository.AuthRepository
+import kotlinx.coroutines.launch
+import android.util.Log
 
-class ForgotPasswordViewModel : ViewModel() {
+class ForgotPasswordViewModel(
+    private val authRepository: AuthRepository = AuthRepository()
+) : ViewModel() {
+    companion object {
+        private const val TAG = "ForgotPasswordViewModel"
+    }
+
     var email by mutableStateOf("")
         private set
     
@@ -16,6 +26,12 @@ class ForgotPasswordViewModel : ViewModel() {
         private set
     
     var otpSent by mutableStateOf(false)
+        private set
+
+    var isLoading by mutableStateOf(false)
+        private set
+
+    var errorMessage by mutableStateOf<String?>(null)
         private set
 
     private fun isValidEmail(email: String): Boolean {
@@ -39,12 +55,46 @@ class ForgotPasswordViewModel : ViewModel() {
     fun sendOtp() {
         updateEmail(email)
         if (emailError == null) {
-            // TODO: Implement actual OTP sending logic here
-            otpSent = true
+            viewModelScope.launch {
+                try {
+                    isLoading = true
+                    errorMessage = null
+                    
+                    val response = authRepository.sendOtp(email)
+                    
+                    if (response.isSuccessful) {
+                        response.body()?.let { otpResponse ->
+                            if (otpResponse.success) {
+                                otpSent = true
+                                errorMessage = "Gửi OTP thành công" // Add success message
+                            } else {
+                                errorMessage = "Gửi OTP thất bại, do ${otpResponse.message}"
+                            }
+                        }
+                    } else {
+                        when (response.code()) {
+                            404 -> errorMessage = "Email không tồn tại trong hệ thống"
+                            400 -> errorMessage = "Email không hợp lệ"
+                            500 -> errorMessage = "Lỗi máy chủ, vui lòng thử lại sau"
+                            else -> errorMessage = "Gửi mã OTP thất bại: ${response.errorBody()?.string() ?: "Lỗi không xác định"}"
+                        }
+                    }
+                } catch (e: Exception) {
+                    errorMessage = "Không thể kết nối đến máy chủ. Vui lòng kiểm tra kết nối mạng và thử lại."
+                    Log.e(TAG, "Error sending OTP", e)
+                } finally {
+                    isLoading = false
+                }
+            }
         }
     }
 
     fun verifyOtp() {
         // TODO: Implement OTP verification logic here
+    }
+
+    fun resetState() {
+        errorMessage = null
+        isLoading = false
     }
 }

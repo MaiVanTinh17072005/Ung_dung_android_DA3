@@ -6,6 +6,8 @@ import com.example.learnjapanese.data.model.LoginRequest
 import com.example.learnjapanese.data.model.LoginResponse
 import com.example.learnjapanese.data.model.RegisterRequest
 import com.example.learnjapanese.data.model.RegisterResponse
+import com.example.learnjapanese.data.model.OtpRequest
+import com.example.learnjapanese.data.model.OtpResponse
 
 interface AuthApi {
     companion object {
@@ -21,4 +23,6 @@ interface AuthApi {
     @POST("api/auth/register")
     suspend fun register(@Body registerRequest: RegisterRequest): Response<RegisterResponse>
 
+    @POST("api/auth/send-otp")
+    suspend fun sendOtp(@Body otpRequest: OtpRequest): Response<OtpResponse>
 }

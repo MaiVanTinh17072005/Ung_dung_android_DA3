@@ -6,6 +6,8 @@ import com.example.learnjapanese.data.model.LoginRequest
 import com.example.learnjapanese.data.model.LoginResponse
 import com.example.learnjapanese.data.model.RegisterRequest
 import com.example.learnjapanese.data.model.RegisterResponse
+import com.example.learnjapanese.data.model.OtpRequest
+import com.example.learnjapanese.data.model.OtpResponse
 import java.security.MessageDigest
 
 class AuthRepository {
@@ -61,5 +63,22 @@ class AuthRepository {
     private fun hashPassword(password: String): String {
         val bytes = MessageDigest.getInstance("SHA-256").digest(password.toByteArray())
         return bytes.joinToString("") { "%02x".format(it) }
+    }
+
+    suspend fun sendOtp(email: String): Response<OtpResponse> {
+        Log.d(TAG, "AuthRepository: Starting OTP sending process for email: $email")
+        try {
+            val response = RetrofitClient.authApi.sendOtp(OtpRequest(email))
+            Log.d(TAG, "AuthRepository: API Response - Status: ${response.code()}")
+            if (response.isSuccessful) {
+                Log.d(TAG, "AuthRepository: OTP sent successfully")
+            } else {
+                Log.e(TAG, "AuthRepository: OTP sending failed with error: ${response.errorBody()?.string()}")
+            }
+            return response
+        } catch (e: Exception) {
+            Log.e(TAG, "AuthRepository: Exception during OTP sending", e)
+            throw e
+        }
     }
 }
