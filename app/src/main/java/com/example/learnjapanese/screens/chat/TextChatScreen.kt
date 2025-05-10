@@ -1,6 +1,7 @@
 package com.example.learnjapanese.screens.chat
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +35,9 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextFieldDefaults
@@ -41,6 +45,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -53,8 +58,10 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.learnjapanese.data.model.ChatMessage
+import com.example.learnjapanese.ui.components.MarkdownText
 import com.example.learnjapanese.ui.theme.LearnJapaneseTheme
-import kotlinx.coroutines.delay
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -63,50 +70,36 @@ import java.util.Locale
 @Composable
 fun TextChatScreen(
     chatId: String? = null,
+    viewModel: TextChatViewModel = hiltViewModel(),
     onBack: () -> Unit = {}
 ) {
-    // Giả lập tin nhắn
-    var messageList by remember { mutableStateOf(getSampleMessages(chatId)) }
+    // Khởi tạo dữ liệu cho cuộc trò chuyện nếu có
+    LaunchedEffect(chatId) {
+        viewModel.initializeChat(chatId)
+    }
+    
+    // Collect states từ ViewModel
+    val messages by viewModel.messages.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
+    
     var inputMessage by remember { mutableStateOf("") }
-    var isLoading by remember { mutableStateOf(false) }
     val listState = rememberLazyListState()
+    val snackbarHostState = remember { SnackbarHostState() }
     
-    // Thêm biến state để theo dõi tin nhắn mới cần phản hồi
-    var latestUserMessage by remember { mutableStateOf<ChatMessage?>(null) }
+    // Hàm xử lý gửi tin nhắn
+    val sendMessage: (String) -> Unit = { message ->
+        if (message.isNotBlank()) {
+            viewModel.sendMessage(message)
+            inputMessage = ""
+        }
+    }
     
-    // Xử lý phản hồi AI khi có tin nhắn mới
-    latestUserMessage?.let { userMessage ->
-        LaunchedEffect(userMessage) {
-            delay((1000..2000).random().toLong())
-            
-            // Tạo phản hồi giả lập
-            val botResponse = when {
-                userMessage.content.contains("xin chào", ignoreCase = true) -> 
-                    "Xin chào! Tôi là trợ lý AI giúp bạn học tiếng Nhật. Bạn cần tôi giúp gì hôm nay?"
-                userMessage.content.contains("từ vựng", ignoreCase = true) -> 
-                    "Bạn muốn học từ vựng về chủ đề gì? Tôi có thể giúp bạn với các chủ đề như: gia đình, thực phẩm, du lịch, công việc, v.v."
-                userMessage.content.contains("ngữ pháp", ignoreCase = true) -> 
-                    "Tiếng Nhật có nhiều điểm ngữ pháp thú vị. Bạn đang học ở trình độ nào? N5, N4, hay cao hơn?"
-                userMessage.content.contains("こんにちは", ignoreCase = true) -> 
-                    "こんにちは！お元気ですか？(Xin chào! Bạn khỏe không?)"
-                userMessage.content.contains("ありがとう", ignoreCase = true) -> 
-                    "どういたしまして！(Không có gì!)"
-                else -> 
-                    "Tôi hiểu rồi. Bạn có thể hỏi tôi về từ vựng, ngữ pháp, cách phát âm hoặc bất kỳ điều gì liên quan đến tiếng Nhật. Tôi sẽ cố gắng giúp đỡ bạn!"
-            }
-            
-            // Thêm phản hồi của bot
-            val aiMessage = ChatMessage(
-                id = "a${messageList.size + 1}",
-                content = botResponse,
-                isFromUser = false,
-                timestamp = System.currentTimeMillis()
-            )
-            messageList = messageList + aiMessage
-            isLoading = false
-            
-            // Reset latestUserMessage để không phản hồi lại tin nhắn cũ
-            latestUserMessage = null
+    // Hiển thị thông báo lỗi nếu có
+    LaunchedEffect(error) {
+        error?.let {
+            snackbarHostState.showSnackbar(it)
+            viewModel.clearError()
         }
     }
     
@@ -148,7 +141,8 @@ fun TextChatScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                 )
             )
-        }
+        },
+        snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { innerPadding ->
         Column(
             modifier = Modifier
@@ -166,14 +160,14 @@ fun TextChatScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 // Hiển thị thông báo chào mừng nếu là cuộc trò chuyện mới
-                if (messageList.isEmpty() && !isLoading) {
+                if (messages.isEmpty() && !isLoading) {
                     item {
-                        WelcomeMessage()
+                        WelcomeMessage(onSuggestionClick = sendMessage)
                     }
                 }
                 
                 // Hiển thị danh sách tin nhắn
-                items(messageList) { message ->
+                items(messages) { message ->
                     MessageItem(message = message)
                 }
                 
@@ -247,8 +241,8 @@ fun TextChatScreen(
             }
             
             // Cuộn đến tin nhắn cuối cùng
-            LaunchedEffect(messageList.size, isLoading) {
-                if (messageList.isNotEmpty() || isLoading) {
+            LaunchedEffect(messages.size, isLoading) {
+                if (messages.isNotEmpty() || isLoading) {
                     listState.animateScrollToItem(listState.layoutInfo.totalItemsCount - 1)
                 }
             }
@@ -257,32 +251,16 @@ fun TextChatScreen(
             MessageInputField(
                 value = inputMessage,
                 onValueChange = { inputMessage = it },
-                onSend = {
-                    if (inputMessage.isNotBlank()) {
-                        // Thêm tin nhắn người dùng
-                        val userMessage = ChatMessage(
-                            id = "u${messageList.size + 1}",
-                            content = inputMessage,
-                            isFromUser = true,
-                            timestamp = System.currentTimeMillis()
-                        )
-                        messageList = messageList + userMessage
-                        
-                        // Xóa input và hiển thị loading
-                        inputMessage = ""
-                        isLoading = true
-                        
-                        // Đặt tin nhắn mới để LaunchedEffect xử lý
-                        latestUserMessage = userMessage
-                    }
-                }
+                onSend = { sendMessage(inputMessage) }
             )
         }
     }
 }
 
 @Composable
-fun WelcomeMessage() {
+fun WelcomeMessage(
+    onSuggestionClick: (String) -> Unit = {}
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -321,20 +299,24 @@ fun WelcomeMessage() {
             
             Spacer(modifier = Modifier.height(8.dp))
             
-            SuggestionChip("Dạy tôi từ vựng về gia đình")
-            SuggestionChip("Giải thích ngữ pháp て-form")
-            SuggestionChip("Cách phát âm âm \"つ\" và \"づ\"")
-            SuggestionChip("Xin chào bằng tiếng Nhật là gì?")
+            SuggestionChip("Dạy tôi từ vựng về gia đình", onSuggestionClick)
+            SuggestionChip("Giải thích ngữ pháp て-form", onSuggestionClick)
+            SuggestionChip("Cách phát âm âm \"つ\" và \"づ\"", onSuggestionClick)
+            SuggestionChip("Xin chào bằng tiếng Nhật là gì?", onSuggestionClick)
         }
     }
 }
 
 @Composable
-fun SuggestionChip(text: String) {
+fun SuggestionChip(
+    text: String,
+    onClick: (String) -> Unit = {}
+) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 4.dp),
+            .padding(vertical = 4.dp)
+            .clickable { onClick(text) },
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surface
@@ -395,15 +377,24 @@ fun MessageItem(message: ChatMessage) {
                         MaterialTheme.colorScheme.surfaceVariant
                 )
             ) {
-                Text(
-                    text = message.content,
-                    modifier = Modifier.padding(12.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = if (message.isFromUser) 
-                        MaterialTheme.colorScheme.onPrimary 
-                    else 
-                        MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                // Sử dụng Text thông thường cho tin nhắn của người dùng
+                if (message.isFromUser) {
+                    Text(
+                        text = message.content,
+                        modifier = Modifier.padding(12.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } 
+                // Sử dụng MarkdownText cho tin nhắn của AI
+                else {
+                    MarkdownText(
+                        markdown = message.content,
+                        modifier = Modifier.padding(12.dp),
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
             
             Spacer(modifier = Modifier.height(2.dp))
@@ -433,66 +424,6 @@ fun MessageItem(message: ChatMessage) {
                     style = MaterialTheme.typography.bodySmall,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-        }
-    }
-}
-
-@Composable
-fun TypingIndicator() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.Start
-    ) {
-        // Avatar AI
-        Box(
-            modifier = Modifier
-                .size(36.dp)
-                .clip(CircleShape)
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = "AI",
-                style = MaterialTheme.typography.bodySmall,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-        
-        Spacer(modifier = Modifier.width(8.dp))
-        
-        // Loading indicator
-        Card(
-            shape = RoundedCornerShape(
-                topStart = 0.dp,
-                topEnd = 16.dp,
-                bottomStart = 16.dp,
-                bottomEnd = 16.dp
-            ),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant
-            )
-        ) {
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Đang nhập",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                
-                Spacer(modifier = Modifier.width(8.dp))
-                
-                CircularProgressIndicator(
-                    modifier = Modifier.size(16.dp),
-                    strokeWidth = 2.dp,
-                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }
@@ -587,65 +518,6 @@ fun formatMessageTime(timestamp: Long): String {
         else -> {
             val format = SimpleDateFormat("HH:mm", Locale.getDefault())
             format.format(Date(timestamp))
-        }
-    }
-}
-
-data class ChatMessage(
-    val id: String,
-    val content: String,
-    val isFromUser: Boolean,
-    val timestamp: Long
-)
-
-fun getSampleMessages(chatId: String?): List<ChatMessage> {
-    return if (chatId == null) {
-        // Cuộc trò chuyện mới - không có tin nhắn
-        emptyList()
-    } else {
-        // Giả lập tin nhắn cho cuộc trò chuyện đã có
-        when (chatId) {
-            "c1" -> listOf(
-                ChatMessage(
-                    id = "u1",
-                    content = "Tôi muốn học về mẫu câu với て-form",
-                    isFromUser = true,
-                    timestamp = System.currentTimeMillis() - 3700000
-                ),
-                ChatMessage(
-                    id = "a1",
-                    content = "て-form là một hình thức quan trọng trong tiếng Nhật. Nó được sử dụng trong nhiều tình huống khác nhau như:\n\n1. Kết nối nhiều hành động\n2. Yêu cầu/Đề nghị\n3. Xin phép\n4. Diễn tả trạng thái\n\nBạn muốn tìm hiểu về cách nào?",
-                    isFromUser = false,
-                    timestamp = System.currentTimeMillis() - 3680000
-                ),
-                ChatMessage(
-                    id = "u2",
-                    content = "Tôi muốn học cách kết nối nhiều hành động",
-                    isFromUser = true,
-                    timestamp = System.currentTimeMillis() - 3600000
-                ),
-                ChatMessage(
-                    id = "a2",
-                    content = "Để kết nối nhiều hành động, chúng ta sử dụng động từ ở dạng て-form rồi thêm động từ tiếp theo. Ví dụ:\n\n朝ごはんを食べて、学校に行きます。\nAsagohan o tabete, gakkou ni ikimasu.\n(Tôi ăn sáng, rồi đi học.)\n\nテレビを見て、寝ました。\nTerebi o mite, nemashita.\n(Tôi xem TV, rồi đi ngủ.)",
-                    isFromUser = false,
-                    timestamp = System.currentTimeMillis() - 3580000
-                )
-            )
-            "c2" -> listOf(
-                ChatMessage(
-                    id = "u1",
-                    content = "Tôi gặp khó khăn khi phát âm âm R và L trong tiếng Nhật",
-                    isFromUser = true,
-                    timestamp = System.currentTimeMillis() - 90000000
-                ),
-                ChatMessage(
-                    id = "a1",
-                    content = "Trong tiếng Nhật, âm \"R\" (ら、り、る、れ、ろ) được phát âm khác với cả âm R và L trong tiếng Anh. Đó là âm đánh lưỡi, gần giống với âm \"d\" trong từ \"ready\" của tiếng Anh.\n\nĐể luyện tập, hãy thử lặp lại: らりるれろ (ra-ri-ru-re-ro) nhiều lần.",
-                    isFromUser = false,
-                    timestamp = System.currentTimeMillis() - 89900000
-                )
-            )
-            else -> emptyList()
         }
     }
 }

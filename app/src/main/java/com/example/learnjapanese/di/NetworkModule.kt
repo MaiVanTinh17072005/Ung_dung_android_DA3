@@ -1,5 +1,6 @@
 package com.example.learnjapanese.di
 
+import com.example.learnjapanese.data.api.AIChatApiService
 import com.example.learnjapanese.data.api.GrammarApiService
 import com.example.learnjapanese.data.api.VocabularyApiService
 import com.google.gson.Gson
@@ -21,10 +22,15 @@ object NetworkModule {
     
     /**
      * Cung cấp BASE_URL cho Retrofit
+     * 
+     * Các địa chỉ URL phổ biến:
+     * - "http://10.0.2.2:3000" - Localhost khi chạy emulator (tương đương 127.0.0.1 trên máy host)
+     * - "http://192.168.1.xxx:3000" - Địa chỉ IP máy chủ trong mạng LAN
+     * - "https://api.example.com" - Địa chỉ máy chủ production
      */
     @Provides
     //fun provideBaseUrl() = "http://10.0.2.2:3000" // Thay đổi thành URL thực tế của API
-    fun provideBaseUrl() = "http://192.168.68.156:3000"
+    fun provideBaseUrl() = "http://192.168.1.10:3000"
     /**
      * Cung cấp Gson cho việc parse JSON
      */
@@ -79,5 +85,14 @@ object NetworkModule {
     @Singleton
     fun provideGrammarApiService(retrofit: Retrofit): GrammarApiService {
         return retrofit.create(GrammarApiService::class.java)
+    }
+    
+    /**
+     * Cung cấp AIChatApiService
+     */
+    @Provides
+    @Singleton
+    fun provideAIChatApiService(retrofit: Retrofit): AIChatApiService {
+        return retrofit.create(AIChatApiService::class.java)
     }
 } 
