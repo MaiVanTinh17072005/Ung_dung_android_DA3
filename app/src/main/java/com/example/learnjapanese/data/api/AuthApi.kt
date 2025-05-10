@@ -2,6 +2,8 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
 import android.util.Log
+import com.example.learnjapanese.data.model.ChangePasswordRequest
+import com.example.learnjapanese.data.model.ChangePasswordResponse
 import com.example.learnjapanese.data.model.LoginRequest
 import com.example.learnjapanese.data.model.LoginResponse
 import com.example.learnjapanese.data.model.RegisterRequest
@@ -29,4 +31,7 @@ interface AuthApi {
 
     @POST("api/auth/verify-otp")
     suspend fun verifyOtp(@Body otpRequest: VerifyOtpRequest): Response<OtpResponse>
+
+    @POST("api/auth/change-password")
+    suspend fun changePassword(@Body changePasswordRequest: ChangePasswordRequest): Response<ChangePasswordResponse>
 }

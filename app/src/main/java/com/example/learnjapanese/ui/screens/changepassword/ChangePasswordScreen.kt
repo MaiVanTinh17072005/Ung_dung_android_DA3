@@ -11,16 +11,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.learnjapanese.ui.theme.LearnJapaneseTheme
 import com.example.learnjapanese.ui.viewmodels.ChangePasswordViewModel
 
 // Add these imports at the top
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.ui.text.TextStyle
 
 // Add these imports
 import com.example.learnjapanese.ui.theme.MauChinh
@@ -31,6 +27,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
+import kotlinx.coroutines.delay
 
 @Composable
 fun ChangePasswordScreen(
@@ -47,6 +44,15 @@ fun ChangePasswordScreen(
             color = MauNen,
             darkIcons = true
         )
+    }
+
+    // Add this at the top level of the composable
+    LaunchedEffect(viewModel.showSuccessMessage) {
+        if (viewModel.showSuccessMessage) {
+            delay(2000) // Wait for 2 seconds
+            viewModel.hideSuccessMessage()
+            onPasswordChanged() // Navigate to login screen
+        }
     }
 
     Surface(
@@ -147,12 +153,34 @@ fun ChangePasswordScreen(
                     .padding(bottom = 32.dp)
             )
 
+            if (viewModel.isLoading) {
+                CircularProgressIndicator(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    color = MauChinh
+                )
+            }
+
+            if (viewModel.showSuccessMessage) {
+                Text(
+                    text = "Đổi mật khẩu thành công!",
+                    color = Color.Green,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+
+            viewModel.error?.let { error ->
+                Text(
+                    text = error,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+            }
+
             Button(
                 onClick = {
-                    if (viewModel.validateInputs()) {
-                        viewModel.changePassword()
-                        onPasswordChanged()
-                    }
+                    viewModel.changePassword()
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -167,21 +195,29 @@ fun ChangePasswordScreen(
                     pressedElevation = 8.dp
                 )
             ) {
-                Text(
-                    "Xác nhận",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 1.sp
+                if (viewModel.isLoading) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(24.dp),
+                        color = Color.White
                     )
-                )
+                } else {
+                    Text(
+                        "Xác nhận",
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.sp
+                        )
+                    )
+                }
             }
 
+            // Replace the existing TextButton with this one
             TextButton(
-                onClick = onBackClick,
+                onClick = onPasswordChanged, // Changed from onBackClick to onPasswordChanged
                 modifier = Modifier.padding(top = 8.dp)
             ) {
                 Text(
-                    "Quay lại",
+                    "Quay lại đăng nhập", // Updated text to be more specific
                     style = MaterialTheme.typography.bodyMedium.copy(
                         color = MauChinhDam,
                         fontWeight = FontWeight.Medium

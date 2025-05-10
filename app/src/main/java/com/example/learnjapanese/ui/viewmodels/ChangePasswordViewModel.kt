@@ -4,8 +4,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.launch
+import retrofit2.Response
+import com.example.learnjapanese.data.model.ChangePasswordRequest
+import com.example.learnjapanese.data.model.ChangePasswordResponse
+import com.example.learnjapanese.data.repository.AuthRepository
 
 class ChangePasswordViewModel : ViewModel() {
+    private val authRepository = AuthRepository()
     var newPassword by mutableStateOf("")
         private set
     
@@ -64,10 +71,54 @@ class ChangePasswordViewModel : ViewModel() {
         return newPasswordError == null && confirmPasswordError == null
     }
     
+    private var _isLoading by mutableStateOf(false)
+    val isLoading: Boolean get() = _isLoading
+
+    private var _error by mutableStateOf<String?>(null)
+    val error: String? get() = _error
+
+    private var _isSuccess by mutableStateOf(false)
+    val isSuccess: Boolean get() = _isSuccess
+
+    private var _showSuccessMessage by mutableStateOf(false)
+    val showSuccessMessage: Boolean get() = _showSuccessMessage
+
     fun changePassword() {
         if (validateInputs()) {
-            // Thực hiện logic thay đổi mật khẩu ở đây
-            // Thông thường sẽ gọi đến repository
+            viewModelScope.launch {
+                _isLoading = true
+                _error = null
+                _isSuccess = false
+                _showSuccessMessage = false
+                try {
+                    val response = authRepository.changePassword(newPassword)
+                    if (response.isSuccessful && response.body() != null) {
+                        val responseBody = response.body()!!
+                        if (responseBody.success) {
+                            _isSuccess = true
+                            _showSuccessMessage = true
+                            _error = null
+                        } else {
+                            _error = responseBody.message
+                        }
+                    } else {
+                        when (response.code()) {
+                            400 -> _error = "Mật khẩu không hợp lệ"
+                            401 -> _error = "Phiên đăng nhập đã hết hạn"
+                            500 -> _error = "Lỗi máy chủ, vui lòng thử lại sau"
+                            else -> _error = "Không thể đổi mật khẩu. Vui lòng thử lại sau."
+                        }
+                    }
+                } catch (e: Exception) {
+                    _error = "Đã xảy ra lỗi: ${e.message}"
+                } finally {
+                    _isLoading = false
+                }
+            }
         }
+    }
+
+    fun hideSuccessMessage() {
+        _showSuccessMessage = false
     }
 }

@@ -2,6 +2,8 @@ package com.example.learnjapanese.data.repository
 
 import retrofit2.Response
 import android.util.Log
+import com.example.learnjapanese.data.model.ChangePasswordRequest
+import com.example.learnjapanese.data.model.ChangePasswordResponse
 import com.example.learnjapanese.data.model.LoginRequest
 import com.example.learnjapanese.data.model.LoginResponse
 import com.example.learnjapanese.data.model.RegisterRequest
@@ -96,6 +98,29 @@ class AuthRepository {
             return response
         } catch (e: Exception) {
             Log.e(TAG, "AuthRepository: Exception during OTP verification", e)
+            throw e
+        }
+    }
+
+    suspend fun changePassword(newPassword: String): Response<ChangePasswordResponse> {
+        Log.d(TAG, "AuthRepository: Starting change password process")
+        try {
+            // Hash the new password
+            val hashedPassword = hashPassword(newPassword)
+            
+            val response = RetrofitClient.authApi.changePassword(
+                ChangePasswordRequest(hashedPassword)
+            )
+            
+            Log.d(TAG, "AuthRepository: API Response - Status: ${response.code()}")
+            if (response.isSuccessful) {
+                Log.d(TAG, "AuthRepository: Password changed successfully")
+            } else {
+                Log.e(TAG, "AuthRepository: Password change failed with error: ${response.errorBody()?.string()}")
+            }
+            return response
+        } catch (e: Exception) {
+            Log.e(TAG, "AuthRepository: Exception during password change", e)
             throw e
         }
     }
