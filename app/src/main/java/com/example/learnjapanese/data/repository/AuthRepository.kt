@@ -8,6 +8,7 @@ import com.example.learnjapanese.data.model.RegisterRequest
 import com.example.learnjapanese.data.model.RegisterResponse
 import com.example.learnjapanese.data.model.OtpRequest
 import com.example.learnjapanese.data.model.OtpResponse
+import com.example.learnjapanese.data.model.VerifyOtpRequest
 import java.security.MessageDigest
 
 class AuthRepository {
@@ -78,6 +79,23 @@ class AuthRepository {
             return response
         } catch (e: Exception) {
             Log.e(TAG, "AuthRepository: Exception during OTP sending", e)
+            throw e
+        }
+    }
+
+    suspend fun verifyOtp(email: String, otp: String): Response<OtpResponse> {
+        Log.d(TAG, "AuthRepository: Starting OTP verification process for email: $email")
+        try {
+            val response = RetrofitClient.authApi.verifyOtp(VerifyOtpRequest(email, otp))
+            Log.d(TAG, "AuthRepository: API Response - Status: ${response.code()}")
+            if (response.isSuccessful) {
+                Log.d(TAG, "AuthRepository: OTP verified successfully")
+            } else {
+                Log.e(TAG, "AuthRepository: OTP verification failed with error: ${response.errorBody()?.string()}")
+            }
+            return response
+        } catch (e: Exception) {
+            Log.e(TAG, "AuthRepository: Exception during OTP verification", e)
             throw e
         }
     }

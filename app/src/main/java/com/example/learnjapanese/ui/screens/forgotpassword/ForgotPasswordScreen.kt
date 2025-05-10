@@ -176,10 +176,18 @@ fun ForgotPasswordScreen(
                             .padding(bottom = 16.dp)
                     )
 
+                    // Add this LaunchedEffect to handle navigation
+                    LaunchedEffect(viewModel.otpVerified) {
+                        if (viewModel.otpVerified) {
+                            delay(1500) // Wait for success message to show
+                            onSubmitOtp()
+                        }
+                    }
+
+                    // Modify the Button onClick to only call verifyOtp
                     Button(
                         onClick = { 
                             viewModel.verifyOtp()
-                            onSubmitOtp() 
                         },
                         modifier = Modifier
                             .fillMaxWidth()

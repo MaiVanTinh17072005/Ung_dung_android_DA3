@@ -4,6 +4,11 @@ data class OtpRequest(
     val email: String
 )
 
+data class VerifyOtpRequest(
+    val email: String,
+    val otp: String
+)
+
 data class OtpResponse(
     val success: Boolean,
     val message: String,

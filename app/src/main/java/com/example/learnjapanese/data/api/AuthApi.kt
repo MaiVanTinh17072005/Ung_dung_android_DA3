@@ -8,6 +8,7 @@ import com.example.learnjapanese.data.model.RegisterRequest
 import com.example.learnjapanese.data.model.RegisterResponse
 import com.example.learnjapanese.data.model.OtpRequest
 import com.example.learnjapanese.data.model.OtpResponse
+import com.example.learnjapanese.data.model.VerifyOtpRequest
 
 interface AuthApi {
     companion object {
@@ -25,4 +26,7 @@ interface AuthApi {
 
     @POST("api/auth/send-otp")
     suspend fun sendOtp(@Body otpRequest: OtpRequest): Response<OtpResponse>
+
+    @POST("api/auth/verify-otp")
+    suspend fun verifyOtp(@Body otpRequest: VerifyOtpRequest): Response<OtpResponse>
 }
