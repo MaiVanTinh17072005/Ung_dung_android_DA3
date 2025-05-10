@@ -12,6 +12,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import javax.inject.Inject
 
 /**
@@ -29,6 +32,10 @@ class GrammarDetailViewModel @Inject constructor(
     // State của chi tiết ngữ pháp
     private val _grammarDetail = MutableStateFlow<Resource<GrammarItem>>(Resource.Loading())
     val grammarDetail: StateFlow<Resource<GrammarItem>> = _grammarDetail.asStateFlow()
+    
+    // State toàn màn hình video
+    var isFullscreen by mutableStateOf(false)
+        private set
     
     init {
         loadGrammarDetail()
@@ -58,6 +65,13 @@ class GrammarDetailViewModel @Inject constructor(
                 _grammarDetail.value = Resource.Error(e.message ?: "Đã xảy ra lỗi không xác định")
             }
         }
+    }
+    
+    /**
+     * Chuyển đổi chế độ toàn màn hình
+     */
+    fun toggleFullscreen() {
+        isFullscreen = !isFullscreen
     }
     
     /**

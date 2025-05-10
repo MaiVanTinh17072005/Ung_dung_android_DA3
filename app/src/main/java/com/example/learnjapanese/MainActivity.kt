@@ -100,7 +100,7 @@ class MainActivity : ComponentActivity() {
                                 onBack = {
                                     navController.popBackStack()
                                 },
-                                onStartFlashcards = { id ->
+                                 onStartFlashcards = { id ->
                                     navController.navigate("vocabulary/flashcards/$id")
                                 },
                                 onStartQuiz = { id ->

@@ -7,3 +7,4 @@ plugins {
     id("com.google.dagger.hilt.android") version "2.50" apply false
 }
 true // Needed to make the Suppress annotation work for the plugins block
+
