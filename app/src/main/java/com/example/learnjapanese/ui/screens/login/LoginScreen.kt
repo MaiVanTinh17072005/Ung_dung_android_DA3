@@ -78,19 +78,9 @@ fun LoginScreen(
     LaunchedEffect(viewModel.loginState) {
         when (viewModel.loginState) {
             is LoginState.Success -> {
-                scope.launch {
-                    try {
-                        snackbarHostState.showSnackbar(
-                            message = "Đăng nhập thành công",
-                            duration = SnackbarDuration.Short,
-                            actionLabel = null
-                        )
-                        delay(1000)
-                        onLoginSuccess()
-                    } catch (e: Exception) {
-                        Log.e("LoginScreen", "Error showing success snackbar", e)
-                    }
-                }
+                // Đợi một chút để đảm bảo dữ liệu được lưu hoàn toàn
+                delay(300)
+                onLoginSuccess()
             }
             is LoginState.Error -> {
                 scope.launch {
@@ -192,15 +182,12 @@ fun LoginScreen(
                 .align(Alignment.Center)
                 .padding(16.dp)
         ) { data ->
-            val isSuccess = data.visuals.message.contains("thành công")
-            val backgroundColor = if (isSuccess) Color(0xFF4CAF50) else Color.Red.copy(alpha = 0.9f)
-            val icon = if (isSuccess) Icons.Default.CheckCircle else Icons.Default.Error
-            
+            // Chỉ hiển thị thông báo lỗi
             Snackbar(
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
                     .clip(RoundedCornerShape(12.dp)),
-                containerColor = backgroundColor,
+                containerColor = Color.Red.copy(alpha = 0.9f),
                 contentColor = Color.White,
             ) {
                 Row(
@@ -209,7 +196,7 @@ fun LoginScreen(
                     modifier = Modifier.padding(horizontal = 4.dp)
                 ) {
                     Icon(
-                        imageVector = icon,
+                        imageVector = Icons.Default.Error,
                         contentDescription = null,
                         tint = Color.White,
                         modifier = Modifier.size(16.dp)

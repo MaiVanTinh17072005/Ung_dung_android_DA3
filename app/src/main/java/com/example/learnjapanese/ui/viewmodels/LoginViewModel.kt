@@ -129,18 +129,16 @@ class LoginViewModel(
                     if (response.isSuccessful) {
                         response.body()?.let { loginResponse ->
                             if (loginResponse.success && loginResponse.data != null) {
-                                // Save user data to DataStore
+                                // Lưu dữ liệu vào DataStore trước
                                 userPreferences.saveUserData(
                                     userId = loginResponse.data.user_id,
                                     email = loginResponse.data.email
                                 )
-                                // In ra dữ liệu sau khi lưu
-                                userPreferences.debugPrintDataStore()
-                                // Đảm bảo thông báo thành công được gửi
+                                // Sau đó mới chuyển trạng thái thành công
                                 _loginState.value = LoginState.Success(
                                     userData = loginResponse.data
                                 )
-                                Log.d(TAG, "Login successful, state updated to Success")
+                                Log.d(TAG, "Login successful")
                             } else {
                                 _loginState.value = LoginState.Error("Đăng nhập thất bại: ${loginResponse.message}")
                                 Log.e(TAG, "Login failed: ${loginResponse.message}")
