@@ -9,6 +9,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import android.util.Log
+import java.io.File
 
 private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "user_preferences")
 
@@ -48,10 +49,18 @@ class UserPreferences(private val context: Context) {
 
     // Hàm debug để in ra dữ liệu trong DataStore
     suspend fun debugPrintDataStore() {
+        // Lấy đường dẫn của DataStore
+        val dataStoreFile = File(context.filesDir, "datastore/user_preferences.preferences_pb")
+        val dataStorePath = dataStoreFile.absolutePath
+        
         context.dataStore.data.collect { preferences ->
             val userId = preferences[USER_ID]
             val userEmail = preferences[USER_EMAIL]
-            Log.d(TAG, "DataStore contents:")
+            Log.d(TAG, "DataStore Information:")
+            Log.d(TAG, "File Path: $dataStorePath")
+            Log.d(TAG, "File Exists: ${dataStoreFile.exists()}")
+            Log.d(TAG, "File Size: ${if (dataStoreFile.exists()) dataStoreFile.length() else 0} bytes")
+            Log.d(TAG, "DataStore Contents:")
             Log.d(TAG, "User ID: $userId")
             Log.d(TAG, "User Email: $userEmail")
         }
