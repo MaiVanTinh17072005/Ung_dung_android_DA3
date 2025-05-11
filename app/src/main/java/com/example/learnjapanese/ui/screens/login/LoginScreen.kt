@@ -29,6 +29,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.learnjapanese.ui.viewmodels.LoginViewModel
+import com.example.learnjapanese.ui.viewmodels.LoginViewModelFactory
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import androidx.compose.foundation.Image
 import androidx.compose.ui.layout.ContentScale
@@ -58,10 +59,12 @@ import androidx.compose.material.icons.filled.Error
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.draw.shadow
 import kotlinx.coroutines.launch
+import androidx.lifecycle.viewmodel.compose.viewModel
+import android.util.Log
 
 @Composable
 fun LoginScreen(
-    viewModel: LoginViewModel = androidx.lifecycle.viewmodel.compose.viewModel(),
+    viewModel: LoginViewModel = viewModel(factory = LoginViewModelFactory(LocalContext.current)),
     onRegisterClick: () -> Unit,
     onForgotPasswordClick: () -> Unit,
     onLoginSuccess: () -> Unit
@@ -76,22 +79,30 @@ fun LoginScreen(
         when (viewModel.loginState) {
             is LoginState.Success -> {
                 scope.launch {
-                    snackbarHostState.showSnackbar(
-                        message = "Đăng nhập thành công",
-                        duration = SnackbarDuration.Short,
-                        actionLabel = null
-                    )
-                    delay(100)
-                    onLoginSuccess()
+                    try {
+                        snackbarHostState.showSnackbar(
+                            message = "Đăng nhập thành công",
+                            duration = SnackbarDuration.Short,
+                            actionLabel = null
+                        )
+                        delay(1000)
+                        onLoginSuccess()
+                    } catch (e: Exception) {
+                        Log.e("LoginScreen", "Error showing success snackbar", e)
+                    }
                 }
             }
             is LoginState.Error -> {
                 scope.launch {
-                    snackbarHostState.showSnackbar(
-                        message = "Đăng nhập thất bại",
-                        duration = SnackbarDuration.Short,
-                        actionLabel = null
-                    )
+                    try {
+                        snackbarHostState.showSnackbar(
+                            message = (viewModel.loginState as LoginState.Error).message,
+                            duration = SnackbarDuration.Short,
+                            actionLabel = null
+                        )
+                    } catch (e: Exception) {
+                        Log.e("LoginScreen", "Error showing error snackbar", e)
+                    }
                 }
             }
             else -> {}
@@ -116,59 +127,101 @@ fun LoginScreen(
         isVisible = true
     }
 
-    AnimatedVisibility(
-        visible = isVisible,
-        enter = fadeIn(animationSpec = tween(300)) + slideInHorizontally(
-            initialOffsetX = { fullWidth -> fullWidth },
-            animationSpec = tween(durationMillis = 300)
-        ),
-        exit = fadeOut(animationSpec = tween(300)) + slideOutHorizontally(
-            targetOffsetX = { fullWidth -> fullWidth },
-            animationSpec = tween(durationMillis = 300)
-        )
-    ) {
-        Box(modifier = Modifier.fillMaxSize()) {
-            // Background Image and Overlay remain unchanged
-            Image(
-                painter = painterResource(id = R.drawable.hinh_nen_1),
-                contentDescription = "Background Image",
-                modifier = Modifier.fillMaxSize(),
-                contentScale = ContentScale.Crop
+    Box(modifier = Modifier.fillMaxSize()) {
+        AnimatedVisibility(
+            visible = isVisible,
+            enter = fadeIn(animationSpec = tween(300)) + slideInHorizontally(
+                initialOffsetX = { fullWidth -> fullWidth },
+                animationSpec = tween(durationMillis = 300)
+            ),
+            exit = fadeOut(animationSpec = tween(300)) + slideOutHorizontally(
+                targetOffsetX = { fullWidth -> fullWidth },
+                animationSpec = tween(durationMillis = 300)
             )
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.White.copy(alpha = 0f))
-            )
-
-            // Outer container remains unchanged
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth(0.9f)
-                    .padding(10.dp)
-                    .height(580.dp)
-                    .clip(RoundedCornerShape(40.dp))
-                    .border(
-                        width = 1.2.dp,
-                        color = MauChinh.copy(alpha = 0.5f),
-                        shape = RoundedCornerShape(40.dp)
-                    )
-                    .align(Alignment.Center)
-            ) {
-                // Inner background
+        ) {
+            Box(modifier = Modifier.fillMaxSize()) {
+                // Background Image and Overlay remain unchanged
+                Image(
+                    painter = painterResource(id = R.drawable.hinh_nen_1),
+                    contentDescription = "Background Image",
+                    modifier = Modifier.fillMaxSize(),
+                    contentScale = ContentScale.Crop
+                )
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(xanhnhat.copy(alpha = 0.6f))
+                        .background(Color.White.copy(alpha = 0f))
                 )
 
-                // Extract inner content to separate composable
-                LoginContent(
-                    viewModel = viewModel,
-                    onRegisterClick = onRegisterClick,
-                    onForgotPasswordClick = onForgotPasswordClick,
-                    onLoginSuccess = onLoginSuccess
-                )
+                // Outer container remains unchanged
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.9f)
+                        .padding(10.dp)
+                        .height(580.dp)
+                        .clip(RoundedCornerShape(40.dp))
+                        .border(
+                            width = 1.2.dp,
+                            color = MauChinh.copy(alpha = 0.5f),
+                            shape = RoundedCornerShape(40.dp)
+                        )
+                        .align(Alignment.Center)
+                ) {
+                    // Inner background
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(xanhnhat.copy(alpha = 0.6f))
+                    )
+
+                    // Extract inner content to separate composable
+                    LoginContent(
+                        viewModel = viewModel,
+                        onRegisterClick = onRegisterClick,
+                        onForgotPasswordClick = onForgotPasswordClick,
+                        onLoginSuccess = onLoginSuccess
+                    )
+                }
+            }
+        }
+
+        // Custom Snackbar ở giữa màn hình
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.Center)
+                .padding(16.dp)
+        ) { data ->
+            val isSuccess = data.visuals.message.contains("thành công")
+            val backgroundColor = if (isSuccess) Color(0xFF4CAF50) else Color.Red.copy(alpha = 0.9f)
+            val icon = if (isSuccess) Icons.Default.CheckCircle else Icons.Default.Error
+            
+            Snackbar(
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .clip(RoundedCornerShape(12.dp)),
+                containerColor = backgroundColor,
+                contentColor = Color.White,
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier.padding(horizontal = 4.dp)
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(16.dp)
+                    )
+                    Text(
+                        text = data.visuals.message,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontWeight = FontWeight.Normal,
+                            fontSize = 11.sp
+                        )
+                    )
+                }
             }
         }
     }
@@ -183,8 +236,6 @@ private fun LoginContent(
 ) {
     var isContentVisible by remember { mutableStateOf(true) }
     var passwordVisible by remember { mutableStateOf(false) }
-    val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
     val context = LocalContext.current
 
     // Reset content visibility when navigating away
@@ -380,10 +431,10 @@ private fun LoginContent(
                 }
             }
 
-            // In LoginContent composable, modify the Button onClick:
+            // Update the Button onClick
             Button(
                 onClick = {
-                    viewModel.login() // Remove onLoginSuccess() from here
+                    viewModel.login()
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -409,33 +460,6 @@ private fun LoginContent(
                 )
             }
 
-            // And in LoginScreen composable, modify the LaunchedEffect:
-            LaunchedEffect(viewModel.loginState) {
-                when (viewModel.loginState) {
-                    is LoginState.Success -> {
-                        scope.launch {
-                            snackbarHostState.showSnackbar(
-                                message = "Đăng nhập thành công",
-                                duration = SnackbarDuration.Short,
-                                actionLabel = null
-                            )
-                            delay(1000) // Increase delay to show snackbar
-                            onLoginSuccess()
-                        }
-                    }
-                    is LoginState.Error -> {
-                        scope.launch {
-                            snackbarHostState.showSnackbar(
-                                message = (viewModel.loginState as LoginState.Error).message,
-                                duration = SnackbarDuration.Short,
-                                actionLabel = null
-                            )
-                        }
-                    }
-                    else -> {}
-                }
-            }
-
             Spacer(modifier = Modifier.height(20.dp))
 
             Row(
@@ -457,47 +481,6 @@ private fun LoginContent(
                             color = MauChinhDam,
                             fontWeight = FontWeight.Bold,
                             fontSize = 15.sp
-                        )
-                    )
-                }
-            }
-        }
-
-        // Add SnackbarHost
-        // In LoginContent composable, update the SnackbarHost
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(16.dp)
-        ) { data ->
-            val isSuccess = data.visuals.message.contains("thành công")
-            val backgroundColor = if (isSuccess) Color(0xFF4CAF50) else Color.Red.copy(alpha = 0.9f) // Brighter green color
-            val icon = if (isSuccess) Icons.Default.CheckCircle else Icons.Default.Error
-            
-            Snackbar(
-                modifier = Modifier
-                    .fillMaxWidth(0.8f)
-                    .clip(RoundedCornerShape(12.dp)),
-                containerColor = backgroundColor,
-                contentColor = Color.White,
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.padding(horizontal = 4.dp)
-                ) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Text(
-                        text = data.visuals.message,
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontWeight = FontWeight.Normal,
-                            fontSize = 11.sp
                         )
                     )
                 }

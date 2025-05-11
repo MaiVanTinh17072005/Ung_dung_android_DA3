@@ -3,6 +3,7 @@ package com.example.learnjapanese.ui.viewmodels
 // Sửa lại các import
 import com.example.learnjapanese.data.repository.AuthRepository
 import com.example.learnjapanese.data.model.LoginState
+import com.example.learnjapanese.data.local.UserPreferences
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -14,7 +15,8 @@ import java.security.MessageDigest
 import java.nio.charset.StandardCharsets
 
 class LoginViewModel(
-    private val authRepository: AuthRepository = AuthRepository()
+    private val authRepository: AuthRepository = AuthRepository(),
+    private val userPreferences: UserPreferences
 ) : ViewModel() {
     companion object {
         private const val TAG = "LoginViewModel"
@@ -127,23 +129,44 @@ class LoginViewModel(
                     if (response.isSuccessful) {
                         response.body()?.let { loginResponse ->
                             if (loginResponse.success && loginResponse.data != null) {
+                                // Save user data to DataStore
+                                userPreferences.saveUserData(
+                                    userId = loginResponse.data.user_id,
+                                    email = loginResponse.data.email
+                                )
+                                // In ra dữ liệu sau khi lưu
+                                userPreferences.debugPrintDataStore()
+                                // Đảm bảo thông báo thành công được gửi
                                 _loginState.value = LoginState.Success(
                                     userData = loginResponse.data
                                 )
+                                Log.d(TAG, "Login successful, state updated to Success")
                             } else {
-                                _loginState.value = LoginState.Error("đăng nhập thất bại")
+                                _loginState.value = LoginState.Error("Đăng nhập thất bại: ${loginResponse.message}")
+                                Log.e(TAG, "Login failed: ${loginResponse.message}")
                             }
+                        } ?: run {
+                            _loginState.value = LoginState.Error("Đăng nhập thất bại: Không nhận được dữ liệu từ server")
+                            Log.e(TAG, "Login failed: No response body")
                         }
                     } else {
-                        _loginState.value = LoginState.Error("đăng nhập thất bại") 
+                        val errorBody = response.errorBody()?.string() ?: "Không xác định"
+                        _loginState.value = LoginState.Error("Đăng nhập thất bại: $errorBody")
+                        Log.e(TAG, "Login failed with status ${response.code()}: $errorBody")
                     }
                 } catch (e: Exception) {
-                    val errorMessage = "không thể kết nối đến server" // Changed and simplified
+                    val errorMessage = "Không thể kết nối đến server: ${e.message}"
                     Log.e(TAG, errorMessage, e)
                     _loginState.value = LoginState.Error(errorMessage)
                 }
             }
         } else {
+            val errorMessage = when {
+                emailError != null -> emailError
+                passwordError != null -> passwordError
+                else -> "Vui lòng kiểm tra lại thông tin đăng nhập"
+            }
+            _loginState.value = LoginState.Error(errorMessage!!)
             Log.w(TAG, "Login validation failed - Email error: $emailError, Password error: $passwordError")
         }
     }
