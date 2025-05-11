@@ -308,10 +308,6 @@ class MainActivity : ComponentActivity() {
                             EditProfileScreen(
                                 onBack = {
                                     navController.popBackStack()
-                                },
-                                onSave = { fullName, email, phone, bio, level ->
-                                    // Xử lý lưu thông tin cá nhân
-                                    navController.popBackStack()
                                 }
                             )
                         }
