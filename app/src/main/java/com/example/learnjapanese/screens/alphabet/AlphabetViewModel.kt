@@ -6,6 +6,9 @@ import androidx.lifecycle.ViewModel
 class AlphabetViewModel : ViewModel() {
     var selectedType by mutableStateOf(CharacterType.HIRAGANA)
         private set
+        
+    var selectedCharacter by mutableStateOf<JapaneseCharacter?>(null)
+        private set
 
     val characters: List<JapaneseCharacter>
         get() = if (selectedType == CharacterType.HIRAGANA) {
@@ -16,5 +19,13 @@ class AlphabetViewModel : ViewModel() {
 
     fun switchCharacterType(type: CharacterType) {
         selectedType = type
+    }
+    
+    fun showCharacterDetail(character: JapaneseCharacter) {
+        selectedCharacter = character
+    }
+    
+    fun dismissCharacterDetail() {
+        selectedCharacter = null
     }
 }

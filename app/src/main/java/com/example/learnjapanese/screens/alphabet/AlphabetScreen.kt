@@ -1,23 +1,20 @@
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.TopAppBar
 import androidx.lifecycle.viewmodel.compose.viewModel
-
+import coil.compose.AsyncImage
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,9 +24,9 @@ fun BangChuCaiScreen(
 ) {
     val selectedType = viewModel.selectedType
     
-    val lightGreen = Color(0xFFF1F8E9)  // Much lighter green background (almost white)
-    val mediumGreen = Color(0xFF81C784)  // Medium green for buttons
-    val darkGreen = Color(0xFF2E7D32)    // Dark green for selected state
+    val lightGreen = Color(0xFFF1F8E9)
+    val mediumGreen = Color(0xFF81C784)
+    val darkGreen = Color(0xFF2E7D32)
     
     Scaffold(
         topBar = {
@@ -52,7 +49,6 @@ fun BangChuCaiScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // Modified Tab switching buttons
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -63,11 +59,11 @@ fun BangChuCaiScreen(
                     onClick = { viewModel.switchCharacterType(CharacterType.HIRAGANA) },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (selectedType == CharacterType.HIRAGANA) 
-                            darkGreen
-                        else 
-                            mediumGreen
+                            darkGreen else mediumGreen
                     ),
-                    modifier = Modifier.weight(1f).padding(horizontal = 8.dp)
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 8.dp)
                 ) {
                     Text("Hiragana", color = Color.White)
                 }
@@ -75,17 +71,16 @@ fun BangChuCaiScreen(
                     onClick = { viewModel.switchCharacterType(CharacterType.KATAKANA) },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (selectedType == CharacterType.KATAKANA) 
-                            darkGreen
-                        else 
-                            mediumGreen
+                            darkGreen else mediumGreen
                     ),
-                    modifier = Modifier.weight(1f).padding(horizontal = 8.dp)
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(horizontal = 8.dp)
                 ) {
                     Text("Katakana", color = Color.White)
                 }
             }
 
-            // Modified Character grid
             LazyVerticalGrid(
                 columns = GridCells.Fixed(4),
                 contentPadding = PaddingValues(12.dp),
@@ -94,23 +89,35 @@ fun BangChuCaiScreen(
                 modifier = Modifier.fillMaxSize()
             ) {
                 items(viewModel.characters) { char ->
-                    CharacterCard(character = char)
+                    CharacterCard(
+                        character = char,
+                        onClick = { viewModel.showCharacterDetail(it) }
+                    )
                 }
             }
         }
     }
+    
+    viewModel.selectedCharacter?.let { character ->
+        CharacterDetailDialog(
+            character = character,
+            onDismiss = { viewModel.dismissCharacterDetail() }
+        )
+    }
 }
 
 @Composable
-fun CharacterCard(character: JapaneseCharacter) {
+fun CharacterCard(
+    character: JapaneseCharacter,
+    onClick: (JapaneseCharacter) -> Unit
+) {
     Card(
         modifier = Modifier
             .padding(4.dp)
-            .size(85.dp),
+            .size(85.dp)
+            .clickable { onClick(character) },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = Color.White
-        ),
+        colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(1.dp, Color(0xFF66BB6A))
     ) {
         Column(
@@ -134,8 +141,41 @@ fun CharacterCard(character: JapaneseCharacter) {
                 text = character.romaji,
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
-                color = Color(0xFF1B5E20)  // Dark green for romaji
+                color = Color(0xFF1B5E20)
             )
         }
     }
+}
+
+@Composable
+fun CharacterDetailDialog(
+    character: JapaneseCharacter,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = "${character.character} - ${character.romaji}",
+                style = MaterialTheme.typography.headlineMedium
+            )
+        },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                AsyncImage(
+                    model = character.strokeOrderUrl,
+                    contentDescription = "Stroke order for ${character.character}",
+                    modifier = Modifier.size(200.dp)
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Close")
+            }
+        }
+    )
 }
