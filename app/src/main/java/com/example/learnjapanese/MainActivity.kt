@@ -1,5 +1,6 @@
 package com.example.learnjapanese
 
+import BangChuCaiScreen
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -38,6 +39,7 @@ import com.example.learnjapanese.ui.theme.LearnJapaneseTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,6 +64,9 @@ class MainActivity : ComponentActivity() {
                                 onNavigateToGrammar = {
                                     navController.navigate("grammar")
                                 },
+                                onNavigateToAlphabet = {  // Thêm parameter này
+                                    navController.navigate("alphabet")
+                                },
                                 onNavigateToReading = {
                                     // Sẽ thêm sau
                                 },
@@ -73,6 +78,15 @@ class MainActivity : ComponentActivity() {
                                 },
                                 onNavigateToChat = {
                                     navController.navigate("chat")
+                                }
+                            )
+                        }
+                        
+                        // Thêm route mới cho màn hình Alphabet
+                        composable("alphabet") {
+                            BangChuCaiScreen(
+                                onBack = {
+                                    navController.popBackStack()
                                 }
                             )
                         }
