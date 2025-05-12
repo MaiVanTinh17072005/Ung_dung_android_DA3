@@ -118,7 +118,7 @@ fun CharacterCard(
     Card(
         modifier = Modifier
             .padding(4.dp)
-            .size(85.dp)
+            .size(100.dp)  // Increased from 85dp to 100dp
             .clickable { onClick(character) },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -129,7 +129,7 @@ fun CharacterCard(
                 .fillMaxSize()
                 .padding(4.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            verticalArrangement = Arrangement.SpaceEvenly  // Changed to SpaceEvenly for better spacing
         ) {
             Text(
                 text = character.character,
@@ -140,7 +140,6 @@ fun CharacterCard(
                 textAlign = TextAlign.Center,
                 color = Color.Black
             )
-            Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = character.romaji,
                 style = MaterialTheme.typography.bodyMedium,
@@ -156,12 +155,13 @@ fun CharacterCard(
                         setOnPreparedListener { start() }
                     }
                 },
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(32.dp)  // Increased from 24dp to 32dp
             ) {
                 Icon(
                     imageVector = Icons.Default.VolumeUp,
                     contentDescription = "Play pronunciation",
-                    tint = Color(0xFF1B5E20)
+                    tint = Color(0xFF1B5E20),
+                    modifier = Modifier.size(28.dp)  // Added explicit size for the icon
                 )
             }
         }
