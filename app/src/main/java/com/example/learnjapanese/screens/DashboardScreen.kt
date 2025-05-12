@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoStories
 import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.Call
 import androidx.compose.material.icons.filled.ChatBubble
@@ -36,6 +37,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.outlined.AutoStories
 import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.Call
 import androidx.compose.material.icons.outlined.ChatBubble
@@ -75,6 +77,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -95,7 +98,6 @@ fun DashboardScreen(
     onNavigateToGrammar: () -> Unit = {},
     onNavigateToReading: () -> Unit = {},
     onNavigateToAccount: () -> Unit = {},
-    onNavigateToCall: () -> Unit = {},
     onNavigateToChat: () -> Unit = {}
 ) {
     // Collect states from ViewModel
@@ -113,7 +115,7 @@ fun DashboardScreen(
         when (index) {
             0 -> onNavigateToVocabulary()
             1 -> onNavigateToGrammar()
-            2 -> onNavigateToCall() // Gọi điện
+            2 -> onNavigateToReading() // Đọc hiểu
             3 -> onNavigateToChat() // Trò chuyện
             4 -> {} // Trang chủ (mặc định)
         }
@@ -183,23 +185,31 @@ fun DashboardScreen(
                         .shadow(5.dp)
                         .zIndex(0f)
                 ) {
+                    val bottomNavItems = getBottomNavItems()
                     val navItems = listOf(
-                        BottomNavItems[0],
-                        BottomNavItems[1],
+                        bottomNavItems[0],
+                        bottomNavItems[1],
                         // Để trống ở giữa cho nút Home
-                        BottomNavItems[2],
-                        BottomNavItems[3]
+                        bottomNavItems[2],
+                        bottomNavItems[3]
                     )
                     
                     // 2 mục đầu tiên
                     navItems.subList(0, 2).forEachIndexed { index, item ->
                         NavigationBarItem(
                             icon = { 
-                                Icon(
-                                    imageVector = if (selectedNavItem == index) item.selectedIcon else item.icon,
-                                    contentDescription = item.title,
-                                    modifier = Modifier.size(24.dp)
-                                )
+                                when (val icon = if (selectedNavItem == index) item.selectedIcon else item.icon) {
+                                    is ImageVector -> Icon(
+                                        imageVector = icon,
+                                        contentDescription = item.title,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    else -> Icon(
+                                        painter = icon as androidx.compose.ui.graphics.painter.Painter,
+                                        contentDescription = item.title,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
                             },
                             label = { 
                                 Text(
@@ -241,11 +251,18 @@ fun DashboardScreen(
                         val actualIndex = index + 2
                         NavigationBarItem(
                             icon = { 
-                                Icon(
-                                    imageVector = if (selectedNavItem == actualIndex) item.selectedIcon else item.icon,
-                                    contentDescription = item.title,
-                                    modifier = Modifier.size(24.dp)
-                                )
+                                when (val icon = if (selectedNavItem == actualIndex) item.selectedIcon else item.icon) {
+                                    is ImageVector -> Icon(
+                                        imageVector = icon,
+                                        contentDescription = item.title,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    else -> Icon(
+                                        painter = icon as androidx.compose.ui.graphics.painter.Painter,
+                                        contentDescription = item.title,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
                             },
                             label = { 
                                 Text(
@@ -661,19 +678,28 @@ fun QuickFeatureCard(title: String, progress: Float, modifier: Modifier = Modifi
     }
 }
 
-data class BottomNavItem(
-    val title: String, 
-    val icon: ImageVector,
-    val selectedIcon: ImageVector
+// Data class cho các mục trong bottom navigation
+private data class BottomNavItem(
+    val title: String,
+    val icon: Any, // Có thể là ImageVector hoặc Painter
+    val selectedIcon: Any
 )
 
-val BottomNavItems = listOf(
-    BottomNavItem("Từ vựng", Icons.Outlined.Book, Icons.Filled.Book),
-    BottomNavItem("Ngữ pháp", Icons.Outlined.Edit, Icons.Filled.Edit),
-    BottomNavItem("Gọi điện", Icons.Outlined.Call, Icons.Filled.Call),
-    BottomNavItem("Trò chuyện", Icons.Outlined.ChatBubble, Icons.Filled.ChatBubble),
-    BottomNavItem("Trang chủ", Icons.Outlined.Home, Icons.Filled.Home)
-)
+// Danh sách các mục trong bottom navigation
+@Composable
+private fun getBottomNavItems(): List<BottomNavItem> {
+    return listOf(
+        BottomNavItem("Từ vựng", Icons.Outlined.Book, Icons.Filled.Book),
+        BottomNavItem("Ngữ pháp", Icons.Outlined.Edit, Icons.Filled.Edit),
+        BottomNavItem(
+            "Đọc hiểu",
+            painterResource(id = R.drawable.ic_reading),
+            painterResource(id = R.drawable.ic_reading_filled)
+        ),
+        BottomNavItem("Trò chuyện", Icons.Outlined.ChatBubble, Icons.Filled.ChatBubble),
+        BottomNavItem("Trang chủ", Icons.Outlined.Home, Icons.Filled.Home)
+    )
+}
 
 @Preview(showBackground = true)
 @Composable

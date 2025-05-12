@@ -30,6 +30,8 @@ import com.example.learnjapanese.screens.profile.FriendsScreen
 import com.example.learnjapanese.screens.profile.NotificationsScreen
 import com.example.learnjapanese.screens.profile.ProfileScreen
 import com.example.learnjapanese.screens.profile.SettingsScreen
+import com.example.learnjapanese.screens.reading.ReadingDetailScreen
+import com.example.learnjapanese.screens.reading.ReadingListScreen
 import com.example.learnjapanese.screens.vocabulary.VocabularyDetailScreen
 import com.example.learnjapanese.screens.vocabulary.VocabularyFlashcardScreen
 import com.example.learnjapanese.screens.vocabulary.VocabularyQuizScreen
@@ -63,13 +65,10 @@ class MainActivity : ComponentActivity() {
                                     navController.navigate("grammar")
                                 },
                                 onNavigateToReading = {
-                                    // Sẽ thêm sau
+                                    navController.navigate("reading")
                                 },
                                 onNavigateToAccount = {
                                     navController.navigate("profile")
-                                },
-                                onNavigateToCall = {
-                                    navController.navigate("calls")
                                 },
                                 onNavigateToChat = {
                                     navController.navigate("chat")
@@ -197,40 +196,27 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         
-                        composable("calls") {
-                            CallListScreen(
+                        composable("reading") {
+                            ReadingListScreen(
                                 onBack = {
                                     navController.popBackStack()
                                 },
-                                onContactClick = { contactId ->
-                                    // Xử lý khi nhấn vào liên hệ
-                                },
-                                onStartCall = { contactId, isVideo ->
-                                    navController.navigate("calls/active/$contactId?video=$isVideo")
+                                onReadingClick = { readingId ->
+                                    navController.navigate("reading/detail/$readingId")
                                 }
                             )
                         }
                         
                         composable(
-                            route = "calls/active/{contactId}?video={isVideo}",
+                            route = "reading/detail/{readingId}",
                             arguments = listOf(
-                                navArgument("contactId") { type = NavType.StringType },
-                                navArgument("isVideo") { 
-                                    type = NavType.BoolType 
-                                    defaultValue = false
-                                }
+                                navArgument("readingId") { type = NavType.StringType }
                             )
                         ) { backStackEntry ->
-                            val contactId = backStackEntry.arguments?.getString("contactId") ?: "c1"
-                            val isVideo = backStackEntry.arguments?.getBoolean("isVideo") ?: false
-                            
-                            CallScreen(
-                                contactId = contactId,
-                                isVideoCall = isVideo,
-                                onEndCall = {
-                                    navController.popBackStack()
-                                },
-                                onNavigateBack = {
+                            val readingId = backStackEntry.arguments?.getString("readingId") ?: "1"
+                            ReadingDetailScreen(
+                                readingId = readingId,
+                                onBack = {
                                     navController.popBackStack()
                                 }
                             )
