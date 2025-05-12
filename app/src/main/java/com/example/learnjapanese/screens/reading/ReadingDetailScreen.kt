@@ -87,19 +87,25 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.net.URLEncoder
 import java.nio.charset.StandardCharsets
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarHost
+import androidx.hilt.navigation.compose.hiltViewModel
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ReadingDetailScreen(
     readingId: String,
-    viewModel: ReadingViewModel = viewModel(),
+    viewModel: ReadingViewModel = hiltViewModel(),
     onBack: () -> Unit = {}
 ) {
     val readingDetail by viewModel.currentReading.collectAsState()
+    val isLoading by viewModel.isLoading.collectAsState()
+    val error by viewModel.error.collectAsState()
     val scrollState = rememberScrollState()
     var selectedSentence by remember { mutableStateOf<Sentence?>(null) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
     
     // MediaPlayer cho phát âm
     var isSpeaking by remember { mutableStateOf(false) }
@@ -145,6 +151,14 @@ fun ReadingDetailScreen(
         viewModel.loadReadingDetail(readingId)
     }
     
+    // Hiển thị thông báo lỗi nếu có
+    LaunchedEffect(error) {
+        error?.let {
+            snackbarHostState.showSnackbar(message = it)
+            viewModel.clearError()
+        }
+    }
+    
     // Hàm phát âm sử dụng Google Translate TTS
     val speakText = { text: String ->
         if (isSpeaking) {
@@ -181,6 +195,7 @@ fun ReadingDetailScreen(
     }
 
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = {
@@ -207,12 +222,11 @@ fun ReadingDetailScreen(
                 )
             )
         }
-    ) { paddingValues ->
-        // Background with book-like appearance
+    ) { innerPadding ->
         Box(
             modifier = Modifier
+                .padding(innerPadding)
                 .fillMaxSize()
-                .padding(paddingValues)
                 .background(Color(0xFFF8F5E6))
                 .pointerInput(Unit) {
                     detectTapGestures(
@@ -220,8 +234,8 @@ fun ReadingDetailScreen(
                     )
                 }
         ) {
-            if (readingDetail == null) {
-                // Loading state
+            if (isLoading) {
+                // Hiển thị loading khi đang tải dữ liệu
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -229,6 +243,14 @@ fun ReadingDetailScreen(
                     CircularProgressIndicator(
                         color = MaterialTheme.colorScheme.primary
                     )
+                }
+            } else if (readingDetail == null) {
+                // Hiển thị thông báo khi không có dữ liệu
+                Box(
+                    modifier = Modifier.fillMaxSize(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text("Không thể tải bài đọc", style = MaterialTheme.typography.bodyLarge)
                 }
             } else {
                 Column(

@@ -2,6 +2,7 @@ package com.example.learnjapanese.di
 
 import com.example.learnjapanese.data.api.AIChatApiService
 import com.example.learnjapanese.data.api.GrammarApiService
+import com.example.learnjapanese.data.api.ReadingApiService
 import com.example.learnjapanese.data.api.VocabularyApiService
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
@@ -94,5 +95,14 @@ object NetworkModule {
     @Singleton
     fun provideAIChatApiService(retrofit: Retrofit): AIChatApiService {
         return retrofit.create(AIChatApiService::class.java)
+    }
+    
+    /**
+     * Cung cấp ReadingApiService
+     */
+    @Provides
+    @Singleton
+    fun provideReadingApiService(retrofit: Retrofit): ReadingApiService {
+        return retrofit.create(ReadingApiService::class.java)
     }
 } 
