@@ -24,17 +24,25 @@ fun BangChuCaiScreen(
 ) {
     var selectedType by remember { mutableStateOf(CharacterType.HIRAGANA) }
     
+    val lightGreen = Color(0xFFF1F8E9)  // Much lighter green background (almost white)
+    val mediumGreen = Color(0xFF81C784)  // Medium green for buttons
+    val darkGreen = Color(0xFF2E7D32)    // Dark green for selected state
+    
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Bảng chữ cái Nhật") },
+                title = { Text("Bảng chữ cái Tiếng Nhật") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(Icons.Default.ArrowBack, "Back")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = lightGreen
+                )
             )
-        }
+        },
+        containerColor = lightGreen
     ) { padding ->
         Column(
             modifier = Modifier
@@ -45,37 +53,39 @@ fun BangChuCaiScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(8.dp),
+                    .padding(12.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Button(
                     onClick = { selectedType = CharacterType.HIRAGANA },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (selectedType == CharacterType.HIRAGANA) 
-                            MaterialTheme.colorScheme.primary 
+                            darkGreen
                         else 
-                            MaterialTheme.colorScheme.surface
-                    )
+                            mediumGreen
+                    ),
+                    modifier = Modifier.weight(1f).padding(horizontal = 8.dp)
                 ) {
-                    Text("Hiragana")
+                    Text("Hiragana", color = Color.White)
                 }
                 Button(
                     onClick = { selectedType = CharacterType.KATAKANA },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (selectedType == CharacterType.KATAKANA) 
-                            MaterialTheme.colorScheme.primary 
+                            darkGreen
                         else 
-                            MaterialTheme.colorScheme.surface
-                    )
+                            mediumGreen
+                    ),
+                    modifier = Modifier.weight(1f).padding(horizontal = 8.dp)
                 ) {
-                    Text("Katakana")
+                    Text("Katakana", color = Color.White)
                 }
             }
 
             // Character grid
             LazyVerticalGrid(
                 columns = GridCells.Fixed(4),
-                contentPadding = PaddingValues(8.dp),
+                contentPadding = PaddingValues(12.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxSize()
@@ -98,7 +108,11 @@ fun CharacterCard(character: JapaneseCharacter) {
         modifier = Modifier
             .padding(4.dp)
             .size(85.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White
+        ),
+        border = BorderStroke(1.dp, Color(0xFF66BB6A))
     ) {
         Column(
             modifier = Modifier
@@ -113,13 +127,15 @@ fun CharacterCard(character: JapaneseCharacter) {
                     MaterialTheme.typography.titleLarge
                 else 
                     MaterialTheme.typography.headlineLarge,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = Color.Black
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
                 text = character.romaji,
                 style = MaterialTheme.typography.bodyMedium,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
+                color = Color(0xFF1B5E20)  // Dark green for romaji
             )
         }
     }
