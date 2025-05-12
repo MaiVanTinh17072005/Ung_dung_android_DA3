@@ -2,7 +2,8 @@ data class JapaneseCharacter(
     val character: String,
     val romaji: String,
     val type: CharacterType,
-    val strokeOrderUrl: String = ""
+    val strokeOrderUrl: String = "",
+    val audioUrl: String = "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=ja&q=$character"
 )
 
 enum class CharacterType {

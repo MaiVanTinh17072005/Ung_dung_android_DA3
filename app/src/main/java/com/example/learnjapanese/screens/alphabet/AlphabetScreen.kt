@@ -1,3 +1,4 @@
+import android.media.MediaPlayer
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -6,6 +7,7 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -111,6 +113,8 @@ fun CharacterCard(
     character: JapaneseCharacter,
     onClick: (JapaneseCharacter) -> Unit
 ) {
+    val mediaPlayer = remember { MediaPlayer() }
+    
     Card(
         modifier = Modifier
             .padding(4.dp)
@@ -143,6 +147,23 @@ fun CharacterCard(
                 textAlign = TextAlign.Center,
                 color = Color(0xFF1B5E20)
             )
+            IconButton(
+                onClick = {
+                    mediaPlayer.apply {
+                        reset()
+                        setDataSource(character.audioUrl)
+                        prepareAsync()
+                        setOnPreparedListener { start() }
+                    }
+                },
+                modifier = Modifier.size(24.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.VolumeUp,
+                    contentDescription = "Play pronunciation",
+                    tint = Color(0xFF1B5E20)
+                )
+            }
         }
     }
 }
@@ -152,13 +173,36 @@ fun CharacterDetailDialog(
     character: JapaneseCharacter,
     onDismiss: () -> Unit
 ) {
+    val mediaPlayer = remember { MediaPlayer() }
+    
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(
-                text = "${character.character} - ${character.romaji}",
-                style = MaterialTheme.typography.headlineMedium
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = "${character.character} - ${character.romaji}",
+                    style = MaterialTheme.typography.headlineMedium
+                )
+                IconButton(
+                    onClick = {
+                        mediaPlayer.apply {
+                            reset()
+                            setDataSource(character.audioUrl)
+                            prepareAsync()
+                            setOnPreparedListener { start() }
+                        }
+                    }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.VolumeUp,
+                        contentDescription = "Play pronunciation"
+                    )
+                }
+            }
         },
         text = {
             Column(

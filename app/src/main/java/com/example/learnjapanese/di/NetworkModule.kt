@@ -1,5 +1,6 @@
 package com.example.learnjapanese.di
 
+import android.media.MediaPlayer
 import com.example.learnjapanese.data.api.AIChatApiService
 import com.example.learnjapanese.data.api.GrammarApiService
 import com.example.learnjapanese.data.api.VocabularyApiService
@@ -95,4 +96,10 @@ object NetworkModule {
     fun provideAIChatApiService(retrofit: Retrofit): AIChatApiService {
         return retrofit.create(AIChatApiService::class.java)
     }
-} 
+    
+    @Provides
+    @Singleton
+    fun provideMediaPlayer(): MediaPlayer {
+        return MediaPlayer()
+    }
+}
