@@ -16,13 +16,16 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TopAppBar
+import androidx.lifecycle.viewmodel.compose.viewModel
+
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BangChuCaiScreen(
+    viewModel: AlphabetViewModel = viewModel(),
     onBack: () -> Unit = {}
 ) {
-    var selectedType by remember { mutableStateOf(CharacterType.HIRAGANA) }
+    val selectedType = viewModel.selectedType
     
     val lightGreen = Color(0xFFF1F8E9)  // Much lighter green background (almost white)
     val mediumGreen = Color(0xFF81C784)  // Medium green for buttons
@@ -49,7 +52,7 @@ fun BangChuCaiScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            // Tab switching buttons
+            // Modified Tab switching buttons
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -57,7 +60,7 @@ fun BangChuCaiScreen(
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Button(
-                    onClick = { selectedType = CharacterType.HIRAGANA },
+                    onClick = { viewModel.switchCharacterType(CharacterType.HIRAGANA) },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (selectedType == CharacterType.HIRAGANA) 
                             darkGreen
@@ -69,7 +72,7 @@ fun BangChuCaiScreen(
                     Text("Hiragana", color = Color.White)
                 }
                 Button(
-                    onClick = { selectedType = CharacterType.KATAKANA },
+                    onClick = { viewModel.switchCharacterType(CharacterType.KATAKANA) },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (selectedType == CharacterType.KATAKANA) 
                             darkGreen
@@ -82,7 +85,7 @@ fun BangChuCaiScreen(
                 }
             }
 
-            // Character grid
+            // Modified Character grid
             LazyVerticalGrid(
                 columns = GridCells.Fixed(4),
                 contentPadding = PaddingValues(12.dp),
@@ -90,11 +93,7 @@ fun BangChuCaiScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxSize()
             ) {
-                items(if (selectedType == CharacterType.HIRAGANA) 
-                    AlphabetData.hiragana 
-                else 
-                    AlphabetData.katakana
-                ) { char ->
+                items(viewModel.characters) { char ->
                     CharacterCard(character = char)
                 }
             }
