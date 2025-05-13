@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.first
 import android.util.Log
 import java.io.File
 import javax.inject.Inject
@@ -65,14 +66,17 @@ class UserPreferences @Inject constructor(private val context: Context) {
 
     // Hàm debug để in ra dữ liệu trong DataStore
     suspend fun debugPrintDataStore() {
-        // Lấy đường dẫn của DataStore
-        val dataStoreFile = File(context.filesDir, "datastore/user_preferences.preferences_pb")
-        val dataStorePath = dataStoreFile.absolutePath
-        
-        context.dataStore.data.collect { preferences ->
+        try {
+            // Lấy đường dẫn của DataStore
+            val dataStoreFile = File(context.filesDir, "datastore/user_preferences.preferences_pb")
+            val dataStorePath = dataStoreFile.absolutePath
+            
+            // Sử dụng first() thay vì collect để chỉ lấy giá trị hiện tại
+            val preferences = context.dataStore.data.first()
             val userId = preferences[USER_ID_KEY]
             val userEmail = preferences[EMAIL_KEY]
             val token = preferences[TOKEN_KEY]
+            
             Log.d(TAG, "DataStore Information:")
             Log.d(TAG, "File Path: $dataStorePath")
             Log.d(TAG, "File Exists: ${dataStoreFile.exists()}")
@@ -81,6 +85,8 @@ class UserPreferences @Inject constructor(private val context: Context) {
             Log.d(TAG, "User ID: $userId")
             Log.d(TAG, "User Email: $userEmail")
             Log.d(TAG, "Token: $token")
+        } catch (e: Exception) {
+            Log.e(TAG, "Lỗi khi đọc DataStore: ${e.message}", e)
         }
     }
 }

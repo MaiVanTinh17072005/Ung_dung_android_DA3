@@ -1,5 +1,6 @@
 package com.example.learnjapanese.navigation
 
+import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
@@ -28,16 +29,26 @@ fun NavGraph(navController: NavHostController) {
         }
         
         composable(route = Screen.Login.route) {
+            Log.d("NavGraph", "Đang render màn hình Login")
             LoginScreen(
                 onRegisterClick = {
+                    Log.d("NavGraph", "Người dùng nhấn đăng ký, điều hướng đến Register")
                     navController.navigate(Screen.Register.route)
                 },
                 onForgotPasswordClick = {
+                    Log.d("NavGraph", "Người dùng nhấn quên mật khẩu, điều hướng đến ForgotPassword")
                     navController.navigate(Screen.ForgotPassword.route)
                 },
                 onLoginSuccess = {
-                    navController.navigate(Screen.Dashboard.route) {
-                        popUpTo(Screen.Login.route) { inclusive = true }
+                    Log.d("NavGraph", "Login success callback triggered, navigating to Dashboard...")
+                    try {
+                        Log.d("NavGraph", "Chuẩn bị điều hướng đến Dashboard với route: ${Screen.Dashboard.route}")
+                        navController.navigate(Screen.Dashboard.route) {
+                            popUpTo(Screen.Login.route) { inclusive = true }
+                        }
+                        Log.d("NavGraph", "Navigation to Dashboard completed successfully")
+                    } catch (e: Exception) {
+                        Log.e("NavGraph", "Error during navigation to Dashboard: ${e.message}", e)
                     }
                 }
             )
@@ -84,24 +95,31 @@ fun NavGraph(navController: NavHostController) {
         }
         
         composable(route = Screen.Dashboard.route) {
+            Log.d("NavGraph", "Đang render màn hình Dashboard")
             DashboardScreen(
                 onNavigateToVocabulary = {
                     // Điều hướng đến màn hình Vocabulary
+                    Log.d("NavGraph", "Điều hướng đến màn hình Vocabulary")
                 },
                 onNavigateToGrammar = {
                     // Điều hướng đến màn hình Grammar
+                    Log.d("NavGraph", "Điều hướng đến màn hình Grammar")
                 },
                 onNavigateToAlphabet = {
                     // Điều hướng đến màn hình Alphabet
+                    Log.d("NavGraph", "Điều hướng đến màn hình Alphabet")
                 },
                 onNavigateToReading = {
                     // Điều hướng đến màn hình Reading
+                    Log.d("NavGraph", "Điều hướng đến màn hình Reading")
                 },
                 onNavigateToAccount = {
                     // Điều hướng đến màn hình Account
+                    Log.d("NavGraph", "Điều hướng đến màn hình Account")
                 },
                 onNavigateToChat = {
                     // Điều hướng đến màn hình Chat
+                    Log.d("NavGraph", "Điều hướng đến màn hình Chat")
                 }
             )
         }

@@ -1,5 +1,6 @@
 package com.example.learnjapanese.screens.login
 
+import android.content.ContentValues.TAG
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -52,6 +53,7 @@ import kotlinx.coroutines.launch
 import androidx.hilt.navigation.compose.hiltViewModel
 import android.util.Log
 
+
 @Composable
 fun LoginScreen(
     viewModel: LoginViewModel = hiltViewModel(),
@@ -65,41 +67,59 @@ fun LoginScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
+    Log.d("LoginScreen", "LoginScreen composable được gọi lại, loginState: ${viewModel.loginState}")
+    
+    // Theo dõi các thay đổi trong loginState
+    DisposableEffect(Unit) {
+        Log.d("LoginScreen", "LoginScreen được thiết lập, loginState ban đầu: ${viewModel.loginState}")
+        onDispose {
+            Log.d("LoginScreen", "LoginScreen bị hủy, loginState cuối: ${viewModel.loginState}")
+            viewModel.updateUsername("")
+            viewModel.updatePassword("")
+            viewModel.resetAllNotifications()
+        }
+    }
+
     LaunchedEffect(viewModel.loginState) {
+        Log.d("LoginScreen", "LaunchedEffect được kích hoạt với loginState: ${viewModel.loginState}")
         when (viewModel.loginState) {
             is LoginState.Success -> {
                 // Đợi một chút để đảm bảo dữ liệu được lưu hoàn toàn
+                Log.d("LoginScreen", "Nhận được trạng thái LoginState.Success, chuẩn bị chuyển hướng...")
                 delay(300)
-                onLoginSuccess()
+                Log.d("LoginScreen", "Gọi callback chuyển hướng đến Dashboard...")
+                try {
+                    onLoginSuccess()
+                    Log.d("LoginScreen", "Đã gọi callback chuyển hướng thành công")
+                } catch (e: Exception) {
+                    Log.e("LoginScreen", "Lỗi khi gọi callback chuyển hướng: ${e.message}", e)
+                }
             }
             is LoginState.Error -> {
                 scope.launch {
                     try {
+                        val errorMessage = (viewModel.loginState as LoginState.Error).message
+                        Log.e("LoginScreen", "Hiển thị lỗi: $errorMessage")
                         snackbarHostState.showSnackbar(
-                            message = (viewModel.loginState as LoginState.Error).message,
+                            message = errorMessage,
                             duration = SnackbarDuration.Short,
                             actionLabel = null
                         )
                     } catch (e: Exception) {
-                        Log.e("LoginScreen", "Error showing error snackbar", e)
+                        Log.e("LoginScreen", "Lỗi khi hiển thị thông báo lỗi: ${e.message}", e)
                     }
                 }
             }
-            else -> {}
+            else -> {
+                Log.d("LoginScreen", "Trạng thái login hiện tại: ${viewModel.loginState}")
+            }
         }
     }
 
     // Add this LaunchedEffect to reset notifications when screen is shown
     LaunchedEffect(Unit) {
+        Log.d("LoginScreen", "LaunchedEffect(Unit) được kích hoạt, reset notifications")
         viewModel.resetAllNotifications()
-    }
-
-    DisposableEffect(Unit) {
-        onDispose {
-            viewModel.updateUsername("")
-            viewModel.updatePassword("")
-            viewModel.resetAllNotifications()
-        }
     }
 
     LaunchedEffect(Unit) {
@@ -411,6 +431,7 @@ private fun LoginContent(
             // Update the Button onClick
             Button(
                 onClick = {
+                    Log.d(TAG, "Đã nhấn đăng nhập")
                     viewModel.login()
                 },
                 modifier = Modifier

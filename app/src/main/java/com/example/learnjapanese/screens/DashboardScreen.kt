@@ -1,5 +1,6 @@
 package com.example.learnjapanese.screens
 
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -86,6 +87,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.learnjapanese.R
 import com.example.learnjapanese.ui.theme.LearnJapaneseTheme
@@ -93,7 +95,7 @@ import com.example.learnjapanese.ui.theme.LearnJapaneseTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
-    viewModel: DashboardViewModel = viewModel(),
+    viewModel: DashboardViewModel = hiltViewModel(),
     onNavigateToVocabulary: () -> Unit = {},
     onNavigateToGrammar: () -> Unit = {},
     onNavigateToAlphabet: () -> Unit = {},
@@ -101,10 +103,14 @@ fun DashboardScreen(
     onNavigateToAccount: () -> Unit = {},
     onNavigateToChat: () -> Unit = {}
 ) {
+    Log.d("DashboardScreen", "DashboardScreen composable started")
+    
     // Collect states from ViewModel
     val learningStats by viewModel.learningStats.collectAsState()
     val featuredBanner by viewModel.featuredBanner.collectAsState()
     val learningFeatures by viewModel.learningFeatures.collectAsState()
+    
+    Log.d("DashboardScreen", "States collected from ViewModel")
     
     var selectedNavItem by remember { mutableStateOf(4) } // Mặc định là trang chủ
     var searchQuery by remember { mutableStateOf("") }
