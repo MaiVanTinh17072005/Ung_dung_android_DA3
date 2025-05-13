@@ -96,6 +96,7 @@ fun DashboardScreen(
     viewModel: DashboardViewModel = viewModel(),
     onNavigateToVocabulary: () -> Unit = {},
     onNavigateToGrammar: () -> Unit = {},
+    onNavigateToAlphabet: () -> Unit = {},
     onNavigateToReading: () -> Unit = {},
     onNavigateToAccount: () -> Unit = {},
     onNavigateToChat: () -> Unit = {}
@@ -409,8 +410,9 @@ fun DashboardScreen(
                 Spacer(modifier = Modifier.height(16.dp))
             }
             
-            // Grid của các tính năng
+           // Grid của các tính năng
             if (learningFeatures.isNotEmpty()) {
+                // Trong phần LazyVerticalGrid items, thêm một card mới cho Bảng chữ cái
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
@@ -421,6 +423,64 @@ fun DashboardScreen(
                         .fillMaxWidth(),
                     userScrollEnabled = false
                 ) {
+                    item {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(130.dp)
+                                .clickable { onNavigateToAlphabet() },
+                            shape = RoundedCornerShape(16.dp),
+                            elevation = CardDefaults.cardElevation(
+                                defaultElevation = 0.dp
+                            ),
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.surface
+                            )
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(16.dp),
+                                verticalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Text(
+                                    text = "Bảng chữ cái",
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                                
+                                Spacer(modifier = Modifier.height(8.dp))
+                                
+                                Box(
+                                    modifier = Modifier
+                                        .size(48.dp)
+                                        .clip(RoundedCornerShape(percent = 25))
+                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Edit,
+                                        contentDescription = "Alphabet",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                                
+                                Spacer(modifier = Modifier.height(8.dp))
+                                
+                                LinearProgressIndicator(
+                                    progress = 0f,
+                                    modifier = Modifier.fillMaxWidth(),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
+                                )
+                            }
+                        }
+                    }
+                    
+                    // Hiển thị các tính năng khác
                     items(learningFeatures) { feature ->
                         QuickFeatureCard(
                             title = feature.title,
@@ -434,6 +494,7 @@ fun DashboardScreen(
         }
     }
 }
+
 
 @Composable
 fun LearningStatsCard(stats: LearningStats) {

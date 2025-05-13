@@ -1,5 +1,6 @@
 package com.example.learnjapanese
 
+import BangChuCaiScreen
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -64,6 +65,9 @@ class MainActivity : ComponentActivity() {
                                 onNavigateToGrammar = {
                                     navController.navigate("grammar")
                                 },
+                                onNavigateToAlphabet = {  
+                                    navController.navigate("alphabet")
+                                },
                                 onNavigateToReading = {
                                     navController.navigate("reading")
                                 },
@@ -76,6 +80,15 @@ class MainActivity : ComponentActivity() {
                             )
                         }
                         
+                        // Thêm route mới cho màn hình Alphabet
+                        composable("alphabet") {
+                            BangChuCaiScreen(
+                                onBack = {
+                                    navController.popBackStack()
+                                }
+                            )
+                        }
+
                         composable("vocabulary") {
                             VocabularyScreen(
                                 onBack = {
