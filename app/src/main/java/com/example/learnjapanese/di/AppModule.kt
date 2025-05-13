@@ -4,6 +4,7 @@ import android.content.Context
 import com.example.learnjapanese.data.dao.LearningProgressDao
 import com.example.learnjapanese.data.dao.UserDao
 import com.example.learnjapanese.data.database.AppDatabase
+import com.example.learnjapanese.data.local.UserPreferences
 import com.example.learnjapanese.data.repository.LearningProgressRepository
 import com.example.learnjapanese.data.repository.UserRepository
 import dagger.Module
@@ -45,5 +46,11 @@ object AppModule {
     @Singleton
     fun provideLearningProgressRepository(learningProgressDao: LearningProgressDao): LearningProgressRepository {
         return LearningProgressRepository(learningProgressDao)
+    }
+    
+    @Provides
+    @Singleton
+    fun provideUserPreferences(@ApplicationContext context: Context): UserPreferences {
+        return UserPreferences(context)
     }
 } 

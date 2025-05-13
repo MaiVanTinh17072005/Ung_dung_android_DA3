@@ -2,6 +2,7 @@ package com.example.learnjapanese.di
 
 import android.media.MediaPlayer
 import com.example.learnjapanese.data.api.AIChatApiService
+import com.example.learnjapanese.data.api.AuthApi
 import com.example.learnjapanese.data.api.GrammarApiService
 import com.example.learnjapanese.data.api.ReadingApiService
 import com.example.learnjapanese.data.api.VocabularyApiService
@@ -32,7 +33,7 @@ object NetworkModule {
      */
     @Provides
     //fun provideBaseUrl() = "http://10.0.2.2:3000" // Thay đổi thành URL thực tế của API
-    fun provideBaseUrl() = "http://192.168.1.10:3000"
+    fun provideBaseUrl() = "http://192.168.1.10:3000" // URL máy chủ NodeJS của bạn
     /**
      * Cung cấp Gson cho việc parse JSON
      */
@@ -105,6 +106,15 @@ object NetworkModule {
     @Singleton
     fun provideReadingApiService(retrofit: Retrofit): ReadingApiService {
         return retrofit.create(ReadingApiService::class.java)
+    }
+
+    /**
+     * Cung cấp AuthApi Service
+     */
+    @Provides
+    @Singleton
+    fun provideAuthApiService(retrofit: Retrofit): AuthApi {
+        return retrofit.create(AuthApi::class.java)
     }
 
     @Provides

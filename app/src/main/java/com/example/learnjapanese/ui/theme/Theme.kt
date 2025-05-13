@@ -43,6 +43,14 @@ private val LightColorScheme = lightColorScheme(
     onSurfaceVariant = DarkGray
 )
 
+private val ColorScheme = lightColorScheme(
+    primary = MauChinh,
+    secondary = MauChinhNhat,
+    tertiary = MauChinhDam,
+    background = MauNen,
+    surface = MauNen
+)
+
 @Composable
 fun LearnJapaneseTheme(
     darkTheme: Boolean = isSystemInDarkTheme(),
