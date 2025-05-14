@@ -116,7 +116,7 @@ fun VocabularyScreen(
                                 .focusRequester(focusRequester),
                             placeholder = {
                                 Text(
-                                    "Tìm kiếm chủ đề từ vựng...",
+                                    "Tìm kiếm chủ đề...",
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                 )
                             },
@@ -532,54 +532,54 @@ fun FavoriteTopicCard(
                 )
             }
             
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Progress
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Tiến độ:",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                        )
-                        Text(
-                            text = "${(topic.progress * 100).toInt()}%",
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    
-                    Spacer(modifier = Modifier.height(4.dp))
-                    
-                    LinearProgressIndicator(
-                        progress = { topic.progress },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(4.dp)
-                            .clip(CircleShape),
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                    )
-                }
-                
-                Spacer(modifier = Modifier.width(8.dp))
-                
-                // Arrow icon
-                Icon(
-                    imageVector = Icons.Default.ArrowForward,
-                    contentDescription = "Go to topic",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+//            Row(
+//                modifier = Modifier.fillMaxWidth(),
+//                horizontalArrangement = Arrangement.SpaceBetween,
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                // Progress
+//                Column(modifier = Modifier.weight(1f)) {
+//                    Row(
+//                        modifier = Modifier.fillMaxWidth(),
+//                        horizontalArrangement = Arrangement.SpaceBetween
+//                    ) {
+//                        Text(
+//                            text = "Tiến độ:",
+//                            style = MaterialTheme.typography.bodySmall,
+//                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+//                        )
+//                        Text(
+//                            text = "${(topic.progress * 100).toInt()}%",
+//                            style = MaterialTheme.typography.bodySmall.copy(
+//                                fontWeight = FontWeight.Bold
+//                            ),
+//                            color = MaterialTheme.colorScheme.primary
+//                        )
+//                    }
+//
+//                    Spacer(modifier = Modifier.height(4.dp))
+//
+//                    LinearProgressIndicator(
+//                        progress = { topic.progress },
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .height(4.dp)
+//                            .clip(CircleShape),
+//                        color = MaterialTheme.colorScheme.primary,
+//                        trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+//                    )
+//                }
+//
+//                Spacer(modifier = Modifier.width(8.dp))
+//
+//                // Arrow icon
+//                Icon(
+//                    imageVector = Icons.Default.ArrowForward,
+//                    contentDescription = "Go to topic",
+//                    tint = MaterialTheme.colorScheme.primary,
+//                    modifier = Modifier.size(20.dp)
+//                )
+//            }
         }
     }
 }
@@ -664,54 +664,54 @@ fun TopicCard(
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Progress
-                Column(modifier = Modifier.weight(1f)) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "Tiến độ:",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                        )
-                        Text(
-                            text = "${(topic.progress * 100).toInt()}%",
-                            style = MaterialTheme.typography.bodySmall.copy(
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                    
-                    Spacer(modifier = Modifier.height(4.dp))
-                    
-                    LinearProgressIndicator(
-                        progress = { topic.progress },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(4.dp)
-                            .clip(CircleShape),
-                        color = MaterialTheme.colorScheme.primary,
-                        trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-                    )
-                }
-                
-                Spacer(modifier = Modifier.width(8.dp))
-                
-                // Go icon
-                Icon(
-                    imageVector = Icons.Default.KeyboardArrowRight,
-                    contentDescription = "Go to topic",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
+//            Row(
+//                modifier = Modifier.fillMaxWidth(),
+//                horizontalArrangement = Arrangement.SpaceBetween,
+//                verticalAlignment = Alignment.CenterVertically
+//            ) {
+//                // Progress
+//                Column(modifier = Modifier.weight(1f)) {
+//                    Row(
+//                        modifier = Modifier.fillMaxWidth(),
+//                        horizontalArrangement = Arrangement.SpaceBetween
+//                    ) {
+//                        Text(
+//                            text = "Tiến độ:",
+//                            style = MaterialTheme.typography.bodySmall,
+//                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+//                        )
+//                        Text(
+//                            text = "${(topic.progress * 100).toInt()}%",
+//                            style = MaterialTheme.typography.bodySmall.copy(
+//                                fontWeight = FontWeight.Bold
+//                            ),
+//                            color = MaterialTheme.colorScheme.primary
+//                        )
+//                    }
+//
+//                    Spacer(modifier = Modifier.height(4.dp))
+//
+//                    LinearProgressIndicator(
+//                        progress = { topic.progress },
+//                        modifier = Modifier
+//                            .fillMaxWidth()
+//                            .height(4.dp)
+//                            .clip(CircleShape),
+//                        color = MaterialTheme.colorScheme.primary,
+//                        trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+//                    )
+//                }
+//
+//                Spacer(modifier = Modifier.width(8.dp))
+//
+//                // Go icon
+//                Icon(
+//                    imageVector = Icons.Default.KeyboardArrowRight,
+//                    contentDescription = "Go to topic",
+//                    tint = MaterialTheme.colorScheme.primary,
+//                    modifier = Modifier.size(24.dp)
+//                )
+//            }
         }
     }
 }

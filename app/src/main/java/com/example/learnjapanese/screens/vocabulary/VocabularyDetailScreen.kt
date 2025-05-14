@@ -1,5 +1,8 @@
 package com.example.learnjapanese.screens.vocabulary
 
+import android.media.MediaPlayer
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
@@ -51,6 +54,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -62,6 +66,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -211,23 +216,23 @@ fun VocabularyDetailScreen(
                                 
                                 Spacer(modifier = Modifier.height(16.dp))
                                 
-                                // Progress
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Text(
-                                        text = "Tiến độ học tập",
-                                        style = MaterialTheme.typography.titleSmall
-                                    )
-                                    Text(
-                                        text = "${(topic?.progress ?: 0f * 100).toInt()}%",
-                                        style = MaterialTheme.typography.titleSmall.copy(
-                                            fontWeight = FontWeight.Bold
-                                        ),
-                                        color = MaterialTheme.colorScheme.primary
-                                    )
-                                }
+//                                // Progress
+//                                Row(
+//                                    modifier = Modifier.fillMaxWidth(),
+//                                    horizontalArrangement = Arrangement.SpaceBetween
+//                                ) {
+//                                    Text(
+//                                        text = "Tiến độ học tập",
+//                                        style = MaterialTheme.typography.titleSmall
+//                                    )
+//                                    Text(
+//                                        text = "${(topic?.progress ?: 0f * 100).toInt()}%",
+//                                        style = MaterialTheme.typography.titleSmall.copy(
+//                                            fontWeight = FontWeight.Bold
+//                                        ),
+//                                        color = MaterialTheme.colorScheme.primary
+//                                    )
+//                                }
                                 
                                 Spacer(modifier = Modifier.height(8.dp))
                                 
@@ -435,6 +440,15 @@ fun VocabularyDetailScreen(
 
 @Composable
 fun WordCard(word: VocabularyWord) {
+    val context = LocalContext.current
+    val mediaPlayer = remember { MediaPlayer() }
+    
+    DisposableEffect(mediaPlayer) {
+        onDispose {
+            mediaPlayer.release()
+        }
+    }
+    
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -448,66 +462,182 @@ fun WordCard(word: VocabularyWord) {
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
-        Row(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+                .padding(16.dp)
         ) {
-            Column(
-                modifier = Modifier.weight(1f)
+            // Phần từ vựng và nghĩa
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
+                Column(
+                    modifier = Modifier.weight(1f)
                 ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = word.word,
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
+                        
+                        Spacer(modifier = Modifier.width(8.dp))
+                        
+                        if (word.isLearned) {
+                            Icon(
+                                imageVector = Icons.Default.Check,
+                                contentDescription = "Đã học",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(16.dp)
+                            )
+                        }
+                    }
+                    
                     Text(
-                        text = word.word,
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Bold
+                        text = word.reading,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
                     )
+                    
+                    Spacer(modifier = Modifier.height(4.dp))
+                    
+                    Text(
+                        text = word.meaning,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+                
+                // Nút phát âm từ
+                IconButton(
+                    onClick = { 
+                        // Phát âm từ vựng
+                        playTextToSpeech(word.word, mediaPlayer, context)
+                    },
+                    modifier = Modifier
+                        .size(40.dp)
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.VolumeUp,
+                        contentDescription = "Nghe phát âm từ",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
+            }
+            
+            // Hiển thị câu ví dụ nếu có
+            if (!word.exampleSentence.isNullOrEmpty() && !word.exampleSentenceTranslation.isNullOrEmpty()) {
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                Divider(
+                    modifier = Modifier.fillMaxWidth(),
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+                )
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                // Phần ví dụ
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(24.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "例",
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                     
                     Spacer(modifier = Modifier.width(8.dp))
                     
-                    if (word.isLearned) {
-                        Icon(
-                            imageVector = Icons.Default.Check,
-                            contentDescription = "Đã học",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(16.dp)
+                    Column(
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        // Câu ví dụ tiếng Nhật
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = word.exampleSentence,
+                                style = MaterialTheme.typography.bodyMedium,
+                                fontWeight = FontWeight.SemiBold,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                modifier = Modifier.weight(1f)
+                            )
+                            
+                            // Nút phát âm câu ví dụ
+                            IconButton(
+                                onClick = { 
+                                    // Phát âm câu ví dụ
+                                    playTextToSpeech(word.exampleSentence, mediaPlayer, context)
+                                },
+                                modifier = Modifier
+                                    .size(32.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.05f))
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Default.VolumeUp,
+                                    contentDescription = "Nghe phát âm câu ví dụ",
+                                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                                    modifier = Modifier.size(16.dp)
+                                )
+                            }
+                        }
+                        
+                        Spacer(modifier = Modifier.height(4.dp))
+                        
+                        // Dịch nghĩa ví dụ
+                        Text(
+                            text = word.exampleSentenceTranslation,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
                         )
                     }
                 }
-                
-                Text(
-                    text = word.reading,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
-                )
-                
-                Spacer(modifier = Modifier.height(4.dp))
-                
-                Text(
-                    text = word.meaning,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-            
-            IconButton(
-                onClick = { /* Play pronunciation */ },
-                modifier = Modifier
-                    .size(40.dp)
-                    .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
-            ) {
-                Icon(
-                    imageVector = Icons.Default.VolumeUp,
-                    contentDescription = "Nghe phát âm",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(20.dp)
-                )
             }
         }
+    }
+}
+
+// Hàm helper để phát âm text
+private fun playTextToSpeech(text: String, mediaPlayer: MediaPlayer, context: android.content.Context) {
+    val encodedText = java.net.URLEncoder.encode(text, "UTF-8")
+    val ttsUrl = "https://translate.google.com/translate_tts?ie=UTF-8&client=tw-ob&tl=ja&q=$encodedText"
+    
+    try {
+        mediaPlayer.apply {
+            reset()
+            setDataSource(ttsUrl)
+            prepareAsync()
+            setOnPreparedListener { start() }
+            setOnErrorListener { mp, what, extra ->
+                Log.e("WordCard", "MediaPlayer error: $what, $extra")
+                Toast.makeText(context, "Không thể phát âm", Toast.LENGTH_SHORT).show()
+                true
+            }
+        }
+    } catch (e: Exception) {
+        Log.e("WordCard", "Error playing TTS: ${e.message}")
+        Toast.makeText(context, "Không thể phát âm", Toast.LENGTH_SHORT).show()
     }
 }
 

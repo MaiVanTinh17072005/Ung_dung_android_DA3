@@ -127,7 +127,7 @@ fun GrammarScreen(
                                 .focusRequester(focusRequester),
                             placeholder = {
                                 Text(
-                                    "Tìm kiếm ngữ pháp...",
+                                    "Tìm kiếm...",
                                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                 )
                             },

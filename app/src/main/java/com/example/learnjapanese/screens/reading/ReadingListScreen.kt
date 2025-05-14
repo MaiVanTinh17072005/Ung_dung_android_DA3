@@ -18,16 +18,10 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.AutoStories
-import androidx.compose.material.icons.filled.Bookmark
-import androidx.compose.material.icons.filled.BookmarkBorder
-import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -107,14 +101,6 @@ fun ReadingListScreen(
                         )
                     }
                 },
-                actions = {
-                    IconButton(onClick = { }) {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Tìm kiếm"
-                        )
-                    }
-                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 )
@@ -125,18 +111,6 @@ fun ReadingListScreen(
                 currentRoute = Screen.Reading.route,
                 onNavigate = onNavigate
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = { },
-                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-            ) {
-                Icon(
-                    imageVector = Icons.Default.MenuBook,
-                    contentDescription = "Đọc ngay"
-                )
-            }
         }
     ) { paddingValues ->
         Box(
@@ -161,13 +135,6 @@ fun ReadingListScreen(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_reading),
-                            contentDescription = null,
-                            modifier = Modifier.size(80.dp),
-                            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
                         Text(
                             "Chưa có bài đọc nào",
                             style = MaterialTheme.typography.bodyLarge,
@@ -282,18 +249,18 @@ fun ReadingListItem(
                         )
                     }
                     
-                    // Đánh dấu
-                    IconButton(
-                        onClick = { isBookmarked = !isBookmarked },
-                        modifier = Modifier.size(32.dp)
-                    ) {
-                        Icon(
-                            imageVector = if (isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
-                            contentDescription = if (isBookmarked) "Bỏ đánh dấu" else "Đánh dấu",
-                            tint = if (isBookmarked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+//                    // Đánh dấu
+//                    IconButton(
+//                        onClick = { isBookmarked = !isBookmarked },
+//                        modifier = Modifier.size(32.dp)
+//                    ) {
+//                        Icon(
+//                            imageVector = if (isBookmarked) Icons.Default.Bookmark else Icons.Default.BookmarkBorder,
+//                            contentDescription = if (isBookmarked) "Bỏ đánh dấu" else "Đánh dấu",
+//                            tint = if (isBookmarked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+//                            modifier = Modifier.size(24.dp)
+//                        )
+//                    }
                 }
                 
                 Column {
