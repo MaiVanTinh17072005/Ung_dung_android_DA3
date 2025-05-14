@@ -59,4 +59,25 @@ data class CompleteTopicRequest(
 data class CompleteTopicResponse(
     @SerializedName("success") val success: Boolean,
     @SerializedName("message") val message: String? = null
+)
+
+/**
+ * Model cho dữ liệu trả về từ API tìm kiếm từ vựng
+ */
+data class VocabularySearchResponse(
+    val success: Boolean,
+    val data: List<VocabularySearchItem>,
+    val message: String
+)
+
+/**
+ * Mỗi mục từ vựng trong kết quả tìm kiếm
+ */
+data class VocabularySearchItem(
+    val vocab_id: String,
+    val word: String,
+    val reading: String,
+    val meaning: String,
+    val example_sentence: String? = null,
+    val example_meaning: String? = null
 ) 

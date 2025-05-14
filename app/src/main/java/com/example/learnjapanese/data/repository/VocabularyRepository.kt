@@ -6,6 +6,7 @@ import com.example.learnjapanese.data.model.CompleteTopicResponse
 import com.example.learnjapanese.data.model.VocabularyCountResponse
 import com.example.learnjapanese.data.model.VocabularyTopicResponse
 import com.example.learnjapanese.data.model.VocabularyWordResponse
+import com.example.learnjapanese.data.model.VocabularySearchItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import retrofit2.Response
@@ -102,6 +103,33 @@ class VocabularyRepository @Inject constructor(
                     } ?: Result.failure(IOException("Phản hồi trống từ API"))
                 } else {
                     Result.failure(IOException("Không thể đánh dấu hoàn thành chủ đề: ${response.code()}"))
+                }
+            } catch (e: Exception) {
+                Result.failure(e)
+            }
+        }
+    }
+
+    /**
+     * Tìm kiếm từ vựng theo từ khóa
+     * @param keyword Từ khóa tìm kiếm (tiếng Nhật, cách đọc hoặc nghĩa tiếng Việt)
+     * @param fuzzy Tìm kiếm gần đúng (true/false, mặc định là true)
+     * @return Kết quả tìm kiếm
+     */
+    suspend fun searchVocabulary(keyword: String, fuzzy: Boolean = true): Result<List<VocabularySearchItem>> {
+        return withContext(Dispatchers.IO) {
+            try {
+                val response = vocabularyApiService.searchVocabulary(keyword, fuzzy)
+                if (response.isSuccessful) {
+                    response.body()?.let {
+                        if (it.success) {
+                            Result.success(it.data)
+                        } else {
+                            Result.failure(IOException(it.message))
+                        }
+                    } ?: Result.failure(IOException("Phản hồi trống từ API"))
+                } else {
+                    Result.failure(IOException("Không thể tìm kiếm từ vựng: ${response.code()}"))
                 }
             } catch (e: Exception) {
                 Result.failure(e)

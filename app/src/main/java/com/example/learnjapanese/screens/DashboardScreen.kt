@@ -16,16 +16,20 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoStories
@@ -38,6 +42,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.outlined.AutoStories
 import androidx.compose.material.icons.outlined.Book
 import androidx.compose.material.icons.outlined.Call
@@ -49,6 +54,7 @@ import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
@@ -96,7 +102,21 @@ import com.example.learnjapanese.data.model.FeaturedBanner
 import com.example.learnjapanese.data.model.LearningFeature
 import com.example.learnjapanese.ui.theme.LearnJapaneseTheme
 import com.example.learnjapanese.components.AppBottomNavigation
+import com.example.learnjapanese.data.model.VocabularySearchItem
 import com.example.learnjapanese.navigation.Screen
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.window.Dialog
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.ui.platform.LocalContext
+import com.example.learnjapanese.utils.TextToSpeechUtil
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.ui.window.DialogProperties
 
 // Data class cho các mục trong bottom navigation
 data class BottomNavItem(
@@ -124,11 +144,15 @@ fun DashboardScreen(
     val featuredBanner by viewModel.featuredBanner.collectAsState()
     val learningFeatures by viewModel.learningFeatures.collectAsState()
     
+    // Collect search states
+    val searchQuery by viewModel.searchQuery.collectAsState()
+    val isSearchActive by viewModel.isSearchActive.collectAsState()
+    val searchResults by viewModel.searchResults.collectAsState()
+    val isSearching by viewModel.isSearching.collectAsState()
+    
     Log.d("DashboardScreen", "States collected from ViewModel")
     
     var selectedNavItem by remember { mutableStateOf(4) } // Mặc định là trang chủ
-    var searchQuery by remember { mutableStateOf("") }
-    var isSearchActive by remember { mutableStateOf(false) }
 
     // Xử lý điều hướng
     val handleNavigation = { index: Int ->
@@ -209,11 +233,16 @@ fun DashboardScreen(
                     .padding(horizontal = 16.dp)
                     .padding(top = 8.dp, bottom = 16.dp)
             ) {
+                Log.d("DashboardScreen", "Rendering search bar, isSearchActive = $isSearchActive")
+                
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp)
-                        .clickable { isSearchActive = true },
+                        .clickable { 
+                            Log.d("DashboardScreen", "Search bar clicked, setting isSearchActive to true")
+                            viewModel.setSearchActive(true) 
+                        },
                     shape = RoundedCornerShape(12.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.surface
@@ -235,26 +264,246 @@ fun DashboardScreen(
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            "Tìm kiếm chức năng...",
+                            "Tìm kiếm từ vựng...",
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
                 }
             }
-
+            
+            // Dialog tìm kiếm khi người dùng nhấn vào thanh tìm kiếm
             if (isSearchActive) {
-                SearchBar(
-                    query = searchQuery,
-                    onQueryChange = { searchQuery = it },
-                    onSearch = { isSearchActive = false },
-                    active = isSearchActive,
-                    onActiveChange = { isSearchActive = it },
-                    placeholder = { Text("Tìm kiếm chức năng...") },
-                    leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
-                    modifier = Modifier.fillMaxWidth()
+                Log.d("DashboardScreen", "Showing search dialog")
+                
+                Dialog(
+                    onDismissRequest = { 
+                        Log.d("DashboardScreen", "Dialog dismissed, closing search")
+                        viewModel.setSearchActive(false) 
+                    },
+                    properties = DialogProperties(
+                        dismissOnBackPress = true,
+                        dismissOnClickOutside = true,
+                        usePlatformDefaultWidth = false
+                    )
                 ) {
-                    // Kết quả tìm kiếm
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth(0.92f) // Chiếm 92% chiều rộng màn hình
+                            .padding(12.dp)
+                            .heightIn(min = 100.dp, max = 550.dp), // Tăng chiều cao tối đa
+                        shape = RoundedCornerShape(24.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        ),
+                        elevation = CardDefaults.cardElevation(
+                            defaultElevation = 4.dp
+                        )
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp)
+                        ) {
+                            // Tiêu đề
+                            Text(
+                                text = "Tìm kiếm từ vựng",
+                                style = MaterialTheme.typography.headlineSmall,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(bottom = 20.dp) // Tăng khoảng cách
+                            )
+                            
+                            // Thanh tìm kiếm
+                            OutlinedTextField(
+                                value = searchQuery,
+                                onValueChange = { viewModel.onSearchQueryChanged(it) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(60.dp),
+                                placeholder = { Text("Nhập từ khóa tìm kiếm...") },
+                                leadingIcon = { 
+                                    Icon(
+                                        imageVector = Icons.Default.Search, 
+                                        contentDescription = "Search",
+                                        tint = MaterialTheme.colorScheme.primary,
+                                        modifier = Modifier.size(28.dp) // Tăng kích thước icon
+                                    ) 
+                                },
+                                trailingIcon = {
+                                    if (searchQuery.isNotEmpty()) {
+                                        IconButton(onClick = { viewModel.onSearchQueryChanged("") }) {
+                                            Icon(
+                                                imageVector = Icons.Default.Close,
+                                                contentDescription = "Clear",
+                                                tint = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.size(24.dp)
+                                            )
+                                        }
+                                    }
+                                },
+                                colors = OutlinedTextFieldDefaults.colors(
+                                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                                    unfocusedBorderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f),
+                                    cursorColor = MaterialTheme.colorScheme.primary
+                                ),
+                                shape = RoundedCornerShape(16.dp),
+                                singleLine = true,
+                                textStyle = MaterialTheme.typography.bodyLarge, // Tăng cỡ chữ
+                                keyboardOptions = KeyboardOptions(
+                                    imeAction = ImeAction.Search
+                                )
+                            )
+                            
+                            Spacer(modifier = Modifier.height(24.dp)) // Tăng khoảng cách
+                            
+                            // Kết quả tìm kiếm
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(400.dp) // Tăng chiều cao kết quả
+                            ) {
+                                when {
+                                    isSearching -> {
+                                        // Hiển thị đang tìm kiếm
+                                        Log.d("DashboardScreen", "Showing search progress indicator")
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .fillMaxHeight(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally
+                                            ) {
+                                                CircularProgressIndicator(
+                                                    modifier = Modifier.size(48.dp), // Tăng kích thước
+                                                    strokeWidth = 4.dp, // Tăng độ dày
+                                                    color = MaterialTheme.colorScheme.primary
+                                                )
+                                                Spacer(modifier = Modifier.height(24.dp)) // Tăng khoảng cách
+                                                Text(
+                                                    text = "Đang tìm kiếm...",
+                                                    style = MaterialTheme.typography.titleMedium, // Tăng cỡ chữ
+                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                                                )
+                                            }
+                                        }
+                                    }
+                                    searchQuery.isNotBlank() && searchResults.isEmpty() -> {
+                                        // Hiển thị không có kết quả
+                                        Log.d("DashboardScreen", "No search results found for query: $searchQuery")
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .fillMaxHeight(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                modifier = Modifier.padding(horizontal = 20.dp) // Thêm padding ngang
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Search,
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(64.dp), // Tăng kích thước
+                                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+                                                )
+                                                Spacer(modifier = Modifier.height(24.dp)) // Tăng khoảng cách
+                                                Text(
+                                                    text = "Không tìm thấy từ vựng nào",
+                                                    style = MaterialTheme.typography.headlineSmall, // Tăng cỡ chữ
+                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                                                    fontWeight = FontWeight.Medium,
+                                                    textAlign = TextAlign.Center
+                                                )
+                                                Spacer(modifier = Modifier.height(12.dp)) // Tăng khoảng cách
+                                                Text(
+                                                    text = "Thử tìm với từ khóa khác",
+                                                    style = MaterialTheme.typography.titleMedium, // Tăng cỡ chữ
+                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                                                    textAlign = TextAlign.Center
+                                                )
+                                            }
+                                        }
+                                    }
+                                    searchResults.isNotEmpty() -> {
+                                        // Hiển thị danh sách kết quả
+                                        Log.d("DashboardScreen", "Showing ${searchResults.size} search results")
+                                        Column(
+                                            modifier = Modifier.padding(horizontal = 4.dp) // Thêm padding ngang
+                                        ) {
+                                            Text(
+                                                text = "Kết quả tìm kiếm (${searchResults.size})",
+                                                style = MaterialTheme.typography.titleLarge, // Tăng cỡ chữ
+                                                fontWeight = FontWeight.SemiBold,
+                                                color = MaterialTheme.colorScheme.primary,
+                                                modifier = Modifier.padding(bottom = 16.dp, start = 8.dp) // Tăng padding
+                                            )
+                                            LazyColumn(
+                                                modifier = Modifier.fillMaxSize(),
+                                                verticalArrangement = Arrangement.spacedBy(16.dp), // Tăng khoảng cách giữa các kết quả
+                                                contentPadding = PaddingValues(bottom = 16.dp) // Thêm padding dưới cùng
+                                            ) {
+                                                items(searchResults) { item ->
+                                                    Log.d("DashboardScreen", "Rendering search result item: ${item.word}")
+                                                    VocabularySearchResultItem(item = item)
+                                                }
+                                            }
+                                        }
+                                    }
+                                    searchQuery.isBlank() -> {
+                                        // Hiển thị gợi ý khi chưa nhập từ khóa
+                                        Log.d("DashboardScreen", "Showing search hint")
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .fillMaxHeight(),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Column(
+                                                horizontalAlignment = Alignment.CenterHorizontally,
+                                                modifier = Modifier.padding(horizontal = 32.dp) // Tăng padding ngang
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(id = R.drawable.ic_sound),
+                                                    contentDescription = null,
+                                                    modifier = Modifier.size(86.dp), // Tăng kích thước icon
+                                                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+                                                )
+                                                Spacer(modifier = Modifier.height(24.dp))
+                                                Text(
+                                                    text = "Tìm kiếm từ vựng Nhật - Việt",
+                                                    style = MaterialTheme.typography.headlineSmall, // Tăng cỡ chữ
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                                                    textAlign = TextAlign.Center
+                                                )
+                                                Spacer(modifier = Modifier.height(16.dp))
+                                                Text(
+                                                    text = "Nhập từ khóa để bắt đầu tìm kiếm",
+                                                    style = MaterialTheme.typography.titleMedium, // Tăng cỡ chữ
+                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                                                    textAlign = TextAlign.Center
+                                                )
+                                                Spacer(modifier = Modifier.height(40.dp)) // Tăng khoảng cách
+                                                Card(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth(),
+                                                    colors = CardDefaults.cardColors(
+                                                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                                                    ),
+                                                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
+                                                    shape = RoundedCornerShape(16.dp) // Tăng bo tròn góc
+                                                ) {
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 
@@ -713,6 +962,163 @@ fun QuickFeatureCard(title: String, progress: Float, modifier: Modifier = Modifi
                 color = MaterialTheme.colorScheme.primary,
                 trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
             )
+        }
+    }
+}
+
+@Composable
+fun VocabularySearchResultItem(item: VocabularySearchItem) {
+    val context = LocalContext.current
+    
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 6.dp), // Thêm padding dọc
+        shape = RoundedCornerShape(20.dp), // Tăng bo tròn góc
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        ),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 2.dp // Thêm đổ bóng nhẹ
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp) // Tăng padding nội dung
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = item.word,
+                        style = MaterialTheme.typography.titleLarge, // Tăng cỡ chữ
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(modifier = Modifier.width(12.dp)) // Tăng khoảng cách
+                    Text(
+                        text = item.reading,
+                        style = MaterialTheme.typography.titleMedium, // Tăng cỡ chữ
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                    )
+                }
+                
+                // Nút phát âm
+                IconButton(
+                    onClick = { 
+                        // Phát âm từ vựng
+                        TextToSpeechUtil.speak(context, item.word)
+                    },
+                    modifier = Modifier
+                        .size(44.dp) // Tăng kích thước nút
+                        .clip(CircleShape)
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_sound),
+                        contentDescription = "Phát âm",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(26.dp) // Tăng kích thước icon
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp)) // Tăng khoảng cách
+            
+            // Nghĩa tiếng Việt
+            Text(
+                text = item.meaning,
+                style = MaterialTheme.typography.bodyLarge, // Tăng cỡ chữ
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                modifier = Modifier.padding(vertical = 4.dp) // Thêm padding dọc
+            )
+            
+            if (!item.example_sentence.isNullOrBlank() && !item.example_meaning.isNullOrBlank()) {
+                Spacer(modifier = Modifier.height(16.dp)) // Tăng khoảng cách
+                Divider(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    thickness = 1.dp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+                )
+                Spacer(modifier = Modifier.height(16.dp)) // Tăng khoảng cách
+                
+                // Ví dụ
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp) // Tăng kích thước badge
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Ex",
+                            style = MaterialTheme.typography.labelMedium, // Tăng cỡ chữ
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    
+                    Spacer(modifier = Modifier.width(12.dp)) // Tăng khoảng cách
+                    
+                    Column(
+                        modifier = Modifier.weight(1f) // Đảm bảo vừa với không gian còn lại
+                    ) {
+                        // Ví dụ tiếng Nhật và nút phát âm
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = item.example_sentence,
+                                style = MaterialTheme.typography.bodyLarge, // Tăng cỡ chữ
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                                modifier = Modifier.weight(1f)
+                            )
+                            
+                            // Nút phát âm ví dụ
+                            IconButton(
+                                onClick = { 
+                                    // Phát âm câu ví dụ
+                                    TextToSpeechUtil.speak(context, item.example_sentence)
+                                },
+                                modifier = Modifier
+                                    .size(36.dp) // Tăng kích thước nút
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.05f))
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_sound),
+                                    contentDescription = "Phát âm ví dụ",
+                                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                                    modifier = Modifier.size(20.dp) // Tăng kích thước icon
+                                )
+                            }
+                        }
+                        
+                        Spacer(modifier = Modifier.height(8.dp)) // Tăng khoảng cách
+                        
+                        // Nghĩa ví dụ
+                        Text(
+                            text = item.example_meaning,
+                            style = MaterialTheme.typography.bodyMedium, // Tăng cỡ chữ
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                        )
+                    }
+                }
+            }
         }
     }
 }
