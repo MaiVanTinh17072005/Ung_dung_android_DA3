@@ -88,11 +88,22 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import coil.compose.rememberAsyncImagePainter
 import com.example.learnjapanese.R
+import com.example.learnjapanese.data.model.ReadingResponse
+import com.example.learnjapanese.data.model.FeaturedBanner
+import com.example.learnjapanese.data.model.LearningFeature
 import com.example.learnjapanese.ui.theme.LearnJapaneseTheme
 import com.example.learnjapanese.components.AppBottomNavigation
 import com.example.learnjapanese.navigation.Screen
+
+// Data class cho các mục trong bottom navigation
+data class BottomNavItem(
+    val title: String,
+    val icon: Any, // Có thể là ImageVector hoặc Painter
+    val selectedIcon: Any
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -109,7 +120,7 @@ fun DashboardScreen(
     Log.d("DashboardScreen", "DashboardScreen composable started")
     
     // Collect states from ViewModel
-    val learningStats by viewModel.learningStats.collectAsState()
+    val latestReadings by viewModel.latestReadings.collectAsState()
     val featuredBanner by viewModel.featuredBanner.collectAsState()
     val learningFeatures by viewModel.learningFeatures.collectAsState()
     
@@ -247,16 +258,19 @@ fun DashboardScreen(
                 }
             }
 
-            // Thống kê tiến độ học tập
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            ) {
-                LearningStatsCard(learningStats)
+            // Bài đọc mới nhất
+            Box(modifier = Modifier.padding(horizontal = 16.dp)) {
+                LatestReadingsCard(
+                    readings = latestReadings,
+                    onReadingClick = { readingId ->
+                        // Navigate to reading detail screen
+                        Log.d("DashboardScreen", "Navigating to reading detail with ID: $readingId")
+                        onNavigate("reading_detail/$readingId")
+                    }
+                )
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Banner quảng cáo tính năng nổi bật
             featuredBanner?.let { banner ->
@@ -370,9 +384,8 @@ fun DashboardScreen(
     }
 }
 
-
 @Composable
-fun LearningStatsCard(stats: LearningStats) {
+fun LatestReadingsCard(readings: List<ReadingResponse>, onReadingClick: (String) -> Unit) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -388,76 +401,156 @@ fun LearningStatsCard(stats: LearningStats) {
             horizontalAlignment = Alignment.Start
         ) {
             Text(
-                text = "Tiến độ học tập",
+                text = "Bài đọc mới nhất",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )
             Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                StatItem(
-                    value = "${stats.wordsLearntToday}", 
-                    label = "Từ mới hôm nay", 
-                    accentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                )
-                Divider(
+            
+            if (readings.isEmpty()) {
+                // Show loading or empty state
+                Box(
                     modifier = Modifier
-                        .height(40.dp)
-                        .width(1.dp),
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
-                )
-                StatItem(
-                    value = "${stats.currentStreak}", 
-                    label = "Ngày liên tiếp", 
-                    accentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                )
-                Divider(
-                    modifier = Modifier
-                        .height(40.dp)
-                        .width(1.dp),
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
-                )
-                StatItem(
-                    value = "${stats.accuracy}%", 
-                    label = "Độ chính xác", 
-                    accentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                )
+                        .fillMaxWidth()
+                        .height(120.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Đang tải bài đọc...",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+            } else {
+                // Show readings
+                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                    readings.forEach { reading ->
+                        ReadingItem(
+                            reading = reading,
+                            onClick = { onReadingClick(reading.reading_id) }
+                        )
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-fun StatItem(value: String, label: String, accentColor: Color) {
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        Box(
-            modifier = Modifier
-                .size(36.dp)
-                .clip(CircleShape)
-                .background(accentColor)
-                .padding(8.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                text = value,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = label,
-            fontSize = 11.sp,
-            textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+fun ReadingItem(reading: ReadingResponse, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(100.dp)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(
+            defaultElevation = 0.dp
+        ),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
         )
+    ) {
+        Row(modifier = Modifier.fillMaxSize()) {
+            // Image section
+            Box(
+                modifier = Modifier
+                    .width(100.dp)
+                    .fillMaxHeight()
+            ) {
+                if (!reading.background_image_url.isNullOrEmpty()) {
+                    // Use AsyncImage instead of Image with rememberAsyncImagePainter for better loading
+                    AsyncImage(
+                        model = reading.background_image_url,
+                        contentDescription = "Reading thumbnail",
+                        modifier = Modifier.fillMaxSize(),
+                        contentScale = ContentScale.Crop,
+                        // Add a placeholder while loading
+                        error = painterResource(id = R.drawable.ic_reading),
+                        placeholder = painterResource(id = R.drawable.ic_reading)
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AutoStories,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(32.dp)
+                        )
+                    }
+                }
+            }
+            
+            // Content section
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .padding(12.dp),
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column {
+                    Text(
+                        text = reading.title,
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.Bold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    
+                    Spacer(modifier = Modifier.height(4.dp))
+                    
+                    Text(
+                        text = reading.short_intro,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+                
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // Level badge
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
+                            .padding(horizontal = 6.dp, vertical = 2.dp)
+                    ) {
+                        Text(
+                            text = reading.level,
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    
+                    // Estimated time
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.Book,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "${reading.estimated_time} phút",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -529,18 +622,19 @@ fun FeatureBanner(banner: FeaturedBanner) {
                     .padding(end = 16.dp)
             ) {
                 banner.imageUrl?.let {
-                    Image(
-                        painter = rememberAsyncImagePainter(it),
+                    AsyncImage(
+                        model = it,
                         contentDescription = "Banner Image",
                         modifier = Modifier
                             .fillMaxSize()
                             .clip(RoundedCornerShape(8.dp)),
-                        contentScale = ContentScale.Crop
+                        contentScale = ContentScale.Crop,
+                        error = painterResource(id = R.drawable.ic_reading),
+                        placeholder = painterResource(id = R.drawable.ic_reading)
                     )
                 } ?: Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .align(Alignment.Center)
                         .clip(RoundedCornerShape(8.dp))
                         .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)),
                     contentAlignment = Alignment.Center
@@ -614,16 +708,9 @@ fun QuickFeatureCard(title: String, progress: Float, modifier: Modifier = Modifi
     }
 }
 
-// Data class cho các mục trong bottom navigation
-private data class BottomNavItem(
-    val title: String,
-    val icon: Any, // Có thể là ImageVector hoặc Painter
-    val selectedIcon: Any
-)
-
 // Danh sách các mục trong bottom navigation
 @Composable
-private fun getBottomNavItems(): List<BottomNavItem> {
+fun getBottomNavItems(): List<BottomNavItem> {
     return listOf(
         BottomNavItem("Từ vựng", Icons.Outlined.Book, Icons.Filled.Book),
         BottomNavItem("Ngữ pháp", Icons.Outlined.Edit, Icons.Filled.Edit),
@@ -648,4 +735,4 @@ fun DashboardScreenPreview() {
             DashboardScreen()
         }
     }
-} 
+}

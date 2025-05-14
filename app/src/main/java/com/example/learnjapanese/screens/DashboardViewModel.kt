@@ -3,6 +3,10 @@ package com.example.learnjapanese.screens
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.learnjapanese.data.model.FeaturedBanner
+import com.example.learnjapanese.data.model.LearningFeature
+import com.example.learnjapanese.data.model.ReadingResponse
+import com.example.learnjapanese.data.repository.ReadingRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -11,15 +15,17 @@ import javax.inject.Inject
 import dagger.hilt.android.lifecycle.HiltViewModel
 
 @HiltViewModel
-class DashboardViewModel @Inject constructor() : ViewModel() {
+class DashboardViewModel @Inject constructor(
+    private val readingRepository: ReadingRepository
+) : ViewModel() {
     
     init {
         Log.d("DashboardViewModel", "DashboardViewModel initialized")
     }
     
-    // State cho dữ liệu thống kê học tập
-    private val _learningStats = MutableStateFlow(LearningStats())
-    val learningStats: StateFlow<LearningStats> = _learningStats.asStateFlow()
+    // State cho các bài đọc mới nhất
+    private val _latestReadings = MutableStateFlow<List<ReadingResponse>>(emptyList())
+    val latestReadings: StateFlow<List<ReadingResponse>> = _latestReadings.asStateFlow()
     
     // State cho tính năng nổi bật
     private val _featuredBanner = MutableStateFlow<FeaturedBanner?>(null)
@@ -31,23 +37,27 @@ class DashboardViewModel @Inject constructor() : ViewModel() {
     
     init {
         Log.d("DashboardViewModel", "Starting to fetch data")
-        // Giả lập lấy dữ liệu từ Repository
-        fetchLearningStats()
+        // Lấy dữ liệu từ Repository
+        fetchLatestReadings()
         fetchFeaturedBanner()
         fetchLearningFeatures()
     }
     
-    private fun fetchLearningStats() {
+    private fun fetchLatestReadings() {
         viewModelScope.launch {
-            Log.d("DashboardViewModel", "Fetching learning stats")
-            // Trong thực tế, dữ liệu này sẽ được lấy từ repository
-            // Chẳng hạn: userRepository.getCurrentUserStats()
-            _learningStats.value = LearningStats(
-                wordsLearntToday = 30,
-                currentStreak = 5,
-                accuracy = 80
-            )
-            Log.d("DashboardViewModel", "Learning stats fetched successfully")
+            Log.d("DashboardViewModel", "Fetching latest readings")
+            try {
+                // Lấy 2 bài đọc mới nhất
+                val result = readingRepository.getReadingList(limit = 2, page = 1)
+                result.onSuccess { readingListData ->
+                    _latestReadings.value = readingListData.readings
+                    Log.d("DashboardViewModel", "Latest readings fetched successfully: ${readingListData.readings.size} items")
+                }.onFailure { error ->
+                    Log.e("DashboardViewModel", "Error fetching latest readings", error)
+                }
+            } catch (e: Exception) {
+                Log.e("DashboardViewModel", "Exception when fetching latest readings", e)
+            }
         }
     }
     
@@ -85,15 +95,4 @@ data class LearningStats(
     val wordsLearntToday: Int = 0,
     val currentStreak: Int = 0,
     val accuracy: Int = 0
-)
-
-data class FeaturedBanner(
-    val title: String,
-    val description: String,
-    val imageUrl: String?
-)
-
-data class LearningFeature(
-    val title: String,
-    val progress: Float
 ) 
