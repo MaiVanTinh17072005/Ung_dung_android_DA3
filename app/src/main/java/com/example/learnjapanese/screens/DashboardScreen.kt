@@ -279,7 +279,13 @@ fun DashboardScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp)
                 ) {
-                    FeatureBanner(banner)
+                    FeatureBanner(
+                        banner = banner,
+                        onNavigateToChat = {
+                            Log.d("DashboardScreen", "Banner tính năng nổi bật được nhấn, điều hướng đến màn hình Chat")
+                            onNavigateToChat()
+                        }
+                    )
                 }
             }
 
@@ -555,11 +561,15 @@ fun ReadingItem(reading: ReadingResponse, onClick: () -> Unit) {
 }
 
 @Composable
-fun FeatureBanner(banner: FeaturedBanner) {
+fun FeatureBanner(banner: FeaturedBanner, onNavigateToChat: () -> Unit = {}) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .height(140.dp),
+            .height(140.dp)
+            .clickable {
+                Log.d("FeatureBanner", "Banner clicked, navigating to Chat Screen")
+                onNavigateToChat()
+            },
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 0.dp
@@ -594,8 +604,7 @@ fun FeatureBanner(banner: FeaturedBanner) {
                 Card(
                     modifier = Modifier
                         .width(120.dp)
-                        .height(36.dp)
-                        .clickable { /* TODO: Handle click */ },
+                        .height(36.dp),
                     shape = RoundedCornerShape(18.dp),
                     colors = CardDefaults.cardColors(
                         containerColor = MaterialTheme.colorScheme.primary
