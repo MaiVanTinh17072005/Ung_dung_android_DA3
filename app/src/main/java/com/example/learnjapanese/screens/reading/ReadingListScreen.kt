@@ -62,13 +62,16 @@ import coil.compose.AsyncImage
 import com.example.learnjapanese.R
 import com.example.learnjapanese.ui.theme.LearnJapaneseTheme
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.learnjapanese.components.AppBottomNavigation
+import com.example.learnjapanese.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReadingListScreen(
     viewModel: ReadingViewModel = hiltViewModel(),
     onBack: () -> Unit = {},
-    onReadingClick: (String) -> Unit = {}
+    onReadingClick: (String) -> Unit = {},
+    onNavigate: (String) -> Unit = {}
 ) {
     val readingList by viewModel.readingList.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
@@ -115,6 +118,12 @@ fun ReadingListScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background
                 )
+            )
+        },
+        bottomBar = {
+            AppBottomNavigation(
+                currentRoute = Screen.Reading.route,
+                onNavigate = onNavigate
             )
         },
         floatingActionButton = {

@@ -89,7 +89,7 @@ fun LoginScreen(
                 delay(300)
                 Log.d("LoginScreen", "Gọi callback chuyển hướng đến Dashboard...")
                 try {
-                    onLoginSuccess()
+                onLoginSuccess()
                     Log.d("LoginScreen", "Đã gọi callback chuyển hướng thành công")
                 } catch (e: Exception) {
                     Log.e("LoginScreen", "Lỗi khi gọi callback chuyển hướng: ${e.message}", e)

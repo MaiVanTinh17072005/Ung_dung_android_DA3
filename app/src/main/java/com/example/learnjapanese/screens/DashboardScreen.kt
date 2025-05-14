@@ -91,6 +91,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.learnjapanese.R
 import com.example.learnjapanese.ui.theme.LearnJapaneseTheme
+import com.example.learnjapanese.components.AppBottomNavigation
+import com.example.learnjapanese.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -101,7 +103,8 @@ fun DashboardScreen(
     onNavigateToAlphabet: () -> Unit = {},
     onNavigateToReading: () -> Unit = {},
     onNavigateToAccount: () -> Unit = {},
-    onNavigateToChat: () -> Unit = {}
+    onNavigateToChat: () -> Unit = {},
+    onNavigate: (String) -> Unit = {}
 ) {
     Log.d("DashboardScreen", "DashboardScreen composable started")
     
@@ -175,144 +178,10 @@ fun DashboardScreen(
             )
         },
         bottomBar = {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(100.dp) // Tăng chiều cao để chứa FAB
-            ) {
-                // Thanh điều hướng
-                NavigationBar(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    contentColor = MaterialTheme.colorScheme.onSurface,
-                    tonalElevation = 0.dp,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(100.dp)
-                        .align(Alignment.BottomCenter)
-                        .shadow(5.dp)
-                        .zIndex(0f)
-                ) {
-                    val bottomNavItems = getBottomNavItems()
-                    val navItems = listOf(
-                        bottomNavItems[0],
-                        bottomNavItems[1],
-                        // Để trống ở giữa cho nút Home
-                        bottomNavItems[2],
-                        bottomNavItems[3]
-                    )
-                    
-                    // 2 mục đầu tiên
-                    navItems.subList(0, 2).forEachIndexed { index, item ->
-                        NavigationBarItem(
-                            icon = { 
-                                when (val icon = if (selectedNavItem == index) item.selectedIcon else item.icon) {
-                                    is ImageVector -> Icon(
-                                        imageVector = icon,
-                                        contentDescription = item.title,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    else -> Icon(
-                                        painter = icon as androidx.compose.ui.graphics.painter.Painter,
-                                        contentDescription = item.title,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                            },
-                            label = { 
-                                Text(
-                                    item.title, 
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        fontWeight = if (selectedNavItem == index) FontWeight.Bold else FontWeight.Normal
-                                    ),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                ) 
-                            },
-                            selected = selectedNavItem == index,
-                            onClick = { handleNavigation(index) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = MaterialTheme.colorScheme.primary,
-                                selectedTextColor = MaterialTheme.colorScheme.primary,
-                                indicatorColor = MaterialTheme.colorScheme.surface,
-                                unselectedIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                unselectedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            )
-                        )
-                    }
-                    
-                    // Mục giữa (trống)
-                    NavigationBarItem(
-                        icon = { 
-                            Spacer(modifier = Modifier.size(24.dp))
-                        },
-                        label = { Spacer(modifier = Modifier.height(12.dp)) },
-                        selected = selectedNavItem == 4,
-                        onClick = { },
-                        colors = NavigationBarItemDefaults.colors(
-                            indicatorColor = MaterialTheme.colorScheme.surface
-                        )
-                    )
-                    
-                    // 2 mục cuối
-                    navItems.subList(2, 4).forEachIndexed { index, item ->
-                        val actualIndex = index + 2
-                        NavigationBarItem(
-                            icon = { 
-                                when (val icon = if (selectedNavItem == actualIndex) item.selectedIcon else item.icon) {
-                                    is ImageVector -> Icon(
-                                        imageVector = icon,
-                                        contentDescription = item.title,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    else -> Icon(
-                                        painter = icon as androidx.compose.ui.graphics.painter.Painter,
-                                        contentDescription = item.title,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                            },
-                            label = { 
-                                Text(
-                                    item.title, 
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        fontWeight = if (selectedNavItem == actualIndex) FontWeight.Bold else FontWeight.Normal
-                                    ),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                ) 
-                            },
-                            selected = selectedNavItem == actualIndex,
-                            onClick = { handleNavigation(actualIndex) },
-                            colors = NavigationBarItemDefaults.colors(
-                                selectedIconColor = MaterialTheme.colorScheme.primary,
-                                selectedTextColor = MaterialTheme.colorScheme.primary,
-                                indicatorColor = MaterialTheme.colorScheme.surface,
-                                unselectedIconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                                unselectedTextColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            )
-                        )
-                    }
-                }
-                
-                // Nút Trang chủ nổi ở giữa
-                FloatingActionButton(
-                    onClick = { handleNavigation(4) },
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary,
-                    shape = CircleShape,
-                    modifier = Modifier
-                        .size(56.dp)
-                        .align(Alignment.TopCenter)
-                        .offset(y = (-16).dp)
-                        .zIndex(1f)
-                ) {
-                    Icon(
-                        imageVector = if (selectedNavItem == 4) Icons.Filled.Home else Icons.Outlined.Home,
-                        contentDescription = "Trang chủ",
-                        modifier = Modifier.size(28.dp)
-                    )
-                }
-            }
+            AppBottomNavigation(
+                currentRoute = Screen.Dashboard.route,
+                onNavigate = onNavigate
+            )
         }
     ) { innerPadding ->
         Column(

@@ -1,7 +1,12 @@
+package com.example.learnjapanese.screens.alphabet
+
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
+import com.example.learnjapanese.data.AlphabetData
+import com.example.learnjapanese.data.CharacterType
+import com.example.learnjapanese.data.JapaneseCharacter
 
 class AlphabetViewModel : ViewModel() {
     var selectedType by mutableStateOf(CharacterType.HIRAGANA)

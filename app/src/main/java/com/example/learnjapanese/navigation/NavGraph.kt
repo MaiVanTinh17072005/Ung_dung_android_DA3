@@ -3,14 +3,34 @@ package com.example.learnjapanese.navigation
 import android.util.Log
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import com.example.learnjapanese.screens.DashboardScreen
 import com.example.learnjapanese.screens.login.LoginScreen
 import com.example.learnjapanese.screens.register.RegisterScreen
 import com.example.learnjapanese.screens.welcome.WelcomeScreen
 import com.example.learnjapanese.screens.forgotpassword.ForgotPasswordScreen
 import com.example.learnjapanese.screens.changepassword.ChangePasswordScreen
+import com.example.learnjapanese.screens.vocabulary.VocabularyScreen
+import com.example.learnjapanese.screens.grammar.GrammarScreen
+import com.example.learnjapanese.screens.reading.ReadingListScreen
+import com.example.learnjapanese.screens.chat.ChatListScreen
+import com.example.learnjapanese.screens.alphabet.BangChuCaiScreen as AlphabetScreen
+import com.example.learnjapanese.screens.profile.ProfileScreen
+import com.example.learnjapanese.screens.vocabulary.VocabularyDetailScreen
+import com.example.learnjapanese.screens.vocabulary.VocabularyFlashcardScreen
+import com.example.learnjapanese.screens.vocabulary.VocabularyQuizScreen
+import com.example.learnjapanese.screens.grammar.GrammarDetailScreen
+import com.example.learnjapanese.screens.grammar.GrammarQuizScreen
+import com.example.learnjapanese.screens.reading.ReadingDetailScreen
+import com.example.learnjapanese.screens.chat.TextChatScreen
+import com.example.learnjapanese.screens.chat.VoiceChatScreen
+import com.example.learnjapanese.screens.profile.EditProfileScreen
+import com.example.learnjapanese.screens.profile.SettingsScreen
+import com.example.learnjapanese.screens.profile.NotificationsScreen
+import com.example.learnjapanese.screens.profile.FriendsScreen
 
 @Composable
 fun NavGraph(navController: NavHostController) {
@@ -43,8 +63,8 @@ fun NavGraph(navController: NavHostController) {
                     Log.d("NavGraph", "Login success callback triggered, navigating to Dashboard...")
                     try {
                         Log.d("NavGraph", "Chuẩn bị điều hướng đến Dashboard với route: ${Screen.Dashboard.route}")
-                        navController.navigate(Screen.Dashboard.route) {
-                            popUpTo(Screen.Login.route) { inclusive = true }
+                    navController.navigate(Screen.Dashboard.route) {
+                        popUpTo(Screen.Login.route) { inclusive = true }
                         }
                         Log.d("NavGraph", "Navigation to Dashboard completed successfully")
                     } catch (e: Exception) {
@@ -98,28 +118,339 @@ fun NavGraph(navController: NavHostController) {
             Log.d("NavGraph", "Đang render màn hình Dashboard")
             DashboardScreen(
                 onNavigateToVocabulary = {
-                    // Điều hướng đến màn hình Vocabulary
                     Log.d("NavGraph", "Điều hướng đến màn hình Vocabulary")
+                    try {
+                        navController.navigate(Screen.Vocabulary.route)
+                        Log.d("NavGraph", "Đã điều hướng đến màn hình Vocabulary thành công")
+                    } catch (e: Exception) {
+                        Log.e("NavGraph", "Lỗi khi điều hướng đến Vocabulary: ${e.message}", e)
+                    }
                 },
                 onNavigateToGrammar = {
-                    // Điều hướng đến màn hình Grammar
                     Log.d("NavGraph", "Điều hướng đến màn hình Grammar")
+                    try {
+                        navController.navigate(Screen.Grammar.route)
+                        Log.d("NavGraph", "Đã điều hướng đến màn hình Grammar thành công")
+                    } catch (e: Exception) {
+                        Log.e("NavGraph", "Lỗi khi điều hướng đến Grammar: ${e.message}", e)
+                    }
                 },
                 onNavigateToAlphabet = {
-                    // Điều hướng đến màn hình Alphabet
                     Log.d("NavGraph", "Điều hướng đến màn hình Alphabet")
+                    try {
+                        navController.navigate(Screen.Alphabet.route)
+                        Log.d("NavGraph", "Đã điều hướng đến màn hình Alphabet thành công")
+                    } catch (e: Exception) {
+                        Log.e("NavGraph", "Lỗi khi điều hướng đến Alphabet: ${e.message}", e)
+                    }
                 },
                 onNavigateToReading = {
-                    // Điều hướng đến màn hình Reading
                     Log.d("NavGraph", "Điều hướng đến màn hình Reading")
-                },
-                onNavigateToAccount = {
-                    // Điều hướng đến màn hình Account
-                    Log.d("NavGraph", "Điều hướng đến màn hình Account")
+                    try {
+                        navController.navigate(Screen.Reading.route)
+                        Log.d("NavGraph", "Đã điều hướng đến màn hình Reading thành công")
+                    } catch (e: Exception) {
+                        Log.e("NavGraph", "Lỗi khi điều hướng đến Reading: ${e.message}", e)
+                    }
                 },
                 onNavigateToChat = {
-                    // Điều hướng đến màn hình Chat
                     Log.d("NavGraph", "Điều hướng đến màn hình Chat")
+                    try {
+                        navController.navigate(Screen.Chat.route)
+                        Log.d("NavGraph", "Đã điều hướng đến màn hình Chat thành công")
+                    } catch (e: Exception) {
+                        Log.e("NavGraph", "Lỗi khi điều hướng đến Chat: ${e.message}", e)
+                    }
+                },
+                onNavigateToAccount = {
+                    Log.d("NavGraph", "Điều hướng đến màn hình Profile")
+                    try {
+                        navController.navigate(Screen.Profile.route)
+                        Log.d("NavGraph", "Đã điều hướng đến màn hình Profile thành công")
+                    } catch (e: Exception) {
+                        Log.e("NavGraph", "Lỗi khi điều hướng đến Profile: ${e.message}", e)
+                    }
+                },
+                onNavigate = { route ->
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                        popUpTo(Screen.Dashboard.route)
+                    }
+                }
+            )
+        }
+
+        composable(route = Screen.Vocabulary.route) {
+            Log.d("NavGraph", "Đang render màn hình Vocabulary")
+            VocabularyScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
+                onTopicClick = { topicId ->
+                    navController.navigate("vocabulary_detail/$topicId")
+                },
+                onNavigate = { route ->
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                        popUpTo(Screen.Dashboard.route)
+                    }
+                }
+            )
+        }
+
+        composable(
+            route = "vocabulary_detail/{topicId}",
+            arguments = listOf(navArgument("topicId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val topicId = backStackEntry.arguments?.getString("topicId") ?: ""
+            VocabularyDetailScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
+                onStartFlashcards = { topicId ->
+                    navController.navigate("vocabulary_flashcard/$topicId")
+                },
+                onStartQuiz = { topicId ->
+                    navController.navigate("vocabulary_quiz/$topicId")
+                },
+                topicId = topicId
+            )
+        }
+
+        composable(
+            route = "vocabulary_flashcard/{topicId}",
+            arguments = listOf(navArgument("topicId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val topicId = backStackEntry.arguments?.getString("topicId") ?: ""
+            VocabularyFlashcardScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
+                topicId = topicId
+            )
+        }
+
+        composable(
+            route = "vocabulary_quiz/{topicId}",
+            arguments = listOf(navArgument("topicId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val topicId = backStackEntry.arguments?.getString("topicId") ?: ""
+            VocabularyQuizScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
+                topicId = topicId
+            )
+        }
+
+        composable(route = Screen.Grammar.route) {
+            Log.d("NavGraph", "Đang render màn hình Grammar")
+            GrammarScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
+                onGrammarClick = { grammarId ->
+                    navController.navigate("grammar_detail/$grammarId")
+                },
+                onStartQuiz = { grammarIds ->
+                    val idsParam = grammarIds.joinToString(",")
+                    navController.navigate("grammar_quiz?ids=$idsParam")
+                },
+                onNavigate = { route ->
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                        popUpTo(Screen.Dashboard.route)
+                    }
+                }
+            )
+        }
+
+        composable(
+            route = "grammar_detail/{grammarId}",
+            arguments = listOf(navArgument("grammarId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val grammarId = backStackEntry.arguments?.getString("grammarId") ?: ""
+            GrammarDetailScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
+                grammarId = grammarId
+            )
+        }
+
+        composable(
+            route = "grammar_quiz?ids={ids}",
+            arguments = listOf(navArgument("ids") { 
+                type = NavType.StringType
+                nullable = true
+                defaultValue = null
+            })
+        ) { backStackEntry ->
+            val idsParam = backStackEntry.arguments?.getString("ids") ?: ""
+            val grammarIds = idsParam.split(",").filter { it.isNotEmpty() }
+            GrammarQuizScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
+                grammarIds = grammarIds
+            )
+        }
+
+        composable(route = Screen.Reading.route) {
+            Log.d("NavGraph", "Đang render màn hình Reading")
+            ReadingListScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
+                onReadingClick = { readingId ->
+                    navController.navigate("reading_detail/$readingId")
+                },
+                onNavigate = { route ->
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                        popUpTo(Screen.Dashboard.route)
+                    }
+                }
+            )
+        }
+
+        composable(
+            route = "reading_detail/{readingId}",
+            arguments = listOf(navArgument("readingId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val readingId = backStackEntry.arguments?.getString("readingId") ?: ""
+            ReadingDetailScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
+                readingId = readingId
+            )
+        }
+
+        composable(route = Screen.Alphabet.route) {
+            Log.d("NavGraph", "Đang render màn hình Alphabet")
+            AlphabetScreen(
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(route = Screen.Chat.route) {
+            Log.d("NavGraph", "Đang render màn hình Chat")
+            ChatListScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
+                onStartTextChat = {
+                    navController.navigate("text_chat")
+                },
+                onStartVoiceChat = {
+                    navController.navigate("voice_chat")
+                },
+                onHistoryChatClick = { chatId ->
+                    navController.navigate("text_chat/$chatId")
+                },
+                onNavigate = { route ->
+                    navController.navigate(route) {
+                        launchSingleTop = true
+                        popUpTo(Screen.Dashboard.route)
+                    }
+                }
+            )
+        }
+
+        composable(route = "text_chat") {
+            TextChatScreen(
+                chatId = null,
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(
+            route = "text_chat/{chatId}",
+            arguments = listOf(navArgument("chatId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val chatId = backStackEntry.arguments?.getString("chatId") ?: ""
+            TextChatScreen(
+                chatId = chatId,
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(route = "voice_chat") {
+            VoiceChatScreen(
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(
+            route = "voice_chat/{chatId}",
+            arguments = listOf(navArgument("chatId") { type = NavType.StringType })
+        ) { backStackEntry ->
+            val chatId = backStackEntry.arguments?.getString("chatId") ?: ""
+            VoiceChatScreen(
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(route = Screen.Profile.route) {
+            Log.d("NavGraph", "Đang render màn hình Profile")
+            ProfileScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
+                onEditProfile = {
+                    navController.navigate("edit_profile")
+                },
+                onFindFriends = {
+                    navController.navigate("friends")
+                },
+                onNotifications = {
+                    navController.navigate("notifications")
+                },
+                onSettings = {
+                    navController.navigate("settings")
+                }
+            )
+        }
+
+        composable(route = "edit_profile") {
+            EditProfileScreen(
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(route = "settings") {
+            SettingsScreen(
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(route = "notifications") {
+            NotificationsScreen(
+                onBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
+        composable(route = "friends") {
+            FriendsScreen(
+                onBack = {
+                    navController.popBackStack()
                 }
             )
         }

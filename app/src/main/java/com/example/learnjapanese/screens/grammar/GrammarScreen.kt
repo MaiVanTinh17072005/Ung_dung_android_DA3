@@ -78,6 +78,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.learnjapanese.data.model.GrammarItem
 import com.example.learnjapanese.utils.Resource
 import com.example.learnjapanese.ui.theme.LearnJapaneseTheme
+import com.example.learnjapanese.components.AppBottomNavigation
+import com.example.learnjapanese.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -85,6 +87,7 @@ fun GrammarScreen(
     onBack: () -> Unit = {},
     onGrammarClick: (String) -> Unit = {},
     onStartQuiz: (List<String>) -> Unit = {},
+    onNavigate: (String) -> Unit = {},
     viewModel: GrammarViewModel = hiltViewModel()
 ) {
     // Lấy state từ ViewModel
@@ -225,6 +228,12 @@ fun GrammarScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                 )
+            )
+        },
+        bottomBar = {
+            AppBottomNavigation(
+                currentRoute = Screen.Grammar.route,
+                onNavigate = onNavigate
             )
         },
         floatingActionButton = {

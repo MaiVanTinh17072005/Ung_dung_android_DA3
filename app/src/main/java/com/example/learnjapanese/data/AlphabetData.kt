@@ -1,3 +1,5 @@
+package com.example.learnjapanese.data
+
 data class JapaneseCharacter(
     val character: String,
     val romaji: String,

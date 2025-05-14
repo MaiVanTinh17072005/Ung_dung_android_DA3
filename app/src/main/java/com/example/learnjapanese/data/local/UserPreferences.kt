@@ -67,10 +67,10 @@ class UserPreferences @Inject constructor(private val context: Context) {
     // Hàm debug để in ra dữ liệu trong DataStore
     suspend fun debugPrintDataStore() {
         try {
-            // Lấy đường dẫn của DataStore
-            val dataStoreFile = File(context.filesDir, "datastore/user_preferences.preferences_pb")
-            val dataStorePath = dataStoreFile.absolutePath
-            
+        // Lấy đường dẫn của DataStore
+        val dataStoreFile = File(context.filesDir, "datastore/user_preferences.preferences_pb")
+        val dataStorePath = dataStoreFile.absolutePath
+        
             // Sử dụng first() thay vì collect để chỉ lấy giá trị hiện tại
             val preferences = context.dataStore.data.first()
             val userId = preferences[USER_ID_KEY]

@@ -60,6 +60,8 @@ import com.example.learnjapanese.ui.theme.LearnJapaneseTheme
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import com.example.learnjapanese.components.AppBottomNavigation
+import com.example.learnjapanese.navigation.Screen
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -67,7 +69,8 @@ fun ChatListScreen(
     onBack: () -> Unit = {},
     onStartTextChat: () -> Unit = {},
     onStartVoiceChat: () -> Unit = {},
-    onHistoryChatClick: (String) -> Unit = {}
+    onHistoryChatClick: (String) -> Unit = {},
+    onNavigate: (String) -> Unit = {}
 ) {
     var selectedTabIndex by remember { mutableStateOf(0) }
     val tabs = listOf("Trò chuyện mới", "Lịch sử")
@@ -136,6 +139,12 @@ fun ChatListScreen(
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                 )
+            )
+        },
+        bottomBar = {
+            AppBottomNavigation(
+                currentRoute = Screen.Chat.route,
+                onNavigate = onNavigate
             )
         }
     ) { innerPadding ->

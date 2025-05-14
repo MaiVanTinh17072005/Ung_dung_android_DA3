@@ -1,3 +1,5 @@
+package com.example.learnjapanese.screens.alphabet
+
 import android.media.MediaPlayer
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -17,6 +19,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.AsyncImage
+import com.example.learnjapanese.data.CharacterType
+import com.example.learnjapanese.data.JapaneseCharacter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
