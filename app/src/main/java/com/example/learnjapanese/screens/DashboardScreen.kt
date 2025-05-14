@@ -132,6 +132,7 @@ fun DashboardScreen(
     onNavigateToVocabulary: () -> Unit = {},
     onNavigateToGrammar: () -> Unit = {},
     onNavigateToAlphabet: () -> Unit = {},
+    onNavigateToKatakana: () -> Unit = {},
     onNavigateToReading: () -> Unit = {},
     onNavigateToAccount: () -> Unit = {},
     onNavigateToChat: () -> Unit = {},
@@ -540,101 +541,139 @@ fun DashboardScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
-            // Danh sách tính năng nhanh
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-            ) {
+            // Phần bảng chữ cái - thay thế phần "Bắt đầu học"
+            AlphabetFeatureSection(
+                onNavigateToAlphabet = onNavigateToAlphabet,
+                onNavigateToKatakana = { onNavigate("alphabet_katakana") }
+            )
+            
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+    }
+}
+
+@Composable
+fun AlphabetFeatureSection(onNavigateToAlphabet: () -> Unit, onNavigateToKatakana: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        Text(
+            text = "Bảng chữ cái Nhật Bản",
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold
+        )
+        
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        // Hiển thị hệ thống Hiragana và Katakana
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            // Hiragana
+            AlphabetTypeCard(
+                title = "Hiragana",
+                description = "Chữ cái cơ bản dùng cho từ và ngữ pháp Nhật",
+                exampleChar = "ひらがな",
+                modifier = Modifier.weight(1f),
+                onClick = onNavigateToAlphabet
+            )
+            
+            // Katakana
+            AlphabetTypeCard(
+                title = "Katakana",
+                description = "Chữ cái dùng cho từ vựng nước ngoài",
+                exampleChar = "カタカナ",
+                modifier = Modifier.weight(1f),
+                onClick = onNavigateToKatakana
+            )
+        }
+    }
+}
+
+@Composable
+fun AlphabetExampleCard(character: String, romaji: String) {
+    Box(
+        modifier = Modifier
+            .size(60.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.3f),
+                shape = RoundedCornerShape(12.dp)
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = character,
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
+            
+            Text(
+                text = romaji,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+            )
+        }
+    }
+}
+
+@Composable
+fun AlphabetTypeCard(
+    title: String,
+    description: String,
+    exampleChar: String,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = modifier
+            .height(140.dp)
+            .clickable(onClick = onClick),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.7f)
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Column {
                 Text(
-                    text = "Bắt đầu học",
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.Bold
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.8f),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
             }
             
-           // Grid của các tính năng
-            if (learningFeatures.isNotEmpty()) {
-                // Trong phần LazyVerticalGrid items, thêm một card mới cho Bảng chữ cái
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    modifier = Modifier
-                        .height((learningFeatures.size * 95).dp)
-                        .fillMaxWidth(),
-                    userScrollEnabled = false
-                ) {
-                    item {
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(130.dp)
-                                .clickable { onNavigateToAlphabet() },
-                            shape = RoundedCornerShape(16.dp),
-                            elevation = CardDefaults.cardElevation(
-                                defaultElevation = 0.dp
-                            ),
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surface
-                            )
-                        ) {
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp),
-                                verticalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Text(
-                                    text = "Bảng chữ cái",
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.SemiBold,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                                
-                                Spacer(modifier = Modifier.height(8.dp))
-                                
-                                Box(
-                                    modifier = Modifier
-                                        .size(48.dp)
-                                        .clip(RoundedCornerShape(percent = 25))
-                                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Default.Edit,
-                                        contentDescription = "Alphabet",
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                }
-                                
-                                Spacer(modifier = Modifier.height(8.dp))
-                                
-                                LinearProgressIndicator(
-                                    progress = 0f,
-                                    modifier = Modifier.fillMaxWidth(),
-                                    color = MaterialTheme.colorScheme.primary,
-                                    trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-                                )
-                            }
-                        }
-                    }
-                    
-                    // Hiển thị các tính năng khác
-                    items(learningFeatures) { feature ->
-                        QuickFeatureCard(
-                            title = feature.title,
-                            progress = feature.progress
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
+            Text(
+                text = exampleChar,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
@@ -905,63 +944,6 @@ fun FeatureBanner(banner: FeaturedBanner, onNavigateToChat: () -> Unit = {}) {
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun QuickFeatureCard(title: String, progress: Float, modifier: Modifier = Modifier) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(130.dp),
-        shape = RoundedCornerShape(16.dp),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 0.dp
-        ),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(percent = 25))
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "${(progress * 100).toInt()}%",
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.primary
-                )
-            }
-            
-            Spacer(modifier = Modifier.height(8.dp))
-            
-            LinearProgressIndicator(
-                progress = progress,
-                modifier = Modifier.fillMaxWidth(),
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)
-            )
         }
     }
 }

@@ -31,6 +31,7 @@ import com.example.learnjapanese.screens.profile.EditProfileScreen
 import com.example.learnjapanese.screens.profile.SettingsScreen
 import com.example.learnjapanese.screens.profile.NotificationsScreen
 import com.example.learnjapanese.screens.profile.FriendsScreen
+import com.example.learnjapanese.data.CharacterType
 
 @Composable
 fun NavGraph(navController: NavHostController) {
@@ -39,10 +40,17 @@ fun NavGraph(navController: NavHostController) {
         startDestination = Screen.Welcome.route
     ) {
         composable(route = Screen.Welcome.route) {
+            Log.d("NavGraph", "Đang render màn hình Welcome")
             WelcomeScreen(
-                onContinueClick = {
+                onNavigateToLogin = {
                     navController.navigate(Screen.Login.route) {
+                        launchSingleTop = true
                         popUpTo(Screen.Welcome.route) { inclusive = true }
+                    }
+                },
+                onNavigateToRegister = {
+                    navController.navigate(Screen.Register.route) {
+                        launchSingleTop = true
                     }
                 }
             )
@@ -118,63 +126,43 @@ fun NavGraph(navController: NavHostController) {
             Log.d("NavGraph", "Đang render màn hình Dashboard")
             DashboardScreen(
                 onNavigateToVocabulary = {
-                    Log.d("NavGraph", "Điều hướng đến màn hình Vocabulary")
-                    try {
-                        navController.navigate(Screen.Vocabulary.route)
-                        Log.d("NavGraph", "Đã điều hướng đến màn hình Vocabulary thành công")
-                    } catch (e: Exception) {
-                        Log.e("NavGraph", "Lỗi khi điều hướng đến Vocabulary: ${e.message}", e)
+                    navController.navigate(Screen.Vocabulary.route) {
+                        launchSingleTop = true
                     }
                 },
                 onNavigateToGrammar = {
-                    Log.d("NavGraph", "Điều hướng đến màn hình Grammar")
-                    try {
-                        navController.navigate(Screen.Grammar.route)
-                        Log.d("NavGraph", "Đã điều hướng đến màn hình Grammar thành công")
-                    } catch (e: Exception) {
-                        Log.e("NavGraph", "Lỗi khi điều hướng đến Grammar: ${e.message}", e)
+                    navController.navigate(Screen.Grammar.route) {
+                        launchSingleTop = true
                     }
                 },
                 onNavigateToAlphabet = {
-                    Log.d("NavGraph", "Điều hướng đến màn hình Alphabet")
-                    try {
-                        navController.navigate(Screen.Alphabet.route)
-                        Log.d("NavGraph", "Đã điều hướng đến màn hình Alphabet thành công")
-                    } catch (e: Exception) {
-                        Log.e("NavGraph", "Lỗi khi điều hướng đến Alphabet: ${e.message}", e)
+                    navController.navigate(Screen.Alphabet.route) {
+                        launchSingleTop = true
+                    }
+                },
+                onNavigateToKatakana = {
+                    navController.navigate("alphabet_katakana") {
+                        launchSingleTop = true
                     }
                 },
                 onNavigateToReading = {
-                    Log.d("NavGraph", "Điều hướng đến màn hình Reading")
-                    try {
-                        navController.navigate(Screen.Reading.route)
-                        Log.d("NavGraph", "Đã điều hướng đến màn hình Reading thành công")
-                    } catch (e: Exception) {
-                        Log.e("NavGraph", "Lỗi khi điều hướng đến Reading: ${e.message}", e)
+                    navController.navigate(Screen.Reading.route) {
+                        launchSingleTop = true
                     }
                 },
                 onNavigateToChat = {
-                    Log.d("NavGraph", "Điều hướng đến màn hình Chat")
-                    try {
-                        navController.navigate(Screen.Chat.route)
-                        Log.d("NavGraph", "Đã điều hướng đến màn hình Chat thành công")
-                    } catch (e: Exception) {
-                        Log.e("NavGraph", "Lỗi khi điều hướng đến Chat: ${e.message}", e)
+                    navController.navigate(Screen.Chat.route) {
+                        launchSingleTop = true
                     }
                 },
                 onNavigateToAccount = {
-                    Log.d("NavGraph", "Điều hướng đến màn hình Profile")
-                    try {
-                        navController.navigate(Screen.Profile.route)
-                        Log.d("NavGraph", "Đã điều hướng đến màn hình Profile thành công")
-                    } catch (e: Exception) {
-                        Log.e("NavGraph", "Lỗi khi điều hướng đến Profile: ${e.message}", e)
+                    navController.navigate(Screen.Profile.route) {
+                        launchSingleTop = true
                     }
                 },
                 onNavigate = { route ->
                     navController.navigate(route) {
                         launchSingleTop = true
-                        popUpTo(Screen.Dashboard.route)
                     }
                 }
             )
@@ -333,6 +321,16 @@ fun NavGraph(navController: NavHostController) {
                 onBack = {
                     navController.popBackStack()
                 }
+            )
+        }
+
+        composable(route = "alphabet_katakana") {
+            Log.d("NavGraph", "Đang render màn hình Alphabet với chế độ Katakana")
+            AlphabetScreen(
+                onBack = {
+                    navController.popBackStack()
+                },
+                initialType = CharacterType.KATAKANA
             )
         }
 

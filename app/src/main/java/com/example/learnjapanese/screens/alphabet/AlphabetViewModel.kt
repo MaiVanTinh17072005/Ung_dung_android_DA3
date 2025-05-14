@@ -7,8 +7,11 @@ import androidx.lifecycle.ViewModel
 import com.example.learnjapanese.data.AlphabetData
 import com.example.learnjapanese.data.CharacterType
 import com.example.learnjapanese.data.JapaneseCharacter
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class AlphabetViewModel : ViewModel() {
+@HiltViewModel
+class AlphabetViewModel @Inject constructor() : ViewModel() {
     var selectedType by mutableStateOf(CharacterType.HIRAGANA)
         private set
         

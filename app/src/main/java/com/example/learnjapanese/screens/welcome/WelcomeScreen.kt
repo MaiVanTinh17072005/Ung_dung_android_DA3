@@ -37,7 +37,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun WelcomeScreen(
-    onContinueClick: () -> Unit
+    onNavigateToLogin: () -> Unit,
+    onNavigateToRegister: () -> Unit
 ) {
     var isExiting by remember { mutableStateOf(false) }
     var firstTextCharCount by remember { mutableStateOf(0) }
@@ -84,7 +85,7 @@ fun WelcomeScreen(
     LaunchedEffect(isExiting) {
         if (isExiting) {
             delay(400) // Thêm độ trễ khi chuyển màn hình để hoàn tất animation
-            onContinueClick()
+            onNavigateToLogin()
         }
     }
 

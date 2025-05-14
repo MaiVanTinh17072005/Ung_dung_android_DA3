@@ -26,9 +26,14 @@ import com.example.learnjapanese.data.JapaneseCharacter
 @Composable
 fun BangChuCaiScreen(
     viewModel: AlphabetViewModel = viewModel(),
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    initialType: CharacterType = CharacterType.HIRAGANA
 ) {
     val selectedType = viewModel.selectedType
+    
+    LaunchedEffect(initialType) {
+        viewModel.switchCharacterType(initialType)
+    }
     
     val lightGreen = Color(0xFFF1F8E9)
     val mediumGreen = Color(0xFF81C784)
