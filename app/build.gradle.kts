@@ -76,7 +76,7 @@ dependencies {
     implementation("com.google.code.gson:gson:2.10.1")
     
     // Coil cho tải và hiển thị hình ảnh
-    implementation("io.coil-kt:coil-compose:2.5.0")
+    implementation("io.coil-kt:coil-compose:2.4.0")
     
     // Dagger Hilt
     implementation("com.google.dagger:hilt-android:2.50")

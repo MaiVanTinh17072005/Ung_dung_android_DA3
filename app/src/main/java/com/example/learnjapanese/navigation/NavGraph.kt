@@ -406,17 +406,10 @@ fun NavGraph(navController: NavHostController) {
                 onBack = {
                     navController.popBackStack()
                 },
-                onEditProfile = {
-                    navController.navigate("edit_profile")
-                },
-                onFindFriends = {
-                    navController.navigate("friends")
-                },
-                onNotifications = {
-                    navController.navigate("notifications")
-                },
-                onSettings = {
-                    navController.navigate("settings")
+                onLogoutSuccess = {
+                    navController.navigate(Screen.Welcome.route) {
+                        popUpTo(0) { inclusive = true }
+                    }
                 }
             )
         }
