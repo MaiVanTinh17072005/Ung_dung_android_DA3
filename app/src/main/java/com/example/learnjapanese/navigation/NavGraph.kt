@@ -407,19 +407,19 @@ fun NavGraph(navController: NavHostController) {
             ProfileScreen(
                 onBack = {
                     navController.popBackStack()
-                },
-                onEditProfile = {
-                    navController.navigate("edit_profile")
-                },
-                onFindFriends = {
-                    navController.navigate("friends")
-                },
-                onNotifications = {
-                    navController.navigate("notifications")
-                },
-                onSettings = {
-                    navController.navigate("settings")
                 }
+//                onEditProfile = {
+//                    navController.navigate("edit_profile")
+//                },
+//                onFindFriends = {
+//                    navController.navigate("friends")
+//                },
+//                onNotifications = {
+//                    navController.navigate("notifications")
+//                },
+//                onSettings = {
+//                    navController.navigate("settings")
+//                }
             )
         }
 
