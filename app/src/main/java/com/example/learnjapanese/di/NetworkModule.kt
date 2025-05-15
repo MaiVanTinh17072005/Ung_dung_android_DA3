@@ -32,8 +32,9 @@ object NetworkModule {
      * - "https://api.example.com" - Địa chỉ máy chủ production
      */
     @Provides
-    //fun provideBaseUrl() = "http://10.0.2.2:3000" // Thay đổi thành URL thực tế của API
-    fun provideBaseUrl() = "http://192.168.1.10:3000" // URL máy chủ NodeJS của bạn
+
+    fun provideBaseUrl() = "http://192.168.111.107:3000" // Thay đổi thành URL thực tế của API
+//    fun provideBaseUrl() = "http://192.168.1.10:3000" // URL máy chủ NodeJS của bạn
     /**
      * Cung cấp Gson cho việc parse JSON
      */

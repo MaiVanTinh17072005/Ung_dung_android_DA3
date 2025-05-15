@@ -46,12 +46,13 @@ class ProfileViewModel @Inject constructor(
                                     displayName = profileData.display_name,
                                     email = profileData.email,
                                     phone = profileData.number_phone,
-                                    avatarUrl = profileData.avatar_url,
+                                    avatarUrl = profileData.profile_image_url,
                                     error = null
                                 )
                             }
                         },
                         onFailure = { error ->
+                            Log.e(TAG, "Failed to load profile data: ${error.message}")
                             _uiState.update {
                                 it.copy(
                                     isLoading = false,
@@ -210,4 +211,4 @@ data class ProfileUiState(
     val error: String? = null,
     val avatarError: String? = null,
     val successMessage: String? = null
-) 
+)

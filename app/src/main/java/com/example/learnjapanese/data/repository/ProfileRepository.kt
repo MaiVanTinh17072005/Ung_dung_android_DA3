@@ -11,6 +11,7 @@ import com.example.learnjapanese.data.api.AuthApi
 import com.example.learnjapanese.data.local.UserPreferences
 import com.example.learnjapanese.data.model.GetProfileRequest
 import com.example.learnjapanese.data.model.SetProfileRequest
+import com.example.learnjapanese.data.model.UpdateAvatarRequest
 import com.example.learnjapanese.data.model.UserProfileData
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -28,28 +29,39 @@ class ProfileRepository @Inject constructor(
 ) {
     companion object {
         private const val TAG = "ProfileRepository"
-        private const val MAX_IMAGE_DIMENSION = 500 // Kích thước tối đa cho avatar
+        private const val MAX_IMAGE_DIMENSION = 500000 // Kích thước tối đa cho avatar
     }
 
     // Lấy thông tin profile từ API
     suspend fun getProfile(): Flow<Result<UserProfileData>> = flow {
         try {
             val userId = userPreferences.userId.first()
+            Log.d(TAG, "Getting profile for userId: $userId")
+            
             if (userId.isNullOrEmpty()) {
+                Log.e(TAG, "Invalid userId: null or empty")
                 emit(Result.failure(Exception("User ID không hợp lệ")))
                 return@flow
             }
             
             val response = authApi.getProfile(GetProfileRequest(userId))
+            Log.d(TAG, "API Response - Status: ${response.code()}, Success: ${response.body()?.success}")
             
             if (response.isSuccessful && response.body()?.success == true) {
                 val profileData = response.body()?.data
                 if (profileData != null) {
+                    Log.d(TAG, "Profile data retrieved successfully: " +
+                        "name=${profileData.display_name}, " +
+                        "email=${profileData.email}, " +
+                        "phone=${profileData.number_phone}, " +
+                        "avatar=${profileData.profile_image_url}")
                     emit(Result.success(profileData))
                 } else {
+                    Log.e(TAG, "Profile data is null")
                     emit(Result.failure(Exception("Không tìm thấy dữ liệu người dùng")))
                 }
             } else {
+                Log.e(TAG, "API error: ${response.body()?.message}")
                 emit(Result.failure(Exception(response.body()?.message ?: "Lỗi khi lấy thông tin profile")))
             }
         } catch (e: Exception) {
@@ -106,7 +118,7 @@ class ProfileRepository @Inject constructor(
             emit(Result.failure(e))
         }
     }
-    
+
     // Cập nhật avatar
     suspend fun updateAvatar(imageUri: Uri): Flow<Result<String>> = flow {
         try {
@@ -122,25 +134,21 @@ class ProfileRepository @Inject constructor(
                 emit(Result.failure(Exception("Không thể xử lý hình ảnh")))
                 return@flow
             }
-            
-            // TODO: Khi API được triển khai, bỏ comment đoạn code bên dưới
-            /*
+
+
             val request = UpdateAvatarRequest(
-                user_id = userId,
-                avatar_data = base64Image
+                userId = userId,
+                profile_image_url = base64Image
             )
-            
+
             val response = authApi.updateAvatar(request)
-            
+
             if (response.isSuccessful && response.body()?.success == true) {
                 emit(Result.success(response.body()?.message ?: "Cập nhật avatar thành công"))
             } else {
                 emit(Result.failure(Exception(response.body()?.message ?: "Lỗi khi cập nhật avatar")))
             }
-            */
-            
-            // Tạm thời trả về thành công để demo UI
-            emit(Result.success("Cập nhật avatar thành công (API chưa được triển khai)"))
+
             
         } catch (e: Exception) {
             Log.e(TAG, "Lỗi khi cập nhật avatar: ${e.message}", e)
@@ -199,4 +207,4 @@ class ProfileRepository @Inject constructor(
     private fun isValidPhoneNumber(phone: String): Boolean {
         return phone.isNotBlank() && phone.length >= 9 && phone.all { it.isDigit() }
     }
-} 
+}

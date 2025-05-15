@@ -14,7 +14,7 @@ data class UserProfileData(
     val email: String,
     val number_phone: String,
     val display_name: String,
-    val avatar_url: String? = null
+    val profile_image_url: String? = null
 )
 
 data class SetProfileRequest(
@@ -31,12 +31,12 @@ data class SetProfileResponse(
 
 // Model cho API thay đổi avatar
 data class UpdateAvatarRequest(
-    val user_id: String,
-    val avatar_data: String // Base64 encoded image data
+    val userId: String,
+    val profile_image_url: String // Base64 encoded image data
 )
 
 data class UpdateAvatarResponse(
     val success: Boolean,
     val message: String,
-    val avatar_url: String? = null
-) 
+    val profile_image_url: String? = null
+)
