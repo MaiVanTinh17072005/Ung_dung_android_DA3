@@ -23,7 +23,6 @@ import com.example.learnjapanese.ui.theme.MauChinhDam
 import com.example.learnjapanese.ui.theme.MauNen
 import com.example.learnjapanese.viewmodels.RegisterViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.CircularProgressIndicator
 import kotlinx.coroutines.delay
 import androidx.hilt.navigation.compose.hiltViewModel

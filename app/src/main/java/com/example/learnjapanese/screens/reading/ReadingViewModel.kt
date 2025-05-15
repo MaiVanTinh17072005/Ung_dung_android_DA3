@@ -6,7 +6,6 @@ import com.example.learnjapanese.data.model.ReadingDetailData
 import com.example.learnjapanese.data.model.ReadingResponse
 import com.example.learnjapanese.data.repository.ReadingRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow

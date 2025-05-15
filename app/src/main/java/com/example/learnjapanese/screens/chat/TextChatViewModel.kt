@@ -3,7 +3,6 @@ package com.example.learnjapanese.screens.chat
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.learnjapanese.data.model.AIChatRequest
-import com.example.learnjapanese.data.model.AIChatResponse
 import com.example.learnjapanese.data.model.ChatMessage
 import com.example.learnjapanese.data.repository.AIChatRepository
 import dagger.hilt.android.lifecycle.HiltViewModel

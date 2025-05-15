@@ -11,7 +11,6 @@ import com.example.learnjapanese.data.api.AuthApi
 import com.example.learnjapanese.data.local.UserPreferences
 import com.example.learnjapanese.data.model.GetProfileRequest
 import com.example.learnjapanese.data.model.SetProfileRequest
-import com.example.learnjapanese.data.model.UpdateAvatarRequest
 import com.example.learnjapanese.data.model.UserProfileData
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow

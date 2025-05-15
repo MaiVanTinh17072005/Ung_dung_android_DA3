@@ -9,7 +9,6 @@ import com.example.learnjapanese.data.model.VocabularyWordResponse
 import com.example.learnjapanese.data.model.VocabularySearchItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import retrofit2.Response
 import java.io.IOException
 import javax.inject.Inject
 import javax.inject.Singleton
