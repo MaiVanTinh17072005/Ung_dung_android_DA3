@@ -40,6 +40,14 @@ class ProfileViewModel @Inject constructor(
                 profileRepository.getProfile().collect { result ->
                     result.fold(
                         onSuccess = { profileData ->
+//                            val imageUrl = if (!profileData.profile_image_url.isNullOrEmpty()) {
+//                                if (!profileData.profile_image_url.startsWith("data:image")) {
+//                                    "data:image/jpeg;base64,${profileData.profile_image_url}"
+//                                } else {
+//                                    profileData.profile_image_url
+//                                }
+//                            } else null
+
                             _uiState.update {
                                 it.copy(
                                     isLoading = false,

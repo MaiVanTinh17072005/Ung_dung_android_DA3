@@ -136,18 +136,18 @@ class ProfileRepository @Inject constructor(
             }
 
 
-            val request = UpdateAvatarRequest(
-                userId = userId,
-                profile_image_url = base64Image
-            )
-
-            val response = authApi.updateAvatar(request)
-
-            if (response.isSuccessful && response.body()?.success == true) {
-                emit(Result.success(response.body()?.message ?: "Cập nhật avatar thành công"))
-            } else {
-                emit(Result.failure(Exception(response.body()?.message ?: "Lỗi khi cập nhật avatar")))
-            }
+//            val request = UpdateAvatarRequest(
+//                userId = userId,
+//                profile_image_url = base64Image
+//            )
+//
+//            val response = authApi.updateAvatar(request)
+//
+//            if (response.isSuccessful && response.body()?.success == true) {
+//                emit(Result.success(response.body()?.message ?: "Cập nhật avatar thành công"))
+//            } else {
+//                emit(Result.failure(Exception(response.body()?.message ?: "Lỗi khi cập nhật avatar")))
+//            }
 
             
         } catch (e: Exception) {
